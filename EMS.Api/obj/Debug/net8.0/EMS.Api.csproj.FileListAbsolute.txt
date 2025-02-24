@@ -101,3 +101,4 @@ D:\Bilal\Test Folder\EMS\EMS.Api\bin\Debug\net8.0\EMS.CronJobs.pdb
 D:\Bilal\Test Folder\EMS\EMS.Api\bin\Debug\net8.0\EMS.Repository.pdb
 D:\Bilal\Test Folder\EMS\EMS.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 D:\Bilal\Test Folder\EMS\EMS.Api\bin\Debug\net8.0\MQTTnet.dll
+D:\Bilal\Test Folder\EMS\EMS.Api\obj\Debug\net8.0\EMS.Api.sourcelink.json

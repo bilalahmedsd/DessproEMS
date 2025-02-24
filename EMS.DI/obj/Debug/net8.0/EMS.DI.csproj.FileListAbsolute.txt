@@ -19,3 +19,4 @@ D:\Bilal\Test Folder\EMS\EMS.DI\bin\Debug\net8.0\EMS.Data.pdb
 D:\Bilal\Test Folder\EMS\EMS.DI\obj\Debug\net8.0\EMS.DI.csproj.Up2Date
 D:\Bilal\Test Folder\EMS\EMS.DI\bin\Debug\net8.0\EMS.CronJobs.dll
 D:\Bilal\Test Folder\EMS\EMS.DI\bin\Debug\net8.0\EMS.CronJobs.pdb
+D:\Bilal\Test Folder\EMS\EMS.DI\obj\Debug\net8.0\EMS.DI.sourcelink.json
