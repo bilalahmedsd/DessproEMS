@@ -1,0 +1,14 @@
+D:\Bilal\Test Folder\EMS\EMS.Data\bin\Debug\net8.0\EMS.Data.deps.json
+D:\Bilal\Test Folder\EMS\EMS.Data\bin\Debug\net8.0\EMS.Data.runtimeconfig.json
+D:\Bilal\Test Folder\EMS\EMS.Data\bin\Debug\net8.0\EMS.Data.dll
+D:\Bilal\Test Folder\EMS\EMS.Data\bin\Debug\net8.0\EMS.Data.pdb
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.csproj.AssemblyReference.cache
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.GeneratedMSBuildEditorConfig.editorconfig
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.AssemblyInfoInputs.cache
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.AssemblyInfo.cs
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.csproj.CoreCompileInputs.cache
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.dll
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\refint\EMS.Data.dll
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.pdb
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.genruntimeconfig.cache
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\ref\EMS.Data.dll

@@ -1,0 +1,501 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\EMS.Api.csproj": {}
+  },
+  "projects": {
+    "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\EMS.Api.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\EMS.Api.csproj",
+        "projectName": "EMS.Api",
+        "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\EMS.Api.csproj",
+        "packagesPath": "C:\\Users\\CC\\.nuget\\packages\\",
+        "outputPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\CC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.devexpress.com/eKAHlE6UbOK1VUPYMF2GbljsmvQldXdILZUmYDPYN3IrCyARhu/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj"
+              },
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\EMS.CronJobs.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\EMS.CronJobs.csproj"
+              },
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\EMS.Data.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\EMS.Data.csproj"
+              },
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.DI\\EMS.DI.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.DI\\EMS.DI.csproj"
+              },
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "all"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.13, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj",
+        "projectName": "EMS.Core",
+        "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj",
+        "packagesPath": "C:\\Users\\CC\\.nuget\\packages\\",
+        "outputPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\CC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.devexpress.com/eKAHlE6UbOK1VUPYMF2GbljsmvQldXdILZUmYDPYN3IrCyARhu/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "all"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "CsvHelper": {
+              "target": "Package",
+              "version": "[33.0.1, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\EMS.CronJobs.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\EMS.CronJobs.csproj",
+        "projectName": "EMS.CronJobs",
+        "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\EMS.CronJobs.csproj",
+        "packagesPath": "C:\\Users\\CC\\.nuget\\packages\\",
+        "outputPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\CC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.devexpress.com/eKAHlE6UbOK1VUPYMF2GbljsmvQldXdILZUmYDPYN3IrCyARhu/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj"
+              },
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "all"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "MQTTnet": {
+              "target": "Package",
+              "version": "[4.3.0.858, )"
+            },
+            "Microsoft.Extensions.Hosting.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\EMS.Data.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\EMS.Data.csproj",
+        "projectName": "EMS.Data",
+        "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\EMS.Data.csproj",
+        "packagesPath": "C:\\Users\\CC\\.nuget\\packages\\",
+        "outputPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\CC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.devexpress.com/eKAHlE6UbOK1VUPYMF2GbljsmvQldXdILZUmYDPYN3IrCyARhu/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "all"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Bilal\\Test Folder\\EMS\\EMS.DI\\EMS.DI.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Bilal\\Test Folder\\EMS\\EMS.DI\\EMS.DI.csproj",
+        "projectName": "EMS.DI",
+        "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.DI\\EMS.DI.csproj",
+        "packagesPath": "C:\\Users\\CC\\.nuget\\packages\\",
+        "outputPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.DI\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\CC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.devexpress.com/eKAHlE6UbOK1VUPYMF2GbljsmvQldXdILZUmYDPYN3IrCyARhu/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj"
+              },
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\EMS.CronJobs.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\EMS.CronJobs.csproj"
+              },
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "all"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.Extensions.DependencyInjection.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj",
+        "projectName": "EMS.Repository",
+        "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj",
+        "packagesPath": "C:\\Users\\CC\\.nuget\\packages\\",
+        "outputPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\CC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://nuget.devexpress.com/eKAHlE6UbOK1VUPYMF2GbljsmvQldXdILZUmYDPYN3IrCyARhu/api/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj"
+              },
+              "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\EMS.Data.csproj": {
+                "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\EMS.Data.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "all"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
