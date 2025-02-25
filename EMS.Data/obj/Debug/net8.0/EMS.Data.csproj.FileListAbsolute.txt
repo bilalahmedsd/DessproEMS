@@ -12,3 +12,18 @@ D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\refint\EMS.Data.dll
 D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.pdb
 D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.genruntimeconfig.cache
 D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\ref\EMS.Data.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\bin\Debug\net8.0\EMS.Data.deps.json
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\bin\Debug\net8.0\EMS.Data.runtimeconfig.json
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\bin\Debug\net8.0\EMS.Data.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\bin\Debug\net8.0\EMS.Data.pdb
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\EMS.Data.csproj.AssemblyReference.cache
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\EMS.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\EMS.Data.AssemblyInfoInputs.cache
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\EMS.Data.AssemblyInfo.cs
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\EMS.Data.csproj.CoreCompileInputs.cache
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\EMS.Data.sourcelink.json
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\EMS.Data.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\refint\EMS.Data.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\EMS.Data.pdb
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\EMS.Data.genruntimeconfig.cache
+C:\Users\HP\Source\Repos\DessproEMS\EMS.Data\obj\Debug\net8.0\ref\EMS.Data.dll

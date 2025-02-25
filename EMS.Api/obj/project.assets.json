@@ -2911,23 +2911,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\CC\\.nuget\\packages\\": {},
+    "C:\\Users\\HP\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\EMS.Api.csproj",
+      "projectUniqueName": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Api\\EMS.Api.csproj",
       "projectName": "EMS.Api",
-      "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\EMS.Api.csproj",
-      "packagesPath": "C:\\Users\\CC\\.nuget\\packages\\",
-      "outputPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\obj\\",
+      "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Api\\EMS.Api.csproj",
+      "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Api\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\CC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -2936,27 +2936,26 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://nuget.devexpress.com/eKAHlE6UbOK1VUPYMF2GbljsmvQldXdILZUmYDPYN3IrCyARhu/api/v3/index.json": {}
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj": {
-              "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Core\\EMS.Core.csproj"
+            "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj": {
+              "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj"
             },
-            "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\EMS.CronJobs.csproj": {
-              "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.CronJobs\\EMS.CronJobs.csproj"
+            "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.CronJobs\\EMS.CronJobs.csproj": {
+              "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.CronJobs\\EMS.CronJobs.csproj"
             },
-            "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\EMS.Data.csproj": {
-              "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Data\\EMS.Data.csproj"
+            "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Data\\EMS.Data.csproj": {
+              "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Data\\EMS.Data.csproj"
             },
-            "D:\\Bilal\\Test Folder\\EMS\\EMS.DI\\EMS.DI.csproj": {
-              "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.DI\\EMS.DI.csproj"
+            "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.DI\\EMS.DI.csproj": {
+              "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.DI\\EMS.DI.csproj"
             },
-            "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj": {
-              "projectPath": "D:\\Bilal\\Test Folder\\EMS\\EMS.Repository\\EMS.Repository.csproj"
+            "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Repository\\EMS.Repository.csproj": {
+              "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Repository\\EMS.Repository.csproj"
             }
           }
         }
@@ -2969,7 +2968,7 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "all"
+        "auditMode": "direct"
       },
       "SdkAnalysisLevel": "9.0.100"
     },
@@ -3001,7 +3000,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

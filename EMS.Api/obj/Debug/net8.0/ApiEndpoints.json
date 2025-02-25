@@ -23,7 +23,17 @@
   {
     "ContainingType": "EMS.Api.Controllers.DashboardController",
     "Method": "Get",
-    "RelativePath": "api/Dashboard",
+    "RelativePath": "api/Dashboard/Get",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EMS.Api.Controllers.ProjectManagementController",
+    "Method": "Get",
+    "RelativePath": "api/ProjectManagement/Get",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

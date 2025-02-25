@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EMS.CronJobs")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0c1cf81039b4be85269c82472d25e6c3c48ad1f3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+728c4c3d53f3a1cb9bd6b73777360f158dfd9d14")]
 [assembly: System.Reflection.AssemblyProductAttribute("EMS.CronJobs")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EMS.CronJobs")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

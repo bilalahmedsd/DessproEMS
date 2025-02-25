@@ -25,13 +25,18 @@ public partial class EMSContext : DbContext
 
     public virtual DbSet<Gateway> Gateways { get; set; }
 
+    public virtual DbSet<ProjectManagement> ProjectManagements { get; set; }
+
     public virtual DbSet<Unit> Units { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserType> UserTypes { get; set; }
 
-    
+//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+//        => optionsBuilder.UseSqlServer("Data Source=192.168.15.32,1433;Initial Catalog=EMS;User ID=sa;Password=sql;Encrypt=False");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Company>(entity =>
@@ -88,6 +93,28 @@ public partial class EMSContext : DbContext
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<ProjectManagement>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__ProjectM__3214EC074B81EDD7");
+
+            entity.ToTable("ProjectManagement");
+
+            entity.Property(e => e.Address)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.CustomerName)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.Principal)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.ProjectName)
+                .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
         });

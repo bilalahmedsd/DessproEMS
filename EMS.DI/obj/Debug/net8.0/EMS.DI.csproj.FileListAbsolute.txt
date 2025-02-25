@@ -20,3 +20,25 @@ D:\Bilal\Test Folder\EMS\EMS.DI\obj\Debug\net8.0\EMS.DI.csproj.Up2Date
 D:\Bilal\Test Folder\EMS\EMS.DI\bin\Debug\net8.0\EMS.CronJobs.dll
 D:\Bilal\Test Folder\EMS\EMS.DI\bin\Debug\net8.0\EMS.CronJobs.pdb
 D:\Bilal\Test Folder\EMS\EMS.DI\obj\Debug\net8.0\EMS.DI.sourcelink.json
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.DI.deps.json
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.DI.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.DI.pdb
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.Core.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.CronJobs.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.Data.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.Repository.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.Core.pdb
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.CronJobs.pdb
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.Repository.pdb
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\bin\Debug\net8.0\EMS.Data.pdb
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\EMS.DI.csproj.AssemblyReference.cache
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\EMS.DI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\EMS.DI.AssemblyInfoInputs.cache
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\EMS.DI.AssemblyInfo.cs
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\EMS.DI.csproj.CoreCompileInputs.cache
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\EMS.DI.sourcelink.json
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\EMS.DI.csproj.Up2Date
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\EMS.DI.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\refint\EMS.DI.dll
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\EMS.DI.pdb
+C:\Users\HP\Source\Repos\DessproEMS\EMS.DI\obj\Debug\net8.0\ref\EMS.DI.dll

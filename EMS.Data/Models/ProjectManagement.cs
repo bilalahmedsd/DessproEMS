@@ -3,13 +3,19 @@ using System.Collections.Generic;
 
 namespace EMS.Data.Models;
 
-public partial class Unit
+public partial class ProjectManagement
 {
     public int Id { get; set; }
 
-    public string? Name { get; set; }
+    public int? FkCompanyId { get; set; }
 
-    public bool? IsActive { get; set; }
+    public string? ProjectName { get; set; }
+
+    public string? CustomerName { get; set; }
+
+    public string? Address { get; set; }
+
+    public string? Principal { get; set; }
 
     public bool? IsDeleted { get; set; }
 
@@ -21,5 +27,5 @@ public partial class Unit
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int? FkProjectManagement { get; set; }
+    public bool? IsActive { get; set; }
 }

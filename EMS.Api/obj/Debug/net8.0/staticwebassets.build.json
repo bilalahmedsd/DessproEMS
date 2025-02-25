@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "qWAbTcmKXimUVyHtm4amunKp2xmwpKDb80LN21QtYaw=",
+  "Hash": "gSLRnJ9wthi39wN1EmWI4BU2qlpysFTIQP2RgOxcT8o=",
   "Source": "EMS.Api",
   "BasePath": "_content/EMS.Api",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "EMS.Api\\wwwroot",
       "Source": "EMS.Api",
-      "ContentRoot": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Api\\wwwroot\\",
       "BasePath": "_content/EMS.Api",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\wwwroot\\favicon.ico",
+      "Identity": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Api\\wwwroot\\favicon.ico",
       "SourceId": "EMS.Api",
       "SourceType": "Discovered",
-      "ContentRoot": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Api\\wwwroot\\",
       "BasePath": "_content/EMS.Api",
       "RelativePath": "favicon#[.{fingerprint}]?.ico",
       "AssetKind": "All",
@@ -41,7 +41,7 @@
   "Endpoints": [
     {
       "Route": "favicon.61n19gt1b8.ico",
-      "AssetFile": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\wwwroot\\favicon.ico",
+      "AssetFile": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Api\\wwwroot\\favicon.ico",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -62,7 +62,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 22 Feb 2025 10:31:35 GMT"
+          "Value": "Mon, 24 Feb 2025 12:56:06 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -86,7 +86,7 @@
     },
     {
       "Route": "favicon.ico",
-      "AssetFile": "D:\\Bilal\\Test Folder\\EMS\\EMS.Api\\wwwroot\\favicon.ico",
+      "AssetFile": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Api\\wwwroot\\favicon.ico",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -107,7 +107,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 22 Feb 2025 10:31:35 GMT"
+          "Value": "Mon, 24 Feb 2025 12:56:06 GMT"
         },
         {
           "Name": "Cache-Control",

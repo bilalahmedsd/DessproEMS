@@ -7,7 +7,7 @@ namespace EMS.Api.Controllers
     [Authorize]
     public class DashboardController : BaseController
     {
-        [HttpGet]
+        [HttpGet("Get")]
         public IActionResult Get()
         {
             return Ok("Hello");
