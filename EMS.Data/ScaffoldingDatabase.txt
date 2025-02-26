@@ -1,1 +1,1 @@
-Scaffold-DbContext "Data Source=192.168.15.32,1433;Initial Catalog=EMS;User ID=sa;Password=sql;Encrypt=False" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context EMSContext
+Scaffold-DbContext "Data Source=192.168.15.33,1433;Initial Catalog=EMS;User ID=sa;Password=sql;Encrypt=False" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context EMSContext

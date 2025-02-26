@@ -38,8 +38,11 @@ namespace EMS.Repository
         public async Task Update(UnitDTO obj)
         {
             var res = await Get(obj.Id.Value);
+            res.FkProjectManagement = obj.FkProjectManagement;
             res.IsActive = obj.IsActive;
             res.Name = obj.Name;
+            res.SerialNumber = obj.SerialNumber;
+            res.Status = obj.Status;
             res.UpdatedAt = obj.UpdatedAt;
             res.UpdatedBy = obj.UpdatedBy;
             res.IsDeleted = obj.IsDeleted;

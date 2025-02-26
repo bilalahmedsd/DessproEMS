@@ -36,6 +36,33 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
+        [HttpPost("Insert")]
+        public async Task<IActionResult> Insert([FromBody] UnitDTO unit)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                if (unit == null)
+                {
+                    resp.Message = "Invalid data!";
+                    resp.IsSuccess = false;
+                    return BadRequest(resp);
+                }
+
+                await _unitRepository.Insert(unit);
+                resp.Message = "Unit added successfully!";
+                resp.IsSuccess = true;
+                resp.Data = unit;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "An error occurred while inserting unit.";
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
         [HttpGet("GetLatestDeviceData")]
         public  IActionResult GetLatest()
         {

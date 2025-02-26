@@ -59,5 +59,21 @@
     "Order": 0,
     "Parameters": [],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EMS.Api.Controllers.UnitController",
+    "Method": "Insert",
+    "RelativePath": "api/Unit/Insert",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "unit",
+        "Type": "EMS.Core.Models.UnitDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

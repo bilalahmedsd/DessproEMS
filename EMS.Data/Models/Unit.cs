@@ -22,4 +22,8 @@ public partial class Unit
     public DateTime? UpdatedAt { get; set; }
 
     public int? FkProjectManagement { get; set; }
+
+    public string? SerialNumber { get; set; }
+
+    public string? Status { get; set; }
 }
