@@ -62,6 +62,34 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
+        [HttpPut("Update")]
+        public async Task<IActionResult> Update([FromBody] UnitDTO unit)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                if (unit == null || unit.Id == null)
+                {
+                    resp.Message = "Invalid data!";
+                    resp.IsSuccess = false;
+                    return BadRequest(resp);
+                }
+
+                await _unitRepository.Update(unit);
+                resp.Message = "Unit updated successfully!";
+                resp.IsSuccess = true;
+                resp.Data = unit;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "An error occurred while updating the unit.";
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
+
 
         [HttpGet("GetLatestDeviceData")]
         public  IActionResult GetLatest()

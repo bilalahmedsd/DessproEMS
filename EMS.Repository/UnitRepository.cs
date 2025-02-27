@@ -35,19 +35,47 @@ namespace EMS.Repository
             await DBEMSContext.SaveChangesAsync();
         }
 
+        //public async Task Update(UnitDTO obj)
+        //{
+        //    var res = await Get(obj.Id.Value);
+        //    if (res == null)
+        //        throw new Exception("Unit not found!");
+        //    res.FkProjectManagement = obj.FkProjectManagement;
+        //    res.IsActive = obj.IsActive;
+        //    res.Name = obj.Name;
+        //    res.SerialNumber = obj.SerialNumber;
+        //    res.Status = obj.Status;
+        //    res.UpdatedAt = obj.UpdatedAt;
+        //    res.UpdatedBy = obj.UpdatedBy;
+        //    res.IsDeleted = obj.IsDeleted;
+        //    DBEMSContext.Update(res);
+        //    await DBEMSContext.SaveChangesAsync();
+        //}
+
         public async Task Update(UnitDTO obj)
         {
-            var res = await Get(obj.Id.Value);
-            res.FkProjectManagement = obj.FkProjectManagement;
-            res.IsActive = obj.IsActive;
-            res.Name = obj.Name;
-            res.SerialNumber = obj.SerialNumber;
-            res.Status = obj.Status;
-            res.UpdatedAt = obj.UpdatedAt;
-            res.UpdatedBy = obj.UpdatedBy;
-            res.IsDeleted = obj.IsDeleted;
-            DBEMSContext.Update(res);
+            var existingUnit = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == obj.Id);
+
+            if (existingUnit == null)
+                throw new Exception("Unit not found!");
+
+            existingUnit.FkProjectManagement = obj.FkProjectManagement;
+            existingUnit.IsActive = obj.IsActive;
+            existingUnit.Name = obj.Name;
+            existingUnit.SerialNumber = obj.SerialNumber;
+            existingUnit.Status = obj.Status;
+            existingUnit.UpdatedAt = obj.UpdatedAt;
+            existingUnit.UpdatedBy = obj.UpdatedBy;
+            existingUnit.IsDeleted = obj.IsDeleted;
+
+            // ✅ Instead of Update(), use Attach() to avoid tracking issues
+            DBEMSContext.Attach(existingUnit);
+            DBEMSContext.Entry(existingUnit).State = EntityState.Modified;
+
             await DBEMSContext.SaveChangesAsync();
         }
+
+
+
     }
 }
