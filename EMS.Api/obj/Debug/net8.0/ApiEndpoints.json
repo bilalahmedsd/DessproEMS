@@ -31,6 +31,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "EMS.Api.Controllers.GatewayController",
+    "Method": "Get",
+    "RelativePath": "api/Gateway/Get",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "EMS.Api.Controllers.ProjectManagementController",
     "Method": "Get",
     "RelativePath": "api/ProjectManagement/Get",

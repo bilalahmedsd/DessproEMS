@@ -34,6 +34,12 @@ namespace EMS.Repository
             await DBEMSContext.Units.AddAsync(obj.ToJson().FromJson<Unit>());
             await DBEMSContext.SaveChangesAsync();
         }
+        public async Task Insert(ProjectManagementDTO obj)
+        {
+            await DBEMSContext.ProjectManagements.AddAsync(obj.ToJson().FromJson<ProjectManagement>());
+            await DBEMSContext.SaveChangesAsync();
+        }
+
 
         //public async Task Update(UnitDTO obj)
         //{

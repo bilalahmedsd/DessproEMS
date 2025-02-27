@@ -1,0 +1,66 @@
+﻿using EMS.Core.Helpers;
+using EMS.Core.Interfaces;
+using EMS.Core.Models;
+using EMS.Data.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EMS.Repository
+{
+    public class GatewayRepository : BaseRepository, IGatewayRepository
+    {
+        public GatewayRepository(EMSContext eMSContext)
+        {
+            DBEMSContext = eMSContext;
+        }
+        public async Task<List<GatewayDTO>> Get()
+        {
+            var res = await DBEMSContext.ProjectManagements.Where(x => x.IsDeleted == false).ToListAsync();
+            return res.ToJson().FromJson<List<GatewayDTO>>();
+        }
+
+        public async Task<GatewayDTO> Get(int id)
+        {
+            var res = DBEMSContext.ProjectManagements.FirstOrDefaultAsync(x => x.Id == id);
+            return res.ToJson().FromJson<GatewayDTO>();
+        }
+
+        public async Task Insert(GatewayDTO obj)
+        {
+            await DBEMSContext.Gateways.AddAsync(obj.ToJson().FromJson<Gateway>());
+            await DBEMSContext.SaveChangesAsync();
+        }
+
+        public async Task Update(GatewayDTO obj)
+        {
+            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == obj.Id);
+
+            if (existingUnit == null)
+                throw new Exception("Unit not found!");
+
+            //existingUnit.FkProjectManagement = obj.FkProjectManagement;
+            //existingUnit.IsActive = obj.IsActive;
+            //existingUnit.Name = obj.Name;
+            //existingUnit.SerialNumber = obj.SerialNumber;
+            //existingUnit.Status = obj.Status;
+            //existingUnit.UpdatedAt = obj.UpdatedAt;
+            //existingUnit.UpdatedBy = obj.UpdatedBy;
+            //existingUnit.IsDeleted = obj.IsDeleted;
+
+            // ✅ Instead of Update(), use Attach() to avoid tracking issues
+            DBEMSContext.Attach(existingUnit);
+            DBEMSContext.Entry(existingUnit).State = EntityState.Modified;
+
+            await DBEMSContext.SaveChangesAsync();
+        }
+
+      
+
+      
+      
+    }
+}

@@ -3,20 +3,64 @@
   "WorkspaceRootPath": "C:\\Users\\HP\\source\\repos\\DessproEMS\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{0FB2404D-318D-40E2-A424-9384C06AC2EB}|EMS.Api\\EMS.Api.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.api\\controllers\\unitcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0FB2404D-318D-40E2-A424-9384C06AC2EB}|EMS.Api\\EMS.Api.csproj|solutionrelative:ems.api\\controllers\\unitcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.repository\\usersrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|solutionrelative:ems.repository\\usersrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.repository\\gatewayrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|solutionrelative:ems.repository\\gatewayrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.repository\\unitrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|solutionrelative:ems.repository\\unitrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.repository\\projectmanagementrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|solutionrelative:ems.repository\\projectmanagementrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.core\\models\\gatewaydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|solutionrelative:ems.core\\models\\gatewaydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.core\\models\\unitdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|solutionrelative:ems.core\\models\\unitdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.core\\interfaces\\igatewayrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|solutionrelative:ems.core\\interfaces\\igatewayrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.core\\interfaces\\iunitrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|solutionrelative:ems.core\\interfaces\\iunitrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.core\\interfaces\\iprojectmanagementrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|solutionrelative:ems.core\\interfaces\\iprojectmanagementrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.core\\interfaces\\ifourfaith.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|solutionrelative:ems.core\\interfaces\\ifourfaith.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ED9E85EA-77FB-4B5D-8E7D-A507D865DD50}|EMS.Data\\EMS.Data.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.data\\ems.data.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{ED9E85EA-77FB-4B5D-8E7D-A507D865DD50}|EMS.Data\\EMS.Data.csproj|solutionrelative:ems.data\\ems.data.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.repository\\usersrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{112D9CFB-4624-4609-A875-5D56E3A5BA40}|EMS.Repository\\EMS.Repository.csproj|solutionrelative:ems.repository\\usersrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0FB2404D-318D-40E2-A424-9384C06AC2EB}|EMS.Api\\EMS.Api.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.api\\controllers\\projectmanagementcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0FB2404D-318D-40E2-A424-9384C06AC2EB}|EMS.Api\\EMS.Api.csproj|solutionrelative:ems.api\\controllers\\projectmanagementcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0FB2404D-318D-40E2-A424-9384C06AC2EB}|EMS.Api\\EMS.Api.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.api\\controllers\\gatewaycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0FB2404D-318D-40E2-A424-9384C06AC2EB}|EMS.Api\\EMS.Api.csproj|solutionrelative:ems.api\\controllers\\gatewaycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0FB2404D-318D-40E2-A424-9384C06AC2EB}|EMS.Api\\EMS.Api.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.api\\controllers\\unitcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0FB2404D-318D-40E2-A424-9384C06AC2EB}|EMS.Api\\EMS.Api.csproj|solutionrelative:ems.api\\controllers\\unitcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ED9E85EA-77FB-4B5D-8E7D-A507D865DD50}|EMS.Data\\EMS.Data.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.data\\scaffoldingdatabase.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{ED9E85EA-77FB-4B5D-8E7D-A507D865DD50}|EMS.Data\\EMS.Data.csproj|solutionrelative:ems.data\\scaffoldingdatabase.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{ED9E85EA-77FB-4B5D-8E7D-A507D865DD50}|EMS.Data\\EMS.Data.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.data\\models\\devicerawdatum.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -29,10 +73,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{ED9E85EA-77FB-4B5D-8E7D-A507D865DD50}|EMS.Data\\EMS.Data.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.data\\models\\projectmanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{ED9E85EA-77FB-4B5D-8E7D-A507D865DD50}|EMS.Data\\EMS.Data.csproj|solutionrelative:ems.data\\models\\projectmanagement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.core\\interfaces\\iprojectmanagementrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|solutionrelative:ems.core\\interfaces\\iprojectmanagementrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{DB8202F3-89FD-488F-88E3-0A8DA53B14D6}|EMS.Core\\EMS.Core.csproj|c:\\users\\hp\\source\\repos\\dessproems\\ems.core\\models\\projectmanagementdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -74,11 +114,141 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "UnitDTO.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Models\\UnitDTO.cs",
+              "RelativeDocumentMoniker": "EMS.Core\\Models\\UnitDTO.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Models\\UnitDTO.cs",
+              "RelativeToolTip": "EMS.Core\\Models\\UnitDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-27T12:57:06.603Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IGatewayRepository.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IGatewayRepository.cs",
+              "RelativeDocumentMoniker": "EMS.Core\\Interfaces\\IGatewayRepository.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IGatewayRepository.cs",
+              "RelativeToolTip": "EMS.Core\\Interfaces\\IGatewayRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-27T12:52:12.063Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "GatewayDTO.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Models\\GatewayDTO.cs",
+              "RelativeDocumentMoniker": "EMS.Core\\Models\\GatewayDTO.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Models\\GatewayDTO.cs",
+              "RelativeToolTip": "EMS.Core\\Models\\GatewayDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-27T12:49:53.068Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ProjectManagementRepository.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\ProjectManagementRepository.cs",
+              "RelativeDocumentMoniker": "EMS.Repository\\ProjectManagementRepository.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\ProjectManagementRepository.cs",
+              "RelativeToolTip": "EMS.Repository\\ProjectManagementRepository.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAQwCMAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-27T12:47:52.008Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "GatewayRepository.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\GatewayRepository.cs",
+              "RelativeDocumentMoniker": "EMS.Repository\\GatewayRepository.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\GatewayRepository.cs",
+              "RelativeToolTip": "EMS.Repository\\GatewayRepository.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAuwBsAAABTAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-27T12:36:31.413Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "UnitRepository.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\UnitRepository.cs",
+              "RelativeDocumentMoniker": "EMS.Repository\\UnitRepository.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\UnitRepository.cs",
+              "RelativeToolTip": "EMS.Repository\\UnitRepository.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAYwFQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-25T05:33:37.331Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "IUnitRepository.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IUnitRepository.cs",
+              "RelativeDocumentMoniker": "EMS.Core\\Interfaces\\IUnitRepository.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IUnitRepository.cs",
+              "RelativeToolTip": "EMS.Core\\Interfaces\\IUnitRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-27T12:52:05.104Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "IProjectManagementRepository.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IProjectManagementRepository.cs",
+              "RelativeDocumentMoniker": "EMS.Core\\Interfaces\\IProjectManagementRepository.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IProjectManagementRepository.cs",
+              "RelativeToolTip": "EMS.Core\\Interfaces\\IProjectManagementRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-25T06:00:11.29Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "IFourFaith.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IFourFaith.cs",
+              "RelativeDocumentMoniker": "EMS.Core\\Interfaces\\IFourFaith.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IFourFaith.cs",
+              "RelativeToolTip": "EMS.Core\\Interfaces\\IFourFaith.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-27T12:56:07.637Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "EMS.Data",
+              "DocumentMoniker": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Data\\EMS.Data.csproj",
+              "RelativeDocumentMoniker": "EMS.Data\\EMS.Data.csproj",
+              "ToolTip": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Data\\EMS.Data.csproj",
+              "RelativeToolTip": "EMS.Data\\EMS.Data.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-02-27T12:55:40.415Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
               "Title": "UsersRepository.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\UsersRepository.cs",
               "RelativeDocumentMoniker": "EMS.Repository\\UsersRepository.cs",
@@ -91,46 +261,59 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 11,
+              "Title": "ProjectManagementController.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Api\\Controllers\\ProjectManagementController.cs",
+              "RelativeDocumentMoniker": "EMS.Api\\Controllers\\ProjectManagementController.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Api\\Controllers\\ProjectManagementController.cs",
+              "RelativeToolTip": "EMS.Api\\Controllers\\ProjectManagementController.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-27T12:47:35.945Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "GatewayController.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Api\\Controllers\\GatewayController.cs",
+              "RelativeDocumentMoniker": "EMS.Api\\Controllers\\GatewayController.cs",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Api\\Controllers\\GatewayController.cs",
+              "RelativeToolTip": "EMS.Api\\Controllers\\GatewayController.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAQwBAAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-27T12:41:26.461Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
               "Title": "UnitController.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Api\\Controllers\\UnitController.cs",
               "RelativeDocumentMoniker": "EMS.Api\\Controllers\\UnitController.cs",
               "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Api\\Controllers\\UnitController.cs",
               "RelativeToolTip": "EMS.Api\\Controllers\\UnitController.cs",
-              "ViewState": "AgIAABsAAAAAAAAAAAAYwFMAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAwCYAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-26T10:38:09.831Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "UnitRepository.cs",
-              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\UnitRepository.cs",
-              "RelativeDocumentMoniker": "EMS.Repository\\UnitRepository.cs",
-              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\UnitRepository.cs",
-              "RelativeToolTip": "EMS.Repository\\UnitRepository.cs",
-              "ViewState": "AgIAADQAAAAAAAAAAAAkwE0AAAAGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-25T05:33:37.331Z",
+              "DocumentIndex": 14,
+              "Title": "ScaffoldingDatabase.txt",
+              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Data\\ScaffoldingDatabase.txt",
+              "RelativeDocumentMoniker": "EMS.Data\\ScaffoldingDatabase.txt",
+              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Data\\ScaffoldingDatabase.txt",
+              "RelativeToolTip": "EMS.Data\\ScaffoldingDatabase.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAC7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-02-27T12:36:40.401Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "IUnitRepository.cs",
-              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IUnitRepository.cs",
-              "RelativeDocumentMoniker": "EMS.Core\\Interfaces\\IUnitRepository.cs",
-              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IUnitRepository.cs",
-              "RelativeToolTip": "EMS.Core\\Interfaces\\IUnitRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-25T05:57:06.988Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 16,
               "Title": "Company.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Data\\Models\\Company.cs",
               "RelativeDocumentMoniker": "EMS.Data\\Models\\Company.cs",
@@ -142,7 +325,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 15,
               "Title": "DeviceRawDatum.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Data\\Models\\DeviceRawDatum.cs",
               "RelativeDocumentMoniker": "EMS.Data\\Models\\DeviceRawDatum.cs",
@@ -154,19 +337,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "IProjectManagementRepository.cs",
-              "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IProjectManagementRepository.cs",
-              "RelativeDocumentMoniker": "EMS.Core\\Interfaces\\IProjectManagementRepository.cs",
-              "ToolTip": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IProjectManagementRepository.cs",
-              "RelativeToolTip": "EMS.Core\\Interfaces\\IProjectManagementRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAoAAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-25T06:00:11.29Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 17,
               "Title": "ProjectManagement.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Data\\Models\\ProjectManagement.cs",
               "RelativeDocumentMoniker": "EMS.Data\\Models\\ProjectManagement.cs",
@@ -178,7 +349,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 18,
               "Title": "ProjectManagementDTO.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Models\\ProjectManagementDTO.cs",
               "RelativeDocumentMoniker": "EMS.Core\\Models\\ProjectManagementDTO.cs",
@@ -190,7 +361,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 19,
               "Title": "ResponseModel.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Models\\ResponseModel.cs",
               "RelativeDocumentMoniker": "EMS.Core\\Models\\ResponseModel.cs",
@@ -202,7 +373,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 20,
               "Title": "DeviceRawDataRepository.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\DeviceRawDataRepository.cs",
               "RelativeDocumentMoniker": "EMS.Repository\\DeviceRawDataRepository.cs",
@@ -214,7 +385,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 21,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Data\\Models\\User.cs",
               "RelativeDocumentMoniker": "EMS.Data\\Models\\User.cs",
@@ -226,7 +397,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 22,
               "Title": "BaseRepository.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Repository\\BaseRepository.cs",
               "RelativeDocumentMoniker": "EMS.Repository\\BaseRepository.cs",
@@ -238,7 +409,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 23,
               "Title": "UserDTO.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Models\\UserDTO.cs",
               "RelativeDocumentMoniker": "EMS.Core\\Models\\UserDTO.cs",
@@ -250,7 +421,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 24,
               "Title": "IUsersRepository.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\Interfaces\\IUsersRepository.cs",
               "RelativeDocumentMoniker": "EMS.Core\\Interfaces\\IUsersRepository.cs",
@@ -262,7 +433,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 25,
               "Title": "BaseController.cs",
               "DocumentMoniker": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Api\\Controllers\\BaseController.cs",
               "RelativeDocumentMoniker": "EMS.Api\\Controllers\\BaseController.cs",

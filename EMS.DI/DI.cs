@@ -20,6 +20,7 @@ namespace EMS.DI
                 .AddTransient<IDeviceRawDataRepository, DeviceRawDataRepository>()
                 .AddTransient<IUnitRepository, UnitRepository>()
                 .AddTransient<IProjectManagementRepository,ProjectManagementRepository>()
+                 .AddTransient<IGatewayRepository, GatewayRepository>()
                 .AddSingleton<IFourFaith, FourFaith>();
                 
         }

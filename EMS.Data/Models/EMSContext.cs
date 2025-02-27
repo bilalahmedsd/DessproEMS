@@ -17,6 +17,8 @@ public partial class EMSContext : DbContext
 
     public virtual DbSet<Company> Companies { get; set; }
 
+    public virtual DbSet<Device> Devices { get; set; }
+
     public virtual DbSet<DeviceDataDetail> DeviceDataDetails { get; set; }
 
     public virtual DbSet<DeviceDataMaster> DeviceDataMasters { get; set; }
@@ -33,9 +35,9 @@ public partial class EMSContext : DbContext
 
     public virtual DbSet<UserType> UserTypes { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Data Source=192.168.15.33,1433;Initial Catalog=EMS;User ID=sa;Password=sql;Encrypt=False");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=192.168.15.33,1433;Initial Catalog=EMS;User ID=sa;Password=sql;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,6 +52,42 @@ public partial class EMSContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<Device>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Devices__3214EC07D82AD161");
+
+            entity.Property(e => e.ChannelName)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.ConsumptionUnit)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.CreatedBy)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.OfflineDuration)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.OfflineTime).HasColumnType("datetime");
+            entity.Property(e => e.SerialNo)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.SerialPort)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.Status)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(255)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<DeviceDataDetail>(entity =>
@@ -93,6 +131,12 @@ public partial class EMSContext : DbContext
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.ProtocolName)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.SerialNo)
+                .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
         });
