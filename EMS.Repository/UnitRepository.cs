@@ -23,7 +23,7 @@ namespace EMS.Repository
             return res.ToJson().FromJson<List<UnitDTO>>();
         }
 
-        public async Task<UnitDTO> Get(int id)
+        public async Task<UnitDTO> GetById(int id)
         {
             var res = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == id);
             return res.ToJson().FromJson<UnitDTO>();
@@ -75,7 +75,7 @@ namespace EMS.Repository
             await DBEMSContext.SaveChangesAsync();
         }
 
-
+      
 
     }
 }
