@@ -32,12 +32,60 @@
   },
   {
     "ContainingType": "EMS.Api.Controllers.GatewayController",
+    "Method": "Delete",
+    "RelativePath": "api/Gateway/Delete/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EMS.Api.Controllers.GatewayController",
     "Method": "Get",
     "RelativePath": "api/Gateway/Get",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EMS.Api.Controllers.GatewayController",
+    "Method": "Insert",
+    "RelativePath": "api/Gateway/Insert",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "gateway",
+        "Type": "EMS.Core.Models.GatewayDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EMS.Api.Controllers.GatewayController",
+    "Method": "Update",
+    "RelativePath": "api/Gateway/Update",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "gateway",
+        "Type": "EMS.Core.Models.GatewayDTO",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -48,6 +96,22 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EMS.Api.Controllers.UnitController",
+    "Method": "Delete",
+    "RelativePath": "api/Unit/Delete/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {

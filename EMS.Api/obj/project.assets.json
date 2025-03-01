@@ -2905,7 +2905,6 @@
       "EMS.Core >= 1.0.0",
       "EMS.CronJobs >= 1.0.0",
       "EMS.DI >= 1.0.0",
-      "EMS.Data >= 1.0.0",
       "EMS.Repository >= 1.0.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.13"
     ]
@@ -2947,9 +2946,6 @@
             },
             "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.CronJobs\\EMS.CronJobs.csproj": {
               "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.CronJobs\\EMS.CronJobs.csproj"
-            },
-            "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Data\\EMS.Data.csproj": {
-              "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Data\\EMS.Data.csproj"
             },
             "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.DI\\EMS.DI.csproj": {
               "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.DI\\EMS.DI.csproj"

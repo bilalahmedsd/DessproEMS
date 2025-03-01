@@ -19,13 +19,13 @@ namespace EMS.Repository
         }
         public async Task<List<GatewayDTO>> Get()
         {
-            var res = await DBEMSContext.ProjectManagements.Where(x => x.IsDeleted == false).ToListAsync();
+            var res = await DBEMSContext.Gateways.Where(x => x.IsDeleted == false).ToListAsync();
             return res.ToJson().FromJson<List<GatewayDTO>>();
         }
 
         public async Task<GatewayDTO> Get(int id)
         {
-            var res = DBEMSContext.ProjectManagements.FirstOrDefaultAsync(x => x.Id == id);
+            var res = DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id);
             return res.ToJson().FromJson<GatewayDTO>();
         }
 
@@ -42,14 +42,16 @@ namespace EMS.Repository
             if (existingUnit == null)
                 throw new Exception("Unit not found!");
 
-            //existingUnit.FkProjectManagement = obj.FkProjectManagement;
-            //existingUnit.IsActive = obj.IsActive;
-            //existingUnit.Name = obj.Name;
-            //existingUnit.SerialNumber = obj.SerialNumber;
-            //existingUnit.Status = obj.Status;
-            //existingUnit.UpdatedAt = obj.UpdatedAt;
-            //existingUnit.UpdatedBy = obj.UpdatedBy;
-            //existingUnit.IsDeleted = obj.IsDeleted;
+
+            existingUnit.IsActive = obj.IsActive;
+            existingUnit.Name = obj.Name;
+            existingUnit.ProtocolName = obj.ProtocolName;
+            existingUnit.SerialNo = obj.SerialNo;
+            existingUnit.AccumulatedVariable = obj.AccumulatedVariable;
+            existingUnit.InstantVariable = obj.InstantVariable;
+            existingUnit.UpdatedAt = obj.UpdatedAt;
+            existingUnit.UpdatedBy = obj.UpdatedBy;
+            existingUnit.IsDeleted = obj.IsDeleted;
 
             // ✅ Instead of Update(), use Attach() to avoid tracking issues
             DBEMSContext.Attach(existingUnit);
@@ -58,9 +60,19 @@ namespace EMS.Repository
             await DBEMSContext.SaveChangesAsync();
         }
 
-      
 
-      
-      
+        public async Task Delete(int id)
+        {
+            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (existingUnit == null)
+                throw new Exception("Gateway not found!");
+
+            existingUnit.IsDeleted = true;
+
+            await DBEMSContext.SaveChangesAsync();
+        }
+
+
     }
 }

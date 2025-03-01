@@ -33,6 +33,84 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
-        
+        [HttpPost("Insert")]
+        public async Task<IActionResult> Insert([FromBody] GatewayDTO gateway)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                if (gateway == null)
+                {
+                    resp.Message = "Invalid data!";
+                    resp.IsSuccess = false;
+                    return BadRequest(resp);
+                }
+
+                await _gatewayRepository.Insert(gateway);
+                resp.Message = "Unit added successfully!";
+                resp.IsSuccess = true;
+                resp.Data = gateway;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "An error occurred while inserting unit.";
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+        [HttpPut("Update")]
+        public async Task<IActionResult> Update([FromBody] GatewayDTO gateway)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                if (gateway == null || gateway.Id == null)
+                {
+                    resp.Message = "Invalid data!";
+                    resp.IsSuccess = false;
+                    return BadRequest(resp);
+                }
+
+                await _gatewayRepository.Update(gateway);
+                resp.Message = "Gateway updated successfully!";
+                resp.IsSuccess = true;
+                resp.Data = gateway;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "An error occurred while updating the gateway.";
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
+        [HttpPut("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                if (id <= 0)
+                {
+                    resp.Message = "Invalid data!";
+                    resp.IsSuccess = false;
+                    return BadRequest(resp);
+                }
+
+                await _gatewayRepository.Delete(id);
+                resp.Message = "Gateway updated successfully!";
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "An error occurred while updating the gateway.";
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
     }
 }

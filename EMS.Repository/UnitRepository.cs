@@ -80,8 +80,16 @@ namespace EMS.Repository
 
             await DBEMSContext.SaveChangesAsync();
         }
+        public async Task Delete(int id)
+        {
+            var existingUnit = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == id);
 
-      
+            if (existingUnit == null)
+                throw new Exception("Unit not found!");
 
+            existingUnit.IsDeleted = true;
+
+            await DBEMSContext.SaveChangesAsync();
+        }
     }
 }

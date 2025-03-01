@@ -1,6 +1,7 @@
 ﻿using EMS.Core.Helper;
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
+using EMS.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -89,7 +90,31 @@ namespace EMS.Api.Controllers
             return Ok(resp);
         }
 
+        [HttpPut("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                if (id <= 0)
+                {
+                    resp.Message = "Invalid data!";
+                    resp.IsSuccess = false;
+                    return BadRequest(resp);
+                }
 
+                await _unitRepository.Delete(id);
+                resp.Message = "Unit updated successfully!";
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "An error occurred while updating the unit.";
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
 
         [HttpGet("GetLatestDeviceData")]
         public  IActionResult GetLatest()

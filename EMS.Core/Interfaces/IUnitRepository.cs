@@ -6,9 +6,10 @@ namespace EMS.Core.Interfaces
     {
         Task<List<UnitDTO>> Get();
         Task<UnitDTO> GetById(int id);
-      
         Task Insert(UnitDTO obj);
         Task Update(UnitDTO obj);
-       
+        Task Delete(int id);
+
+
     }
 }
