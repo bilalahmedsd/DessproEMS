@@ -1,0 +1,59 @@
+# Build output
+bin/
+obj/
+debug/
+release/
+
+# Visual Studio files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+*.sln.iml
+*.sln.nfos
+.idea/
+
+# ASP.NET / Blazor / Web
+wwwroot/
+node_modules/
+dist/
+*.log
+*.npm-debug.log*
+*.yarn-debug.log*
+*.yarn-error.log*
+
+# NuGet packages
+*.nupkg
+packages/
+project.lock.json
+project.assets.json
+
+# Entity Framework / Migrations
+migrations/
+*.mdf
+*.ldf
+
+# Logs and temp files
+*.log
+*.cache
+*.tmp
+*.pdb
+
+# Rider / ReSharper / Code Analysis
+_ReSharper.Caches/
+*.DotSettings.user
+.idea/
+*.vs/
+
+# Windows 
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE specific
+.vs/
+TestResults/

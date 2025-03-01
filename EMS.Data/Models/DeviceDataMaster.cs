@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace EMS.Data.Models;
+
+public partial class DeviceDataMaster
+{
+    public int Id { get; set; }
+
+    public string? DeviceId { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+}
