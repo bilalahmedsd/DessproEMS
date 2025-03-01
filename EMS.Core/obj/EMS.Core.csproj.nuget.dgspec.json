@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj": {}
+    "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj": {}
   },
   "projects": {
-    "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj": {
+    "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj",
+        "projectUniqueName": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj",
         "projectName": "EMS.Core",
-        "projectPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj",
+        "projectPath": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\EMS.Core.csproj",
         "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\Source\\Repos\\DessproEMS\\EMS.Core\\obj\\",
+        "outputPath": "C:\\Users\\HP\\source\\repos\\DessproEMS\\EMS.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
