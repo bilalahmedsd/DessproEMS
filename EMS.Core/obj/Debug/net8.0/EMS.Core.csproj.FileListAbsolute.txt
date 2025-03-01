@@ -10,3 +10,4 @@ D:\Bilal\Test Folder\EMS\EMS.Core\obj\Debug\net8.0\refint\EMS.Core.dll
 D:\Bilal\Test Folder\EMS\EMS.Core\obj\Debug\net8.0\EMS.Core.pdb
 D:\Bilal\Test Folder\EMS\EMS.Core\obj\Debug\net8.0\ref\EMS.Core.dll
 D:\Bilal\Test Folder\EMS\EMS.Core\obj\Debug\net8.0\EMS.Core.csproj.AssemblyReference.cache
+D:\Bilal\Test Folder\EMS\EMS.Core\obj\Debug\net8.0\EMS.Core.sourcelink.json

@@ -15,3 +15,4 @@ D:\Bilal\Test Folder\EMS\EMS.Repository\bin\Debug\net8.0\EMS.Data.dll
 D:\Bilal\Test Folder\EMS\EMS.Repository\bin\Debug\net8.0\EMS.Core.pdb
 D:\Bilal\Test Folder\EMS\EMS.Repository\bin\Debug\net8.0\EMS.Data.pdb
 D:\Bilal\Test Folder\EMS\EMS.Repository\obj\Debug\net8.0\EMS.Repo.D05F0163.Up2Date
+D:\Bilal\Test Folder\EMS\EMS.Repository\obj\Debug\net8.0\EMS.Repository.sourcelink.json

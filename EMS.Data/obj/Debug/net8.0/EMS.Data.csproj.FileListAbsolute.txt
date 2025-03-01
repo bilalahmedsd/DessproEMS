@@ -12,3 +12,4 @@ D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\refint\EMS.Data.dll
 D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.pdb
 D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.genruntimeconfig.cache
 D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\ref\EMS.Data.dll
+D:\Bilal\Test Folder\EMS\EMS.Data\obj\Debug\net8.0\EMS.Data.sourcelink.json
