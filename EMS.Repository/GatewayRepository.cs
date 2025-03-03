@@ -72,7 +72,8 @@ namespace EMS.Repository
             existingUnit.SerialNo = obj.SerialNo;
             existingUnit.AccumulatedVariable = obj.AccumulatedVariable;
             existingUnit.InstantVariable = obj.InstantVariable;
-            existingUnit.UpdatedAt = obj.UpdatedAt;
+            existingUnit.FkUnitId = obj.FkUnitId;
+			existingUnit.UpdatedAt = obj.UpdatedAt;
             existingUnit.UpdatedBy = obj.UpdatedBy;
             existingUnit.IsDeleted = obj.IsDeleted;
 
