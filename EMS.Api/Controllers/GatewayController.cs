@@ -33,6 +33,25 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
+        [HttpGet("GetGatewayWithUnits")]
+        public async Task<IActionResult> GetGatewayWithUnits()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _gatewayRepository.GetGatewayWithUnits();
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+
+            }
+
+            return Ok(resp);
+        }
         [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] GatewayDTO gateway)
         {

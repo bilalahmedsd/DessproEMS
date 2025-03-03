@@ -28,4 +28,6 @@ public partial class User
     public int? UpdatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public int? FkCompanyId { get; set; }
 }

@@ -17,26 +17,43 @@ namespace EMS.Api.Controllers
             _unitRepository = unitRepository;
             _deviceRawDataRepository = deviceRawDataRepository;
         }
-
-        [HttpGet("Get")]
-        public async Task<IActionResult> Get()
+        [HttpGet("GetUnitsWithProjects")]
+        public async Task<IActionResult> GetUnitsWithProjects()
         {
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _unitRepository.Get();
+                resp.Data = await _unitRepository.GetUnitsWithProjects();
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }
             catch (Exception ex)
             {
-                resp.Message = ConstantMessages.ErrorMessage;
+                resp.Message = "Error fetching data.";
                 resp.IsSuccess = false;
-
             }
-
             return Ok(resp);
         }
+
+        //[HttpGet("Get")]
+        //public async Task<IActionResult> Get()
+        //{
+        //    ResponseModel resp = new ResponseModel();
+        //    try
+        //    {
+        //        resp.Data = await _unitRepository.Get();
+        //        resp.Message = ConstantMessages.DataSuccessMessage;
+        //        resp.IsSuccess = true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        resp.Message = ConstantMessages.ErrorMessage;
+        //        resp.IsSuccess = false;
+
+        //    }
+
+        //    return Ok(resp);
+        //}
         [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] UnitDTO unit)
         {

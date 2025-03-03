@@ -91,5 +91,43 @@ namespace EMS.Repository
 
             await DBEMSContext.SaveChangesAsync();
         }
+        public async Task<List<UnitDTO>> GetUnitsWithProjects()
+        {
+            var result = await (from unit in DBEMSContext.Units
+                                where unit.IsDeleted == false
+                                join project in DBEMSContext.ProjectManagements
+                                on unit.FkProjectManagement equals project.Id
+                                select new UnitDTO
+                                {
+                                    Id = unit.Id,
+                                    Name = unit.Name,
+                                    SerialNumber = unit.SerialNumber,
+                                    Status = unit.Status,
+                                    FkProjectManagement = unit.FkProjectManagement,
+                                    IsActive = unit.IsActive,
+                                    CreatedAt = unit.CreatedAt,
+                                    UpdatedAt = unit.UpdatedAt,
+
+                                    // ✅ Include Project Details
+                                    ProjectManagement = new ProjectManagementDTO
+                                    {
+                                        Id = project.Id,
+                                        FkCompanyId = project.FkCompanyId,
+                                        ProjectName = project.ProjectName,
+                                        CustomerName = project.CustomerName,
+                                        Address = project.Address,
+                                        Principal = project.Principal,
+                                        IsDeleted = project.IsDeleted,
+                                        CreatedBy = project.CreatedBy,
+                                        CreatedAt = project.CreatedAt,
+                                        UpdatedBy = project.UpdatedBy,
+                                        UpdatedAt = project.UpdatedAt,
+                                        IsActive = project.IsActive
+                                    }
+                                }).ToListAsync();
+
+            return result;
+        }
+
     }
 }

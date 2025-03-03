@@ -28,6 +28,29 @@ namespace EMS.Repository
             var res = DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id);
             return res.ToJson().FromJson<GatewayDTO>();
         }
+        public async Task<List<GatewayDTO>> GetGatewayWithUnits()
+        {
+            var res = await (from gateway in DBEMSContext.Gateways
+                             where gateway.IsDeleted == false
+                             join unit in DBEMSContext.Units
+                             on gateway.FkUnitId equals unit.Id
+                             select new GatewayDTO
+                             {
+                                 Id = gateway.Id,
+                                 Name = gateway.Name,
+                                 ProtocolName = gateway.ProtocolName,
+                                 SerialNo = gateway.SerialNo,
+                                 InstantVariable = gateway.InstantVariable,
+                                 AccumulatedVariable = gateway.AccumulatedVariable,
+                                 Unit = new UnitDTO
+                                 {
+                                     Id = unit.Id,
+                                     Name = unit.Name,
+                                 }
+
+                             }).ToListAsync();
+            return res;
+        }
 
         public async Task Insert(GatewayDTO obj)
         {

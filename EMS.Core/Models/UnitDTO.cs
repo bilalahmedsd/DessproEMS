@@ -27,5 +27,7 @@ namespace EMS.Core.Models
     public string? SerialNumber { get; set; }
 
     public string? Status { get; set; }
+
+    public ProjectManagementDTO? ProjectManagement { get; set; }
     }
 }

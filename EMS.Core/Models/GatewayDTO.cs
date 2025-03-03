@@ -30,5 +30,9 @@ namespace EMS.Core.Models
         public int? AccumulatedVariable { get; set; }
 
         public int? InstantVariable { get; set; }
+        public int? FkCompanyId { get; set; }
+        public int? FkUnitId { get; set; }
+
+        public UnitDTO? Unit { get; set; }
     }
 }

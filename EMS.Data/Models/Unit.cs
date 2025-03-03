@@ -26,4 +26,6 @@ public partial class Unit
     public string? SerialNumber { get; set; }
 
     public string? Status { get; set; }
+
+    public int? FkCompanyId { get; set; }
 }

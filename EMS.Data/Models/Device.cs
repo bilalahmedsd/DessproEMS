@@ -38,4 +38,6 @@ public partial class Device
     public string? UpdatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public int? FkCompanyId { get; set; }
 }
