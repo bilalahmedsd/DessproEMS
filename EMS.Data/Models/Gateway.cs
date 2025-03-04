@@ -30,5 +30,6 @@ public partial class Gateway
     public int? InstantVariable { get; set; }
 
     public int? FkCompanyId { get; set; }
+
     public int? FkUnitId { get; set; }
 }
