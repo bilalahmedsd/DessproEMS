@@ -1,6 +1,7 @@
 ﻿using EMS.Core.Helper;
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
+using EMS.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.Api.Controllers
@@ -32,7 +33,23 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
-      
+        [HttpGet("GetDevicesWithGateways")]
+        public async Task<IActionResult> GetDevicesWithGateways()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _deviceRepository.GetDevicesWithGateways();
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "Error fetching data.";
+                resp.IsSuccess = false;
+            }
+            return Ok(resp);
+        }
         [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] DeviceDTO device)
         {

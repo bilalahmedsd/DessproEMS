@@ -23,7 +23,7 @@ namespace EMS.Repository
             return res.ToJson().FromJson<List<DeviceDTO>>();
         }
 
-        public async Task<DeviceDTO> Get(int id)
+        public async Task<DeviceDTO> GetWithId(int id)
         {
             var res = DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == id);
             return res.ToJson().FromJson<DeviceDTO>();
@@ -35,13 +35,18 @@ namespace EMS.Repository
             await DBEMSContext.Devices.AddAsync(obj.ToJson().FromJson<Device>());
             await DBEMSContext.SaveChangesAsync();
         }
+        public async Task Insert(GatewayDTO obj)
 
+        {
+            await DBEMSContext.Gateways.AddAsync(obj.ToJson().FromJson<Gateway>());
+            await DBEMSContext.SaveChangesAsync();
+        }
         public async Task Update(DeviceDTO obj)
         {
             var existingUnit = await DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == obj.Id);
 
             if (existingUnit == null)
-                throw new Exception("Unit not found!");
+                throw new Exception("Device not found!");
 
 
             existingUnit.IsActive = obj.IsActive;
@@ -99,6 +104,7 @@ namespace EMS.Repository
                                     OfflineTime = device.OfflineTime,
                                     OfflineDuration = device.OfflineDuration,
                                     IsActive = device.IsActive,
+                                    IsDeleted = device.IsDeleted,
                                     CreatedBy = device.CreatedBy,
                                     CreatedAt = device.CreatedAt,
                                     UpdatedBy = device.UpdatedBy,
@@ -128,6 +134,7 @@ namespace EMS.Repository
 
             return result;
         }
+
 
     }
 }

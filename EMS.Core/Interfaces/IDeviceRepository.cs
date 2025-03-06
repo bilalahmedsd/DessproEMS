@@ -10,7 +10,7 @@ namespace EMS.Core.Interfaces
     public interface IDeviceRepository
     {
         Task<List<DeviceDTO>> Get();
-        Task<DeviceDTO> Get(int id);
+        Task<DeviceDTO> GetWithId(int id);
 
         Task<List<DeviceDTO>> GetDevicesWithGateways();
         Task Insert(DeviceDTO obj);

@@ -42,6 +42,6 @@ namespace EMS.Core.Models
 
         public int? FkCompanyId { get; set; }
 
-        public GatewayDTO Gateway { get; set; }
+        public GatewayDTO? Gateway { get; set; }
     }
 }
