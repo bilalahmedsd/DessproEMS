@@ -41,5 +41,7 @@ namespace EMS.Core.Models
         public DateTime? UpdatedAt { get; set; }
 
         public int? FkCompanyId { get; set; }
+
+        public GatewayDTO Gateway { get; set; }
     }
 }

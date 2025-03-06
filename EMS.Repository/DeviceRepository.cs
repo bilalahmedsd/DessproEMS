@@ -80,6 +80,54 @@ namespace EMS.Repository
 
             await DBEMSContext.SaveChangesAsync();
         }
+        public async Task<List<DeviceDTO>> GetDevicesWithGateways()
+        {
+            var result = await (from device in DBEMSContext.Devices
+                                where device.IsDeleted == false
+                                join gateway in DBEMSContext.Gateways
+                                on device.FkGatewayId equals gateway.Id
+                                select new DeviceDTO
+                                {
+                                    Id = device.Id,
+                                    Name = device.Name,
+                                    ChannelName = device.ChannelName,
+                                    ConsumptionUnit = device.ConsumptionUnit,
+                                    DisplaySequence = device.DisplaySequence,
+                                    SerialPort = device.SerialPort,
+                                    SerialNo = device.SerialNo,
+                                    Status = device.Status,
+                                    OfflineTime = device.OfflineTime,
+                                    OfflineDuration = device.OfflineDuration,
+                                    IsActive = device.IsActive,
+                                    CreatedBy = device.CreatedBy,
+                                    CreatedAt = device.CreatedAt,
+                                    UpdatedBy = device.UpdatedBy,
+                                    UpdatedAt = device.UpdatedAt,
+                                    FkCompanyId = device.FkCompanyId,
+                                    FkGatewayId = device.FkGatewayId,
+
+                                    // ✅ Include Gateway Details
+                                    Gateway = new GatewayDTO
+                                    {
+                                        Id = gateway.Id,
+                                        Name = gateway.Name,
+                                        IsActive = gateway.IsActive,
+                                        IsDeleted = gateway.IsDeleted,
+                                        CreatedBy = gateway.CreatedBy,
+                                        CreatedAt = gateway.CreatedAt,
+                                        UpdatedBy = gateway.UpdatedBy,
+                                        UpdatedAt = gateway.UpdatedAt,
+                                        ProtocolName = gateway.ProtocolName,
+                                        SerialNo = gateway.SerialNo,
+                                        AccumulatedVariable = gateway.AccumulatedVariable,
+                                        InstantVariable = gateway.InstantVariable,
+                                        FkCompanyId = gateway.FkCompanyId,
+                                        FkUnitId = gateway.FkUnitId
+                                    }
+                                }).ToListAsync();
+
+            return result;
+        }
 
     }
 }
