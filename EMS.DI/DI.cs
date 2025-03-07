@@ -18,10 +18,11 @@ namespace EMS.DI
             return collection
                 .AddTransient<IUsersRepository, UsersRepository>()
                 .AddTransient<IDeviceRawDataRepository, DeviceRawDataRepository>()
+                .AddTransient<IDeviceDataDetailRepository, DeviceDataDetailRepository>()
                 .AddTransient<IUnitRepository, UnitRepository>()
                 .AddTransient<IProjectManagementRepository,ProjectManagementRepository>()
-                 .AddTransient<IDeviceRepository, DeviceRepository>()
-              .AddTransient<IGatewayRepository, GatewayRepository>()
+                .AddTransient<IDeviceRepository, DeviceRepository>()
+                .AddTransient<IGatewayRepository, GatewayRepository>()
                 .AddSingleton<IFourFaith, FourFaith>();
                 
         }
