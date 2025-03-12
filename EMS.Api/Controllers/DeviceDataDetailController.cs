@@ -48,5 +48,43 @@ namespace EMS.Api.Controllers
             return Ok(resp);
 
         }
+        [HttpGet("GetfilterDeviceDataDetails")]
+        public async Task<IActionResult> GetfilterDeviceDataDetails(
+     [FromQuery] int? projectId,
+     [FromQuery] int? meterId,
+     [FromQuery] int? unitId,
+     [FromQuery] DateTime startDate,
+     [FromQuery] DateTime endDate,
+     [FromQuery] string? timeRange)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                var data = await _dataDetailRrepository.GetfilterDeviceDataDetails(
+                    projectId, meterId, unitId, startDate, endDate, timeRange);
+
+                //if (data == null || !data.Any())
+                //{
+                //    resp.Message = "No data found for the given filters.";
+                //    resp.IsSuccess = false;
+                //    return NotFound(resp);
+                //}
+
+                resp.Data = data;
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+
+                return Ok(resp);
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "An error occurred while fetching data.";
+                resp.IsSuccess = false;
+               
+
+                return StatusCode(500, resp);
+            }
+        }
+
     }
 }

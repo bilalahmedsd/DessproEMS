@@ -15,5 +15,6 @@ namespace EMS.Core.Models
         public double? AddressVariable { get; set; }
 
         public DateTime? CreatedAt { get; set; }
+        public DeviceDataMasterDTO? DeviceDataMaster { get; set; }
     }
 }

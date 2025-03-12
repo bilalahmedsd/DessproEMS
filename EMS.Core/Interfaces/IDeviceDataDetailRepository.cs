@@ -11,5 +11,8 @@ namespace EMS.Core.Interfaces
     {
         Task<List<DeviceDataDetailDTO>> GetDeviceDataDetailsAsync();
         Task<List<DeviceDataDetailDTO>> GetHistoricDeviceDataDetailsAsync(DateTime startDate, DateTime endDate);
+        Task<List<DeviceDataDetailDTO>> GetfilterDeviceDataDetails(
+            int? projectId, int? meterId, int? unitId, DateTime startDate, DateTime endDate, string? timeRange);
+
     }
 }
