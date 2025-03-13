@@ -56,6 +56,7 @@ namespace EMS.Repository
             existingUnit.Name = obj.Name;
             existingUnit.ChannelName = obj.ChannelName;
             existingUnit.FkGatewayId = obj.FkGatewayId;
+            existingUnit.FkUnitId = obj.FkUnitId;
             existingUnit.SerialNo = obj.SerialNo;
             existingUnit.Status = obj.Status;
             existingUnit.ConsumptionUnit = obj.ConsumptionUnit;
@@ -111,6 +112,7 @@ namespace EMS.Repository
                                     UpdatedAt = device.UpdatedAt,
                                     FkCompanyId = device.FkCompanyId,
                                     FkGatewayId = device.FkGatewayId,
+                                    FkUnitId = device.FkUnitId,
 
                                     // ✅ Include Gateway Details
                                     Gateway = new GatewayDTO

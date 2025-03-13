@@ -1,7 +1,9 @@
 ﻿using EMS.Core.Helper;
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
+using EMS.Repository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EMS.Api.Controllers
 {
@@ -48,42 +50,24 @@ namespace EMS.Api.Controllers
             return Ok(resp);
 
         }
-        [HttpGet("GetfilterDeviceDataDetails")]
-        public async Task<IActionResult> GetfilterDeviceDataDetails(
-     [FromQuery] int? projectId,
-     [FromQuery] int? meterId,
-     [FromQuery] int? unitId,
-     [FromQuery] DateTime startDate,
-     [FromQuery] DateTime endDate,
-     [FromQuery] string? timeRange)
+      
+        [HttpGet("GetfilterDeviceDataDetail")]
+        public async Task<IActionResult> GetfilterDeviceDataDetail([FromQuery] int[] projectIds, [FromQuery] int[] unitIds, [FromQuery] int[] meterIds, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] string timeRange)
         {
-            ResponseModel resp = new ResponseModel();
+            var response = new ResponseModel();
             try
             {
-                var data = await _dataDetailRrepository.GetfilterDeviceDataDetails(
-                    projectId, meterId, unitId, startDate, endDate, timeRange);
-
-                //if (data == null || !data.Any())
-                //{
-                //    resp.Message = "No data found for the given filters.";
-                //    resp.IsSuccess = false;
-                //    return NotFound(resp);
-                //}
-
-                resp.Data = data;
-                resp.Message = ConstantMessages.DataSuccessMessage;
-                resp.IsSuccess = true;
-
-                return Ok(resp);
+                var data = await _dataDetailRrepository.GetFilterDeviceDataDetails(projectIds, unitIds, meterIds, startDate, endDate, timeRange);
+                response.Data = data;
+                response.Message = "Successfully fetched!";
+                response.IsSuccess = true;
             }
             catch (Exception ex)
             {
-                resp.Message = "An error occurred while fetching data.";
-                resp.IsSuccess = false;
-               
-
-                return StatusCode(500, resp);
+                response.Message = $"Error: {ex.Message}";
+                response.IsSuccess = false;
             }
+            return Ok(response);
         }
 
     }

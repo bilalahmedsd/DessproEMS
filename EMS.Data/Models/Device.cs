@@ -40,4 +40,6 @@ public partial class Device
     public DateTime? UpdatedAt { get; set; }
 
     public int? FkCompanyId { get; set; }
+
+    public int? FkUnitId { get; set; }
 }

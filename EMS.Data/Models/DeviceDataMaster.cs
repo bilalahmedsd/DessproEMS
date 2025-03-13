@@ -10,4 +10,6 @@ public partial class DeviceDataMaster
     public string? DeviceId { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public int? FkDeviceId { get; set; }
 }

@@ -12,5 +12,6 @@ namespace EMS.Core.Models
 
         public DateTime? CreatedAt { get; set; }
         public DeviceDTO? Device { get; set; }
+        public int? FkDeviceId { get; set; }
     }
 }

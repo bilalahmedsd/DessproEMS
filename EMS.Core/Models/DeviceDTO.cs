@@ -43,5 +43,9 @@ namespace EMS.Core.Models
         public int? FkCompanyId { get; set; }
 
         public GatewayDTO? Gateway { get; set; }
+        public int? FkUnitId { get; set; }
+
+        public UnitDTO? Unit { get; set; }
+
     }
 }
