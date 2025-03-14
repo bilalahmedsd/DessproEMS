@@ -50,14 +50,23 @@ namespace EMS.Api.Controllers
             return Ok(resp);
 
         }
-      
+
         [HttpGet("GetfilterDeviceDataDetail")]
-        public async Task<IActionResult> GetfilterDeviceDataDetail([FromQuery] int[] projectIds, [FromQuery] int[] unitIds, [FromQuery] int[] meterIds, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] string timeRange)
+        public async Task<IActionResult> GetfilterDeviceDataDetail(
+       [FromQuery] IEnumerable<int> projectId,
+       [FromQuery] IEnumerable<int> unitId,
+       [FromQuery] Dictionary<string, List<int>> meterId,
+       [FromQuery] DateTime startDate,
+       [FromQuery] DateTime endDate,
+       [FromQuery] string timeRange)
         {
             var response = new ResponseModel();
             try
             {
-                var data = await _dataDetailRrepository.GetFilterDeviceDataDetails(projectIds, unitIds, meterIds, startDate, endDate, timeRange);
+                var parsedMeterId = meterId.ToDictionary(k => int.Parse(k.Key), v => v.Value);
+                var data = await _dataDetailRrepository.GetFilteredDeviceDataDetail(
+                    projectId.ToList(), unitId.ToList(), parsedMeterId, startDate, endDate, timeRange);
+
                 response.Data = data;
                 response.Message = "Successfully fetched!";
                 response.IsSuccess = true;

@@ -46,6 +46,7 @@ namespace EMS.Core.Models
         public int? FkUnitId { get; set; }
 
         public UnitDTO? Unit { get; set; }
+        public List<DeviceDataDetailDTO> DeviceDataDetails { get; set; }
 
     }
 }

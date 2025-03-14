@@ -29,5 +29,6 @@ namespace EMS.Core.Models
     public string? Status { get; set; }
 
     public ProjectManagementDTO? ProjectManagement { get; set; }
+    public List<DeviceDTO> Meters { get; set; }
     }
 }
