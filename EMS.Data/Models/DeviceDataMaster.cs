@@ -14,4 +14,6 @@ public partial class DeviceDataMaster
     public int? FkDeviceId { get; set; }
 
     public int? FkGatewayId { get; set; }
+
+    public int? FkCompanyId { get; set; }
 }

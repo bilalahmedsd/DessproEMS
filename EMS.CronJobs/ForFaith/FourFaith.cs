@@ -36,7 +36,8 @@ namespace EMS.CronJobs.ForFaith
                         {
                             DeviceId = energyData.did,
                             CreatedAt = DateTime.Now,
-                            FkGatewayId = gateway.Id
+                            FkGatewayId = gateway.Id,
+                            FkCompanyId = gateway.FkCompanyId
                         };
                         await DBEMSContext.DeviceDataMasters.AddAsync(master);
                         await DBEMSContext.SaveChangesAsync();
