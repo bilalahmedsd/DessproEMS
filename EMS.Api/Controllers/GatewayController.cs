@@ -1,6 +1,7 @@
 ﻿using EMS.Core.Helper;
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
+using EMS.Core.Services;
 using EMS.Repository;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +10,10 @@ namespace EMS.Api.Controllers
     public class GatewayController : BaseController
     {
         private readonly IGatewayRepository _gatewayRepository;
-        public GatewayController(IGatewayRepository gatewayRepository)
+        public GatewayController(IGatewayRepository gatewayRepository, IUserServices services) : base(services)
         {
             _gatewayRepository = gatewayRepository;
+
         }
 
         [HttpGet("Get")]
@@ -20,7 +22,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _gatewayRepository.Get(CurrentUser.FkCompanyId.Value);
+                resp.Data = await _gatewayRepository.Get(userServices.GetUser().FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }
@@ -39,7 +41,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _gatewayRepository.GetGatewaybyUnitId(UnitId,CurrentUser.FkCompanyId.Value);
+                resp.Data = await _gatewayRepository.GetGatewaybyUnitId(UnitId, userServices.GetUser().FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }
@@ -65,7 +67,7 @@ namespace EMS.Api.Controllers
                     return BadRequest(resp);
                 }
                 gateway.CreatedAt = CurrentDateTime;
-                gateway.CreatedBy = CurrentUser.Id;
+                gateway.CreatedBy = userServices.GetUser().Id.Value;
                 await _gatewayRepository.Insert(gateway);
                 resp.Message = "Unit added successfully!";
                 resp.IsSuccess = true;
@@ -92,7 +94,7 @@ namespace EMS.Api.Controllers
                     return BadRequest(resp);
                 }
                 gateway.UpdatedAt = CurrentDateTime;
-                gateway.UpdatedBy = CurrentUser.Id;
+                gateway.UpdatedBy = userServices.GetUser().Id.Value;
                 await _gatewayRepository.Update(gateway);
                 resp.Message = "Gateway updated successfully!";
                 resp.IsSuccess = true;

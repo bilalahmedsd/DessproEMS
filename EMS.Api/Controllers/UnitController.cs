@@ -1,6 +1,7 @@
 ﻿using EMS.Core.Helper;
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
+using EMS.Core.Services;
 using EMS.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ namespace EMS.Api.Controllers
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IDeviceRawDataRepository _deviceRawDataRepository;
-        public UnitController(IUnitRepository unitRepository, IDeviceRawDataRepository deviceRawDataRepository)
+        public UnitController(IUnitRepository unitRepository, IDeviceRawDataRepository deviceRawDataRepository, IUserServices services) : base(services)
         {
             _unitRepository = unitRepository;
             _deviceRawDataRepository = deviceRawDataRepository;
@@ -24,7 +25,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _unitRepository.GetUnitsByProjectId(ProjectId, CurrentUser.FkCompanyId.Value);
+                resp.Data = await _unitRepository.GetUnitsByProjectId(ProjectId, userServices.GetUser().FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }
@@ -67,7 +68,7 @@ namespace EMS.Api.Controllers
                     resp.IsSuccess = false;
                     return BadRequest(resp);
                 }
-                unit.CreatedBy = CurrentUser?.Id;
+                unit.CreatedBy = userServices.GetUser().Id.Value;
                 unit.CreatedAt = CurrentDateTime;
                 await _unitRepository.Insert(unit);
                 resp.Message = "Unit added successfully!";
@@ -94,7 +95,7 @@ namespace EMS.Api.Controllers
                     resp.IsSuccess = false;
                     return BadRequest(resp);
                 }
-                unit.UpdatedBy = CurrentUser?.Id;
+                unit.UpdatedBy = userServices.GetUser().Id.Value;
                 unit.UpdatedAt = CurrentDateTime;
                 await _unitRepository.Update(unit);
                 resp.Message = "Unit updated successfully!";

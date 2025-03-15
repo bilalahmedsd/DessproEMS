@@ -1,6 +1,7 @@
 ﻿using EMS.Core.Helper;
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
+using EMS.Core.Services;
 using EMS.Repository;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,7 @@ namespace EMS.Api.Controllers
     public class DeviceController : BaseController
     {
         private readonly IDeviceRepository _deviceRepository;
-        public DeviceController(IDeviceRepository deviceRepository)
+        public DeviceController(IDeviceRepository deviceRepository, IUserServices services) : base(services)
         {
             _deviceRepository = deviceRepository;
         }

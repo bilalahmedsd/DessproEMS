@@ -10,7 +10,7 @@ using System.Text;
 
 namespace EMS.Api.Controllers
 {
-    public class AuthController : BaseController
+    public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
         private readonly IUsersRepository UserRepository;

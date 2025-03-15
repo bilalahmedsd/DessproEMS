@@ -1,6 +1,7 @@
 ﻿using EMS.Core.Helper;
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
+using EMS.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Metadata;
@@ -12,7 +13,7 @@ namespace EMS.Api.Controllers
     {
         private readonly IProjectManagementRepository _projectmanagementrepository;
 
-        public ProjectManagementController(IProjectManagementRepository projectmanagementRepository)
+        public ProjectManagementController(IProjectManagementRepository projectmanagementRepository,IUserServices services):base(services)
         {
             _projectmanagementrepository = projectmanagementRepository;
         }
@@ -22,7 +23,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _projectmanagementrepository.Get(CurrentUser.FkCompanyId.Value);
+                resp.Data = await _projectmanagementrepository.Get(userServices.GetUser().FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }

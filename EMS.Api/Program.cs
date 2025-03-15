@@ -1,4 +1,7 @@
-﻿using EMS.CronJobs;
+﻿using EMS.Api;
+using EMS.Core.Helper;
+using EMS.Core.Services;
+using EMS.CronJobs;
 using EMS.Data.Models;
 using EMS.DI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,7 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-
 builder.Services.AddServices();
 builder.Services.AddDbContext<EMSContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -50,8 +52,9 @@ builder.Services.AddCors(options =>
 });
 
 
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
-
+IoC.InitServices(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
