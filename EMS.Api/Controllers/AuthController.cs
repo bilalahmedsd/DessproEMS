@@ -1,6 +1,7 @@
 ﻿using EMS.Core.Helper;
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
+using EMS.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
@@ -10,11 +11,11 @@ using System.Text;
 
 namespace EMS.Api.Controllers
 {
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
         private readonly IConfiguration _config;
         private readonly IUsersRepository UserRepository;
-        public AuthController(IConfiguration config, IUsersRepository userRepository)
+        public AuthController(IConfiguration config, IUsersRepository userRepository, IUserServices services) : base(services)
         {
             _config = config;
             UserRepository = userRepository;

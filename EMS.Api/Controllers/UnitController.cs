@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.Api.Controllers
 {
-    
+    [Authorize]
     public class UnitController : BaseController
     {
         private readonly IUnitRepository _unitRepository;
