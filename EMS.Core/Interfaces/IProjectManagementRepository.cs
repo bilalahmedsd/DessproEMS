@@ -5,8 +5,8 @@ namespace EMS.Core.Interfaces
 {
     public interface IProjectManagementRepository
     {
-        Task<List<ProjectManagementDTO>> Get();
-        Task<ProjectManagementDTO> Get(int id);
+        Task<List<ProjectManagementDTO>> Get(int companyID);
+        Task<ProjectManagementDTO> Get(int id, int companyID);
         Task Insert(ProjectManagementDTO obj);
         Task Update(ProjectManagementDTO obj);
     }

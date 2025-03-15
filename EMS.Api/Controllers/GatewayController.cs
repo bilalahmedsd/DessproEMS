@@ -20,7 +20,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _gatewayRepository.Get();
+                resp.Data = await _gatewayRepository.Get(CurrentUser.FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }
@@ -33,13 +33,13 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
-        [HttpGet("GetGatewayWithUnits")]
-        public async Task<IActionResult> GetGatewayWithUnits()
+        [HttpGet("GetGatewaybyUnitId/{UnitId}")]
+        public async Task<IActionResult> GetGatewaybyUnitId(int UnitId)
         {
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _gatewayRepository.GetGatewayWithUnits();
+                resp.Data = await _gatewayRepository.GetGatewaybyUnitId(UnitId,CurrentUser.FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }
@@ -64,7 +64,8 @@ namespace EMS.Api.Controllers
                     resp.IsSuccess = false;
                     return BadRequest(resp);
                 }
-
+                gateway.CreatedAt = CurrentDateTime;
+                gateway.CreatedBy = CurrentUser.Id;
                 await _gatewayRepository.Insert(gateway);
                 resp.Message = "Unit added successfully!";
                 resp.IsSuccess = true;
@@ -90,7 +91,8 @@ namespace EMS.Api.Controllers
                     resp.IsSuccess = false;
                     return BadRequest(resp);
                 }
-
+                gateway.UpdatedAt = CurrentDateTime;
+                gateway.UpdatedBy = CurrentUser.Id;
                 await _gatewayRepository.Update(gateway);
                 resp.Message = "Gateway updated successfully!";
                 resp.IsSuccess = true;

@@ -17,20 +17,23 @@ namespace EMS.Repository
         {
             DBEMSContext = eMSContext;
         }
-        public async Task<List<UnitDTO>> Get()
+        public async Task<List<UnitDTO>> Get(int companyId)
         {
             var res = await DBEMSContext.Units.Where(x => x.IsDeleted == false).ToListAsync();
             return res.ToJson().FromJson<List<UnitDTO>>();
         }
 
-        public async Task<UnitDTO> GetById(int id)
+        public async Task<UnitDTO> GetById(int id, int companyID)
         {
-            var res = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == id);
+            var res = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
             return res.ToJson().FromJson<UnitDTO>();
         }
 
         public async Task Insert(UnitDTO obj)
         {
+            obj.IsActive = true;
+            obj.IsDeleted = false;
+            
             await DBEMSContext.Units.AddAsync(obj.ToJson().FromJson<Unit>());
             await DBEMSContext.SaveChangesAsync();
         }
@@ -60,7 +63,7 @@ namespace EMS.Repository
 
         public async Task Update(UnitDTO obj)
         {
-            var existingUnit = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == obj.Id);
+            var existingUnit = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == obj.Id && x.IsDeleted ==false);
 
             if (existingUnit == null)
                 throw new Exception("Unit not found!");
@@ -72,9 +75,7 @@ namespace EMS.Repository
             existingUnit.Status = obj.Status;
             existingUnit.UpdatedAt = obj.UpdatedAt;
             existingUnit.UpdatedBy = obj.UpdatedBy;
-            existingUnit.IsDeleted = obj.IsDeleted;
 
-            // ✅ Instead of Update(), use Attach() to avoid tracking issues
             DBEMSContext.Attach(existingUnit);
             DBEMSContext.Entry(existingUnit).State = EntityState.Modified;
 
@@ -82,7 +83,7 @@ namespace EMS.Repository
         }
         public async Task Delete(int id)
         {
-            var existingUnit = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == id);
+            var existingUnit = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
 
             if (existingUnit == null)
                 throw new Exception("Unit not found!");
@@ -91,12 +92,13 @@ namespace EMS.Repository
 
             await DBEMSContext.SaveChangesAsync();
         }
-        public async Task<List<UnitDTO>> GetUnitsWithProjects()
+        public async Task<List<UnitDTO>> GetUnitsByProjectId(int projectId, int companyId)
         {
-            var result = await (from unit in DBEMSContext.Units
-                                where unit.IsDeleted == false
+            var result = await (from unit in DBEMSContext.Units       
                                 join project in DBEMSContext.ProjectManagements
                                 on unit.FkProjectManagement equals project.Id
+                                where unit.IsDeleted == false && project.IsDeleted == false
+                                && unit.FkCompanyId == companyId && unit.FkProjectManagement == projectId
                                 select new UnitDTO
                                 {
                                     Id = unit.Id,
@@ -108,7 +110,6 @@ namespace EMS.Repository
                                     CreatedAt = unit.CreatedAt,
                                     UpdatedAt = unit.UpdatedAt,
 
-                                    // ✅ Include Project Details
                                     ProjectManagement = new ProjectManagementDTO
                                     {
                                         Id = project.Id,

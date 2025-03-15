@@ -3,6 +3,7 @@ using EMS.Core.Interfaces;
 using EMS.Core.Models.ForFaith;
 using EMS.Data.Models;
 using EMS.Repository;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -27,25 +28,34 @@ namespace EMS.CronJobs.ForFaith
                 {
                     var DBEMSContext = scope.ServiceProvider.GetRequiredService<EMSContext>();
                     var energyData = data.FromJson<FourFaithMqttPayloadDTO>();
-                    var master = new DeviceDataMaster
+                   
+                    var gateway = await DBEMSContext.Gateways.Where(x => x.SerialNo == energyData.did && x.IsDeleted == false && x.IsActive == true).FirstOrDefaultAsync();
+                    if (gateway != null)
                     {
-                        DeviceId = energyData.did,
-                        CreatedAt = DateTime.Now,
-                    };
-                    await DBEMSContext.DeviceDataMasters.AddAsync(master);
-                    await DBEMSContext.SaveChangesAsync();
-                    foreach (var item in energyData.content)
-                    {
-                        await DBEMSContext.DeviceDataDetails.AddAsync(new DeviceDataDetail()
+                        var master = new DeviceDataMaster
                         {
-                            Address = item.addr,
-                            AddressVariable = item.addrv,
+                            DeviceId = energyData.did,
                             CreatedAt = DateTime.Now,
-                            FkDeviceDataMasterId = master.Id
+                            FkGatewayId = gateway.Id
+                        };
+                        await DBEMSContext.DeviceDataMasters.AddAsync(master);
+                        await DBEMSContext.SaveChangesAsync();
 
-                        });
+                        
+
+                        foreach (var item in energyData.content)
+                        {
+                            await DBEMSContext.DeviceDataDetails.AddAsync(new DeviceDataDetail()
+                            {
+                                Address = item.addr,
+                                AddressVariable = item.addrv,
+                                CreatedAt = DateTime.Now,
+                                FkDeviceDataMasterId = master.Id
+
+                            });
+                        }
+                        await DBEMSContext.SaveChangesAsync();
                     }
-                    await DBEMSContext.SaveChangesAsync();
                 }
 
             }

@@ -12,4 +12,6 @@ public partial class DeviceDataMaster
     public DateTime? CreatedAt { get; set; }
 
     public int? FkDeviceId { get; set; }
+
+    public int? FkGatewayId { get; set; }
 }

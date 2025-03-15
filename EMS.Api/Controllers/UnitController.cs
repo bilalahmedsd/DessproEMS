@@ -17,13 +17,14 @@ namespace EMS.Api.Controllers
             _unitRepository = unitRepository;
             _deviceRawDataRepository = deviceRawDataRepository;
         }
-        [HttpGet("GetUnitsWithProjects")]
-        public async Task<IActionResult> GetUnitsWithProjects()
+
+        [HttpGet("GetUnitsByProjectId/{ProjectId}")]
+        public async Task<IActionResult> GetUnitsByProjectId(int ProjectId)
         {
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _unitRepository.GetUnitsWithProjects();
+                resp.Data = await _unitRepository.GetUnitsByProjectId(ProjectId, CurrentUser.FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }
@@ -66,7 +67,8 @@ namespace EMS.Api.Controllers
                     resp.IsSuccess = false;
                     return BadRequest(resp);
                 }
-
+                unit.CreatedBy = CurrentUser?.Id;
+                unit.CreatedAt = CurrentDateTime;
                 await _unitRepository.Insert(unit);
                 resp.Message = "Unit added successfully!";
                 resp.IsSuccess = true;
@@ -92,7 +94,8 @@ namespace EMS.Api.Controllers
                     resp.IsSuccess = false;
                     return BadRequest(resp);
                 }
-
+                unit.UpdatedBy = CurrentUser?.Id;
+                unit.UpdatedAt = CurrentDateTime;
                 await _unitRepository.Update(unit);
                 resp.Message = "Unit updated successfully!";
                 resp.IsSuccess = true;

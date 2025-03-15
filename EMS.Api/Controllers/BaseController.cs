@@ -12,6 +12,7 @@ namespace EMS.Api.Controllers
     public class BaseController : ControllerBase
     {
         public readonly UserDTO? CurrentUser;
+        public DateTime CurrentDateTime { get; set; } = DateTime.Now;
         public BaseController()
         {
 

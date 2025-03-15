@@ -5,6 +5,7 @@ using EMS.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,23 +18,25 @@ namespace EMS.Repository
         {
             DBEMSContext = eMSContext;
         }
-        public async Task<List<GatewayDTO>> Get()
+        public async Task<List<GatewayDTO>> Get(int companyId)
         {
-            var res = await DBEMSContext.Gateways.Where(x => x.IsDeleted == false).ToListAsync();
+            var res = await DBEMSContext.Gateways.Where(x => x.IsDeleted == false && x.FkCompanyId == companyId ).ToListAsync();
             return res.ToJson().FromJson<List<GatewayDTO>>();
         }
 
-        public async Task<GatewayDTO> Get(int id)
+        public async Task<GatewayDTO> Get(int id,int companyId)
         {
-            var res = DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id);
+            var res = DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id && x.FkCompanyId == companyId);
             return res.ToJson().FromJson<GatewayDTO>();
         }
-        public async Task<List<GatewayDTO>> GetGatewayWithUnits()
+        public async Task<List<GatewayDTO>> GetGatewaybyUnitId(int unitId, int companyId)
         {
             var res = await (from gateway in DBEMSContext.Gateways
-                             where gateway.IsDeleted == false
+                             
                              join unit in DBEMSContext.Units
                              on gateway.FkUnitId equals unit.Id
+                             where gateway.IsDeleted == false && unit.IsDeleted == false
+                             && gateway.FkUnitId == unit.Id && unit.FkCompanyId == companyId
                              select new GatewayDTO
                              {
                                  Id = gateway.Id,
@@ -77,7 +80,6 @@ namespace EMS.Repository
             existingUnit.UpdatedBy = obj.UpdatedBy;
             existingUnit.IsDeleted = obj.IsDeleted;
 
-            // ✅ Instead of Update(), use Attach() to avoid tracking issues
             DBEMSContext.Attach(existingUnit);
             DBEMSContext.Entry(existingUnit).State = EntityState.Modified;
 

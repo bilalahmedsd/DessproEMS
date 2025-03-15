@@ -23,6 +23,7 @@ namespace EMS.DI
                 .AddTransient<IProjectManagementRepository,ProjectManagementRepository>()
                 .AddTransient<IDeviceRepository, DeviceRepository>()
                 .AddTransient<IGatewayRepository, GatewayRepository>()
+                .AddTransient<ICompanyRepository, CompanyRepository>()
                 .AddSingleton<IFourFaith, FourFaith>();
                 
         }

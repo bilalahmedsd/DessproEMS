@@ -17,20 +17,21 @@ namespace EMS.Repository
         {
             DBEMSContext = eMSContext;
         }
-        public async Task<List<ProjectManagementDTO>> Get()
+        public async Task<List<ProjectManagementDTO>> Get(int companyID)
         {
-           var res = await DBEMSContext.ProjectManagements.Where(x => x.IsDeleted == false).ToListAsync();
+           var res = await DBEMSContext.ProjectManagements.Where(x => x.IsDeleted == false && x.FkCompanyId == companyID).ToListAsync();
             return res.ToJson().FromJson<List<ProjectManagementDTO>>();
         }
 
-        public async Task<ProjectManagementDTO> Get(int id)
+        public async Task<ProjectManagementDTO> Get(int id, int companyID)
         {
-            var res = DBEMSContext.ProjectManagements.FirstOrDefaultAsync(x => x.Id == id);
+            var res = DBEMSContext.ProjectManagements.FirstOrDefaultAsync(x => x.Id == id && x.FkCompanyId == companyID);
             return res.ToJson().FromJson<ProjectManagementDTO>();
         }
 
         public async Task Insert(ProjectManagementDTO obj)
         {
+
           await DBEMSContext.ProjectManagements.AddAsync(obj.ToJson().FromJson<ProjectManagement>());
             await DBEMSContext.SaveChangesAsync();
         }
@@ -39,7 +40,7 @@ namespace EMS.Repository
 
         public async Task Update(ProjectManagementDTO obj)
         {
-            var res = await Get(obj.Id.Value);
+            var res = await Get(obj.Id.Value,obj.FkCompanyId.Value);
             res.FkCompanyId = obj.FkCompanyId;
             res.ProjectName = obj.ProjectName;
             res.CustomerName = obj.CustomerName;

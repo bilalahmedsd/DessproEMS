@@ -22,7 +22,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _projectmanagementrepository.Get();
+                resp.Data = await _projectmanagementrepository.Get(CurrentUser.FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }
