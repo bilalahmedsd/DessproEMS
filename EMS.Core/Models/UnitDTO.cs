@@ -10,7 +10,7 @@ namespace EMS.Core.Models
     {
         public string? Name { get; set; }
 
-    public bool? IsActive { get; set; }
+        public bool? IsActive { get; set; } 
 
     public bool? IsDeleted { get; set; } = false;
 
@@ -27,8 +27,8 @@ namespace EMS.Core.Models
     public string? SerialNumber { get; set; }
 
     public string? Status { get; set; }
-
-    public ProjectManagementDTO? ProjectManagement { get; set; }
-    public List<DeviceDTO> Meters { get; set; }
+        public int? FkCompanyId { get; set; } 
+        public ProjectManagementDTO? ProjectManagement { get; set; }
+    //public List<DeviceDTO?> Meters { get; set; }
     }
 }

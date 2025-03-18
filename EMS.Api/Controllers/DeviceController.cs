@@ -16,12 +16,12 @@ namespace EMS.Api.Controllers
         }
 
         [HttpGet("Get")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(int com)
         {
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _deviceRepository.Get();
+                resp.Data = await _deviceRepository.Get(userServices.GetUser().FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }
@@ -34,13 +34,13 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
-        [HttpGet("GetDevicesWithGateways")]
-        public async Task<IActionResult> GetDevicesWithGateways()
+        [HttpGet("GetDevicesWithGateways/{GatewayId}")]
+        public async Task<IActionResult> GetDevicesWithGateways(int GatewayId)
         {
             ResponseModel resp = new ResponseModel();
             try
             {
-                resp.Data = await _deviceRepository.GetDevicesWithGateways();
+                resp.Data = await _deviceRepository.GetDevicesWithGateways(GatewayId,userServices.GetUser().FkCompanyId.Value);
                 resp.Message = ConstantMessages.DataSuccessMessage;
                 resp.IsSuccess = true;
             }

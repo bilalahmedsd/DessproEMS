@@ -17,15 +17,15 @@ namespace EMS.Repository
         {
             DBEMSContext = eMSContext;
         }
-        public async Task<List<DeviceDTO>> Get()
+        public async Task<List<DeviceDTO>> Get(int companyId)
         {
-            var res = await DBEMSContext.Devices.Where(x => x.IsDeleted == false).ToListAsync();
+            var res = await DBEMSContext.Devices.Where(x => x.IsDeleted == false && x.FkCompanyId == companyId).ToListAsync();
             return res.ToJson().FromJson<List<DeviceDTO>>();
         }
 
-        public async Task<DeviceDTO> GetWithId(int id)
+        public async Task<DeviceDTO> GetWithId(int id,int companyId)
         {
-            var res = DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == id);
+            var res = DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == id && x.FkCompanyId == companyId);
             return res.ToJson().FromJson<DeviceDTO>();
         }
        
@@ -86,12 +86,14 @@ namespace EMS.Repository
 
             await DBEMSContext.SaveChangesAsync();
         }
-        public async Task<List<DeviceDTO>> GetDevicesWithGateways()
+        public async Task<List<DeviceDTO>> GetDevicesWithGateways(int GatewayId,int companyId)
         {
             var result = await (from device in DBEMSContext.Devices
-                                where device.IsDeleted == false
+                                
                                 join gateway in DBEMSContext.Gateways
                                 on device.FkGatewayId equals gateway.Id
+                                where device.IsDeleted == false && gateway.IsDeleted == false
+                                && device.FkGatewayId == GatewayId && gateway.FkCompanyId == companyId
                                 select new DeviceDTO
                                 {
                                     Id = device.Id,

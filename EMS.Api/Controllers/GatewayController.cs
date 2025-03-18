@@ -3,10 +3,12 @@ using EMS.Core.Interfaces;
 using EMS.Core.Models;
 using EMS.Core.Services;
 using EMS.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.Api.Controllers
 {
+    [Authorize]
     public class GatewayController : BaseController
     {
         private readonly IGatewayRepository _gatewayRepository;

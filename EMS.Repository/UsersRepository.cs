@@ -20,7 +20,7 @@ namespace EMS.Repository
 
             if (user == null)
                 return null;
-            user.Password = null;
+            //user.Password = null;
             return user.ToJson().FromJson<UserDTO>();
         }
 

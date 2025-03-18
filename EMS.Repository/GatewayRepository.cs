@@ -36,7 +36,7 @@ namespace EMS.Repository
                              join unit in DBEMSContext.Units
                              on gateway.FkUnitId equals unit.Id
                              where gateway.IsDeleted == false && unit.IsDeleted == false
-                             && gateway.FkUnitId == unit.Id && unit.FkCompanyId == companyId
+                             && gateway.FkUnitId == unitId && unit.FkCompanyId == companyId
                              select new GatewayDTO
                              {
                                  Id = gateway.Id,
