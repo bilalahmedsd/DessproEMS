@@ -25,7 +25,7 @@ namespace EMS.Repository
 
         public async Task<DeviceDTO> GetWithId(int id,int companyId)
         {
-            var res = DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == id && x.FkCompanyId == companyId);
+            var res = DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false  && x.FkCompanyId == companyId);
             return res.ToJson().FromJson<DeviceDTO>();
         }
        
@@ -43,7 +43,7 @@ namespace EMS.Repository
         }
         public async Task Update(DeviceDTO obj)
         {
-            var existingUnit = await DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == obj.Id);
+            var existingUnit = await DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == obj.Id && x.IsDeleted == false);
 
             if (existingUnit == null)
                 throw new Exception("Device not found!");
@@ -77,7 +77,7 @@ namespace EMS.Repository
 
         public async Task Delete(int id)
         {
-            var existingUnit = await DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == id);
+            var existingUnit = await DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
 
             if (existingUnit == null)
                 throw new Exception("Gateway not found!");
@@ -92,8 +92,8 @@ namespace EMS.Repository
                                 
                                 join gateway in DBEMSContext.Gateways
                                 on device.FkGatewayId equals gateway.Id
-                                where device.IsDeleted == false && gateway.IsDeleted == false
-                                && device.FkGatewayId == GatewayId && gateway.FkCompanyId == companyId
+                                where device.IsDeleted != true && gateway.IsDeleted !=true
+                                && device.FkGatewayId == GatewayId && device.FkCompanyId == companyId
                                 select new DeviceDTO
                                 {
                                     Id = device.Id,

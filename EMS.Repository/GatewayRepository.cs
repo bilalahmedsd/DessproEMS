@@ -26,7 +26,7 @@ namespace EMS.Repository
 
         public async Task<GatewayDTO> Get(int id,int companyId)
         {
-            var res = DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id && x.FkCompanyId == companyId);
+            var res = DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false && x.FkCompanyId == companyId);
             return res.ToJson().FromJson<GatewayDTO>();
         }
         public async Task<List<GatewayDTO>> GetGatewaybyUnitId(int unitId, int companyId)
@@ -63,7 +63,7 @@ namespace EMS.Repository
 
         public async Task Update(GatewayDTO obj)
         {
-            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == obj.Id);
+            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == obj.Id && x.IsDeleted == false);
 
             if (existingUnit == null)
                 throw new Exception("Unit not found!");
@@ -89,7 +89,7 @@ namespace EMS.Repository
 
         public async Task Delete(int id)
         {
-            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id);
+            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
 
             if (existingUnit == null)
                 throw new Exception("Gateway not found!");

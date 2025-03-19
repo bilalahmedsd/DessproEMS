@@ -43,24 +43,6 @@ namespace EMS.Repository
             await DBEMSContext.SaveChangesAsync();
         }
 
-
-        //public async Task Update(UnitDTO obj)
-        //{
-        //    var res = await Get(obj.Id.Value);
-        //    if (res == null)
-        //        throw new Exception("Unit not found!");
-        //    res.FkProjectManagement = obj.FkProjectManagement;
-        //    res.IsActive = obj.IsActive;
-        //    res.Name = obj.Name;
-        //    res.SerialNumber = obj.SerialNumber;
-        //    res.Status = obj.Status;
-        //    res.UpdatedAt = obj.UpdatedAt;
-        //    res.UpdatedBy = obj.UpdatedBy;
-        //    res.IsDeleted = obj.IsDeleted;
-        //    DBEMSContext.Update(res);
-        //    await DBEMSContext.SaveChangesAsync();
-        //}
-
         public async Task Update(UnitDTO obj)
         {
             var existingUnit = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == obj.Id && x.IsDeleted ==false);

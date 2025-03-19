@@ -2,11 +2,14 @@
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
 using EMS.Core.Services;
+using EMS.Data.Models;
 using EMS.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.Api.Controllers
 {
+    [Authorize]
     public class DeviceController : BaseController
     {
         private readonly IDeviceRepository _deviceRepository;
@@ -16,7 +19,7 @@ namespace EMS.Api.Controllers
         }
 
         [HttpGet("Get")]
-        public async Task<IActionResult> Get(int com)
+        public async Task<IActionResult> Get()
         {
             ResponseModel resp = new ResponseModel();
             try
@@ -34,7 +37,7 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
-        [HttpGet("GetDevicesWithGateways/{GatewayId}")]
+        [HttpGet("GetDevicesbyGatewayId/{GatewayId}")]
         public async Task<IActionResult> GetDevicesWithGateways(int GatewayId)
         {
             ResponseModel resp = new ResponseModel();
@@ -63,7 +66,8 @@ namespace EMS.Api.Controllers
                     resp.IsSuccess = false;
                     return BadRequest(resp);
                 }
-
+                device.CreatedBy = userServices.GetUser().Id.Value;
+                device.CreatedAt = CurrentDateTime;
                 await _deviceRepository.Insert(device);
                 resp.Message = "device added successfully!";
                 resp.IsSuccess = true;
@@ -89,7 +93,8 @@ namespace EMS.Api.Controllers
                     resp.IsSuccess = false;
                     return BadRequest(resp);
                 }
-
+                device.UpdatedBy = userServices.GetUser().Id.Value;
+                device.UpdatedAt = CurrentDateTime;
                 await _deviceRepository.Update(device);
                 resp.Message = "Device updated successfully!";
                 resp.IsSuccess = true;
