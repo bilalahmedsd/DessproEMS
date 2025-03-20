@@ -1,0 +1,84 @@
+﻿@section Breadcrumb {
+
+	<!--begin::Menu wrapper-->
+	<div class="app-header-menu app-header-mobile-drawer align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="app-header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="250px" data-kt-drawer-direction="end" data-kt-drawer-toggle="#kt_app_header_menu_toggle" data-kt-swapper="true" data-kt-swapper-mode="{default: 'append', lg: 'prepend'}" data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}">
+		<div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
+			<!--begin::Title-->
+			<h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">Add/Remove Unit</h1>
+			<!--end::Title-->
+			<!--begin::Breadcrumb-->
+			<ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
+				<!--begin::Item-->
+				<li class="breadcrumb-item text-muted">
+					<a href="javascript:void(0)" class="text-muted text-hover-primary">Unit</a>
+				</li>
+				<!--end::Item-->
+				<!--begin::Item-->
+				<li class="breadcrumb-item">
+					<span class="bullet bg-gray-500 w-5px h-2px"></span>
+				</li>
+				<!--end::Item-->
+				<!--begin::Item-->
+				<li class="breadcrumb-item text-muted">Index</li>
+				<!--end::Item-->
+			</ul>
+			<!--end::Breadcrumb-->
+		</div>
+	</div>
+}
+
+<div class="card mb-5 mb-xl-10">
+	<div class="card-header cursor-pointer">
+		<div class="card-title m-0">
+			<h3 class="fw-bolder m-0">Add/Remove Unit</h3>
+		</div>
+	</div>
+	<div class="card-body pt-9 pb-0">
+		<button type="button" class="btn btn-primary btn-xs" data-bs-toggle="modal" data-bs-target="#kt_modal_1">
+			Add
+		</button>
+
+	</div>
+</div>
+<div class="modal fade" tabindex="-1" id="kt_modal_1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form id="kt_UnitForm">
+				<input type="hidden" name="Id"/>
+			<div class="modal-header">
+				<h3 class="modal-title">Add</h3>
+
+				<!--begin::Close-->
+				<div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+					<i class="ki-duotone ki-cross fs-1"><span class="path1"></span><span class="path2"></span></i>
+				</div>
+				<!--end::Close-->
+			</div>
+
+			<div class="modal-body">
+				
+					<label>Project</label><select class="select2" name="FkProjectManagement" id="FkProjectManagement" required></select><br />
+					<label>Unit Name</label><input Name="Name" required type="text" /><br/>
+					<label>Serial No</label><input Name="SerialNumber" type="text" required /><br />
+
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+					<button id="kt_kt_UnitForm_Save" type="submit" class="btn btn-primary">
+						<span class="indicator-label">
+							Save
+						</span>
+						<span class="indicator-progress">
+							Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+						</span>
+					</button>
+			</div>
+			</form>
+		</div>
+	</div>
+</div>
+@section Scripts {
+	<script src="~/CustomJS/Unit/Index.js"></script>
+
+}

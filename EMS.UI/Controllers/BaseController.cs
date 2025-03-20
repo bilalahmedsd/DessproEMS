@@ -12,7 +12,7 @@ namespace EMS.UI.Controllers
 		{
 			get
 			{
-				string session = HttpContext.Session.GetString("Users");
+				string session = HttpContext.Session.GetString("User");
 				if (session != null)
 				{
 					model = JsonConvert.DeserializeObject<UserDTO>(session);

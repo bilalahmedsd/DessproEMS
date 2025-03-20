@@ -38,7 +38,7 @@ const ajaxPOSTCall = async (url_, data_) => {
                 }
                 else {
                     if (res.message == "session expired") {
-                        location.href = "/Login/Login"
+                        location.href = "/Auth/Login"
                     }
                     else {
                         Reject(res.message)
@@ -91,7 +91,7 @@ const ajaxGETCall = async (url_, data_) => {
                 else {
 
                     if (res.message == "session expired") {
-                        location.href = "/Login/Login"
+                        location.href = "/Auth/Login"
                     }
                     else {
                         Reject(res.message);
@@ -140,7 +140,7 @@ const ajaxCallMultipartFormData = (url, Fromdata) => {
                 }
                 else {
                     if (res.message == "session expired") {
-                        location.href = "/Login/Login"
+                        location.href = "/Auth/Login"
                     }
                     else {
                         Reject(res.message)

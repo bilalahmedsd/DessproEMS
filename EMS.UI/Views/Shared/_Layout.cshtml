@@ -1,8 +1,9 @@
-﻿@using EMS.Core.Models
+﻿@using EMS.Core.Helpers
+@using EMS.Core.Models
 @using Microsoft.AspNetCore.Http
 @using Newtonsoft.Json;
 @{
-	UserDTO currentUser = new();// JsonConvert.DeserializeObject<UserDTO>(Context.Session.GetString("Users"));
+	UserDTO currentUser = Context.Session.GetString("User").FromJson<UserDTO>();
 }
 <!DOCTYPE html>
 
@@ -61,31 +62,7 @@
 					<!--end::Mobile logo-->
 					<!--begin::Header wrapper-->
 					<div class="d-flex align-items-stretch justify-content-between flex-lg-grow-1" id="kt_app_header_wrapper">
-						<!--begin::Menu wrapper-->
-						<div class="app-header-menu app-header-mobile-drawer align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="app-header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="250px" data-kt-drawer-direction="end" data-kt-drawer-toggle="#kt_app_header_menu_toggle" data-kt-swapper="true" data-kt-swapper-mode="{default: 'append', lg: 'prepend'}" data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}">
-							<div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
-								<!--begin::Title-->
-								<h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">Multipurpose</h1>
-								<!--end::Title-->
-								<!--begin::Breadcrumb-->
-								<ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
-									<!--begin::Item-->
-									<li class="breadcrumb-item text-muted">
-										<a href="index.html" class="text-muted text-hover-primary">Home</a>
-									</li>
-									<!--end::Item-->
-									<!--begin::Item-->
-									<li class="breadcrumb-item">
-										<span class="bullet bg-gray-500 w-5px h-2px"></span>
-									</li>
-									<!--end::Item-->
-									<!--begin::Item-->
-									<li class="breadcrumb-item text-muted">Dashboards</li>
-									<!--end::Item-->
-								</ul>
-								<!--end::Breadcrumb-->
-							</div>
-						</div>
+						@RenderSection("Breadcrumb", false)
 						<!--end::Menu wrapper-->
 						<!--begin::Navbar-->
 						<div class="app-navbar flex-shrink-0">
@@ -198,7 +175,7 @@
 									<!--end::Menu separator-->
 									<!--begin::Menu item-->
 									<div class="menu-item px-5">
-										<a href="User/Signout" class="menu-link px-5">Sign Out</a>
+										<a href="/auth/signout" class="menu-link px-5">Sign Out</a>
 									</div>
 									<!--end::Menu item-->
 								</div>
@@ -264,6 +241,7 @@
 							<div id="kt_app_sidebar_menu_scroll" class="scroll-y my-5 mx-3" data-kt-scroll="true" data-kt-scroll-activate="true" data-kt-scroll-height="auto" data-kt-scroll-dependencies="#kt_app_sidebar_logo, #kt_app_sidebar_footer" data-kt-scroll-wrappers="#kt_app_sidebar_menu" data-kt-scroll-offset="5px" data-kt-scroll-save-state="true">
 								<!--begin::Menu-->
 								<div class="menu menu-column menu-rounded menu-sub-indention fw-semibold fs-6" id="#kt_app_sidebar_menu" data-kt-menu="true" data-kt-menu-expand="false">
+									@Html.Partial("_SideBarMenu")
 								</div>
 								<!--end::Menu-->
 							</div>
@@ -274,7 +252,7 @@
 					<!--end::sidebar menu-->
 					<!--begin::Footer-->
 					<div class="app-sidebar-footer flex-column-auto pt-2 pb-6 px-6" id="kt_app_sidebar_footer">
-						<a href="https://preview.keenthemes.com/html/metronic/docs" class="btn btn-flex flex-center btn-custom btn-primary overflow-hidden text-nowrap px-0 h-40px w-100" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss-="click" title="200+ in-house components and 3rd-party plugins">
+						<a href="/auth/signout" class="btn btn-flex flex-center btn-custom btn-primary overflow-hidden text-nowrap px-0 h-40px w-100" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss-="click" title="200+ in-house components and 3rd-party plugins">
 							<span class="btn-label">Sign Out</span>
 							<i class="ki-duotone ki-document btn-icon fs-2 m-0">
 								<span class="path1"></span>
@@ -293,11 +271,7 @@
 							<!--begin::Content container-->
 							<div id="kt_app_content_container" class="app-container container-fluid">
 								<div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
-									<div class="card mb-5 mb-xl-10">
-										<div class="card-body pt-9 pb-0">
-											@RenderBody()
-										</div>
-									</div>
+									@RenderBody()
 								</div>
 							</div>
 						</div>

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using EMS.Core.Models;
+using EMS.Core.Helpers;
 
 namespace EMS.UI.CustomFilter
 {
@@ -15,11 +16,11 @@ namespace EMS.UI.CustomFilter
 		}
 		public void OnAuthorization(AuthorizationFilterContext context)
 		{
-			string userstring = context.HttpContext.Session.GetString("Users");
+			string userstring = context.HttpContext.Session.GetString("User");
 			UserDTO? user;
 			if (!string.IsNullOrEmpty(userstring))
 			{
-				user = JsonConvert.DeserializeObject<UserDTO>(userstring);
+				user = userstring.FromJson<UserDTO>();
 				if (Role.Contains(Convert.ToString(user?.FkUserRoleId)))
 				{
 					return;
@@ -40,7 +41,7 @@ namespace EMS.UI.CustomFilter
 				}
 				else
 				{
-					context.Result = new RedirectResult("/User/Login");
+					context.Result = new RedirectResult("/Auth/Login");
 				}
 			}
 		}

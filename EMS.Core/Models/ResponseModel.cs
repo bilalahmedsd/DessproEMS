@@ -8,7 +8,7 @@ namespace EMS.Core.Models
 {
     public class ResponseModel
     {
-        public bool IsSuccess { get; set; }
+        public bool IsSuccess { get; set; } = true;
         public object Data { get; set; }
         public string Message { get; set; }
     }

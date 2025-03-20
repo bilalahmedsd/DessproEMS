@@ -7,7 +7,7 @@ namespace EMS.UI.CustomFilter
 	{
 		public void OnException(ExceptionContext context)
 		{
-			context.Result = new RedirectResult("/Error/Error");
+			context.Result = new RedirectResult("/Error");
 		}
 	}
 }

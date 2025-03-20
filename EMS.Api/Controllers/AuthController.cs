@@ -10,6 +10,8 @@ using System.Text;
 
 namespace EMS.Api.Controllers
 {
+    [Route("api/v1/[controller]")]
+    [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
