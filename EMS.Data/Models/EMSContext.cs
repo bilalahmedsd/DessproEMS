@@ -37,7 +37,7 @@ public partial class EMSContext : DbContext
 
 //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Data Source=192.168.15.33,1433;Initial Catalog=EMS;User ID=sa;Password=sql;Encrypt=False");
+//        => optionsBuilder.UseSqlServer("Data Source=192.168.15.60,1433;Initial Catalog=EMS;User ID=sa;Password=sql;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,9 +65,6 @@ public partial class EMSContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-            entity.Property(e => e.CreatedBy)
-                .HasMaxLength(255)
-                .IsUnicode(false);
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .IsUnicode(false);
@@ -85,9 +82,6 @@ public partial class EMSContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-            entity.Property(e => e.UpdatedBy)
-                .HasMaxLength(255)
-                .IsUnicode(false);
         });
 
         modelBuilder.Entity<DeviceDataDetail>(entity =>

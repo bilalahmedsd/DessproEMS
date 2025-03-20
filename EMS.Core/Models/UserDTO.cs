@@ -32,5 +32,6 @@ namespace EMS.Core.Models
 
         public DateTime? UpdatedAt { get; set; }
         public int? FkCompanyId { get; set; }
+        public int? FkUserRoleId { get; set; }
     }
 }
