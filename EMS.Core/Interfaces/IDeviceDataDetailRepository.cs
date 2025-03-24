@@ -18,5 +18,7 @@ namespace EMS.Core.Interfaces
        DateTime startDate,
        DateTime endDate,
        string timeRange);
+        Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail2(ProjectDataRequest request);
+
     }
 }
