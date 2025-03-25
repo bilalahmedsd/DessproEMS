@@ -139,6 +139,115 @@ namespace EMS.Repository
             return result;
         }
 
+        public async Task<List<DeviceDTO>> GetDevicesWithoutGatewayId( int companyId)
+        {
+            var result = await (from device in DBEMSContext.Devices
+
+                                join gateway in DBEMSContext.Gateways
+                                on device.FkGatewayId equals gateway.Id
+                                where device.IsDeleted != true && gateway.IsDeleted != true
+                                && device.FkCompanyId == companyId
+                                select new DeviceDTO
+                                {
+                                    Id = device.Id,
+                                    Name = device.Name,
+                                    ChannelName = device.ChannelName,
+                                    ConsumptionUnit = device.ConsumptionUnit,
+                                    DisplaySequence = device.DisplaySequence,
+                                    SerialPort = device.SerialPort,
+                                    SerialNo = device.SerialNo,
+                                    Status = device.Status,
+                                    OfflineTime = device.OfflineTime,
+                                    OfflineDuration = device.OfflineDuration,
+                                    IsActive = device.IsActive,
+                                    IsDeleted = device.IsDeleted,
+                                    CreatedBy = device.CreatedBy,
+                                    CreatedAt = device.CreatedAt,
+                                    UpdatedBy = device.UpdatedBy,
+                                    UpdatedAt = device.UpdatedAt,
+                                    FkCompanyId = device.FkCompanyId,
+                                    FkGatewayId = device.FkGatewayId,
+                                    FkUnitId = device.FkUnitId,
+
+                                    // ✅ Include Gateway Details
+                                    Gateway = new GatewayDTO
+                                    {
+                                        Id = gateway.Id,
+                                        Name = gateway.Name,
+                                        IsActive = gateway.IsActive,
+                                        IsDeleted = gateway.IsDeleted,
+                                        CreatedBy = gateway.CreatedBy,
+                                        CreatedAt = gateway.CreatedAt,
+                                        UpdatedBy = gateway.UpdatedBy,
+                                        UpdatedAt = gateway.UpdatedAt,
+                                        ProtocolName = gateway.ProtocolName,
+                                        SerialNo = gateway.SerialNo,
+                                        AccumulatedVariable = gateway.AccumulatedVariable,
+                                        InstantVariable = gateway.InstantVariable,
+                                        FkCompanyId = gateway.FkCompanyId,
+                                        FkUnitId = gateway.FkUnitId
+                                    }
+                                }).ToListAsync();
+
+            return result;
+        }
+
+        public async Task<List<DeviceDTO>> GetDevicesWithMultipleGateways(List<int> gatewayIds, int companyId)
+        {
+            if (gatewayIds == null || !gatewayIds.Any())
+            {
+                throw new ArgumentException("Gateway IDs list cannot be empty.");
+            }
+
+            var result = await (from device in DBEMSContext.Devices
+                                join gateway in DBEMSContext.Gateways
+                                on device.FkGatewayId equals gateway.Id
+                                where device.IsDeleted != true && gateway.IsDeleted != true
+                                && gatewayIds.Contains(device.FkGatewayId ?? 0) && device.FkCompanyId == companyId
+                                select new DeviceDTO
+                                {
+                                    Id = device.Id,
+                                    Name = device.Name,
+                                    ChannelName = device.ChannelName,
+                                    ConsumptionUnit = device.ConsumptionUnit,
+                                    DisplaySequence = device.DisplaySequence,
+                                    SerialPort = device.SerialPort,
+                                    SerialNo = device.SerialNo,
+                                    Status = device.Status,
+                                    OfflineTime = device.OfflineTime,
+                                    OfflineDuration = device.OfflineDuration,
+                                    IsActive = device.IsActive,
+                                    IsDeleted = device.IsDeleted,
+                                    CreatedBy = device.CreatedBy,
+                                    CreatedAt = device.CreatedAt,
+                                    UpdatedBy = device.UpdatedBy,
+                                    UpdatedAt = device.UpdatedAt,
+                                    FkCompanyId = device.FkCompanyId,
+                                    FkGatewayId = device.FkGatewayId,
+                                    FkUnitId = device.FkUnitId,
+
+                                    // ✅ Include Gateway Details
+                                    Gateway = new GatewayDTO
+                                    {
+                                        Id = gateway.Id,
+                                        Name = gateway.Name,
+                                        IsActive = gateway.IsActive,
+                                        IsDeleted = gateway.IsDeleted,
+                                        CreatedBy = gateway.CreatedBy,
+                                        CreatedAt = gateway.CreatedAt,
+                                        UpdatedBy = gateway.UpdatedBy,
+                                        UpdatedAt = gateway.UpdatedAt,
+                                        ProtocolName = gateway.ProtocolName,
+                                        SerialNo = gateway.SerialNo,
+                                        AccumulatedVariable = gateway.AccumulatedVariable,
+                                        InstantVariable = gateway.InstantVariable,
+                                        FkCompanyId = gateway.FkCompanyId,
+                                        FkUnitId = gateway.FkUnitId
+                                    }
+                                }).ToListAsync();
+
+            return result;
+        }
 
     }
 }
