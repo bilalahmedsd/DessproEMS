@@ -11,12 +11,14 @@ namespace EMS.Core.Interfaces
     {
         Task<List<DeviceDataDetailDTO>> GetDeviceDataDetailsAsync();
         Task<List<DeviceDataDetailDTO>> GetHistoricDeviceDataDetailsAsync(DateTime startDate, DateTime endDate);
-        Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(
-       IEnumerable<int> projectId,
-       IEnumerable<int> unitId,
-       Dictionary<int, List<int>> meterId,
-       DateTime startDate,
-       DateTime endDate,
-       string timeRange);
+       // Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(
+       //IEnumerable<int> projectId,
+       //IEnumerable<int> unitId,
+       //Dictionary<int, List<int>> meterId,
+       //DateTime startDate,
+       //DateTime endDate,
+       //string timeRange);
+        Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail2(ProjectDataRequest request);
+
     }
 }
