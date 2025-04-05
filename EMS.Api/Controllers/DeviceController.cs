@@ -54,6 +54,48 @@ namespace EMS.Api.Controllers
             }
             return Ok(resp);
         }
+
+        [HttpGet("GetDevicesWithoutGatewayId")]
+        public async Task<IActionResult> GetDevicesWithoutGatewayId()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _deviceRepository.GetDevicesWithoutGatewayId(userServices.GetUser().FkCompanyId.Value);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "Error fetching data.";
+                resp.IsSuccess = false;
+            }
+            return Ok(resp);
+        }
+
+        [HttpGet("GetDevicesByMultipleGateways")]
+        public async Task<IActionResult> GetDevicesByMultipleGateways(string gatewayIds)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                // ✅ Convert comma-separated string to List<int>
+                List<int> gatewayIdList = gatewayIds.Split(',').Select(int.Parse).ToList();
+
+                var companyId = userServices.GetUser().FkCompanyId.Value;
+                resp.Data = await _deviceRepository.GetDevicesWithMultipleGateways(gatewayIdList, companyId); // Call updated repository method
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
         [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] DeviceDTO device)
         {

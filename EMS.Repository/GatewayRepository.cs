@@ -54,6 +54,57 @@ namespace EMS.Repository
                              }).ToListAsync();
             return res;
         }
+        public async Task<List<GatewayDTO>> GetGatewayWithoutUnitId(int companyId)
+        {
+            var res = await (from gateway in DBEMSContext.Gateways
+
+                             join unit in DBEMSContext.Units
+                             on gateway.FkUnitId equals unit.Id
+                             where gateway.IsDeleted == false && unit.IsDeleted == false
+                            && unit.FkCompanyId == companyId
+                             select new GatewayDTO
+                             {
+                                 Id = gateway.Id,
+                                 Name = gateway.Name,
+                                 ProtocolName = gateway.ProtocolName,
+                                 SerialNo = gateway.SerialNo,
+                                 InstantVariable = gateway.InstantVariable,
+                                 AccumulatedVariable = gateway.AccumulatedVariable,
+                                 Unit = new UnitDTO
+                                 {
+                                     Id = unit.Id,
+                                     Name = unit.Name,
+                                 }
+
+                             }).ToListAsync();
+            return res;
+        }
+        public async Task<List<GatewayDTO>> GetGatewaybyMultipleUnitIds(List<int> unitIds, int companyId)
+        {
+            var res = await (from gateway in DBEMSContext.Gateways
+                             join unit in DBEMSContext.Units
+                             on gateway.FkUnitId equals unit.Id
+                             where gateway.IsDeleted == false
+                             && unit.IsDeleted == false
+                             && unitIds.Contains(gateway.FkUnitId ?? 0) // ✅ Handle nullable int issue
+                             && unit.FkCompanyId == companyId
+                             select new GatewayDTO
+                             {
+                                 Id = gateway.Id,
+                                 Name = gateway.Name,
+                                 ProtocolName = gateway.ProtocolName,
+                                 SerialNo = gateway.SerialNo,
+                                 InstantVariable = gateway.InstantVariable,
+                                 AccumulatedVariable = gateway.AccumulatedVariable,
+                                 Unit = new UnitDTO
+                                 {
+                                     Id = unit.Id,
+                                     Name = unit.Name,
+                                 }
+                             }).ToListAsync();
+            return res;
+        }
+
 
         public async Task Insert(GatewayDTO obj)
         {

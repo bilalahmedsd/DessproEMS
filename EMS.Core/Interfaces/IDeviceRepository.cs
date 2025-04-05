@@ -13,6 +13,9 @@ namespace EMS.Core.Interfaces
         Task<DeviceDTO> GetWithId(int id, int companyId);
 
         Task<List<DeviceDTO>> GetDevicesWithGateways(int GatewayId, int companyId);
+        Task<List<DeviceDTO>> GetDevicesWithoutGatewayId(int companyId);
+        Task<List<DeviceDTO>> GetDevicesWithMultipleGateways(List<int> gatewayIds, int companyId);
+
         Task Insert(DeviceDTO obj);
         Task Update(DeviceDTO obj);
         Task Delete(int id);
