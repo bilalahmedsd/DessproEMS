@@ -21,6 +21,82 @@ namespace EMS.Repository
             DBEMSContext = eMSContext;
         }
 
+            public async Task<List<DeviceDataDetailDTO>> Get(int id)
+            {
+                var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Pakistan Standard Time");
+                var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
+
+                var startOfToday = now.Date;
+                var startOfYesterday = startOfToday.AddDays(-1);
+
+                var todaySlots = new List<DateTime>();
+                var slot = startOfToday;
+
+                // ✅ Create 1-hour slots until the last full block
+                while (slot.AddHours(1) <= now)
+                {
+                    todaySlots.Add(slot);
+                    slot = slot.AddHours(1);
+                }
+
+                // ✅ Ensure the last block covers from the last full block **to NOW**
+                if (slot < now)
+                {
+                    todaySlots.Add(slot); // Add last partial block (e.g., 12:00 to 12:45)
+                }
+
+                var yesterdaySlots = todaySlots.Select(slot => slot.AddDays(-1)).ToList();
+
+                // 📦 Fetch all required data
+                var todayRaw = await DBEMSContext.DeviceDataDetails
+                    .Where(d =>
+                        d.Address == "P" &&
+                        d.CreatedAt >= startOfToday &&
+                        d.CreatedAt <= now) // Fetch data up to current time
+                    .ToListAsync();
+
+                var yesterdayRaw = await DBEMSContext.DeviceDataDetails
+                    .Where(d =>
+                        d.Address == "P" &&
+                        d.CreatedAt >= startOfYesterday &&
+                        d.CreatedAt <= startOfYesterday + (now - startOfToday))
+                    .ToListAsync();
+
+                // 📊 Group today's data
+                var todayGrouped = todaySlots.Select(slot =>
+                {
+                    var slotEnd = (slot.AddHours(1) > now) ? now : slot.AddHours(1); // Ensure last slot ends at current time
+                    var dataInSlot = todayRaw.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
+
+                    return new DeviceDataDetailDTO
+                    {
+                        CreatedAt = slot,
+                        Address = "P (Today)",
+                        AddressVariable = dataInSlot.Sum(d => d.AddressVariable),
+                    };
+                }).ToList();
+
+                // 📊 Group yesterday's data
+                var yesterdayGrouped = yesterdaySlots.Select(slot =>
+                {
+                    var slotEnd = (slot.AddHours(1) > now.AddDays(-1)) ? now.AddDays(-1) : slot.AddHours(1);
+                    var dataInSlot = yesterdayRaw.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
+
+                    return new DeviceDataDetailDTO
+                    {
+                        CreatedAt = slot,
+                        Address = "P (Yesterday)",
+                        AddressVariable = dataInSlot.Sum(d => d.AddressVariable),
+                    };
+                }).ToList();
+
+                return todayGrouped.Concat(yesterdayGrouped).ToList();
+            }
+
+
+
+
+
         public async Task<List<DeviceDataDetailDTO>> GetDeviceDataDetailsAsync()
         {
             try
@@ -472,6 +548,92 @@ namespace EMS.Repository
             // ✅ Apply Time Range Grouping
             return ApplyTimeRangeGrouping(result, timeRange);
         }
+        
+        private DateTime GetTimeGrouping(DateTime? createdAt, string timeRange)
+        {
+            if (!createdAt.HasValue)
+                return DateTime.MinValue;
+
+            DateTime date = createdAt.Value;
+
+            return timeRange.ToLower() switch
+            {
+                "15minutes" => new DateTime(date.Year, date.Month, date.Day, date.Hour, (date.Minute / 15) * 15, 0),
+                "hourly" => new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0),
+                "daily" => new DateTime(date.Year, date.Month, date.Day, 0, 0, 0),
+                "weekly" => date.AddDays(-(int)date.DayOfWeek).Date,
+                "monthly" => new DateTime(date.Year, date.Month, 1),
+                "quarterly" => new DateTime(date.Year, ((date.Month - 1) / 3) * 3 + 1, 1),
+                "yearly" => new DateTime(date.Year, 1, 1),
+                _ => date // Default: No grouping
+            };
+        }
+
+      public async Task<List<UnitWiseAddressVariableSumDTO>> Getpowerloadtoday()
+{
+            DateTime start = DateTime.Today;               // 2025-04-04 00:00:00
+            DateTime end = start.AddDays(1);               // 2025-04-05 00:00:00 (exclusive end)
+
+
+            var result = await (
+                from detail in DBEMSContext.DeviceDataDetails
+                join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
+                join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
+                join unit in DBEMSContext.Units on device.FkUnitId equals unit.Id
+                where detail.Address == "P"
+  //&& detail.CreatedAt >= start
+  //&& detail.CreatedAt < end
+
+                group detail by new
+                {
+                    UnitId = unit.Id,
+                    UnitName = unit.Name
+                } into unitGroup
+                select new UnitWiseAddressVariableSumDTO
+                {
+                    UnitId = unitGroup.Key.UnitId,
+                    UnitName = unitGroup.Key.UnitName,
+                    TotalAddressVariable = unitGroup.Sum(d => d.AddressVariable)
+                }
+            ).ToListAsync();
+
+
+            return result;
+}
+
+        public async Task<List<UnitWiseAddressVariableSumDTO>> Getpowerloadhourly()
+        {
+            DateTime start = DateTime.Today.AddHours(DateTime.Now.Hour);
+            DateTime end = start.AddHours(1);
+
+            var result = await (
+                from detail in DBEMSContext.DeviceDataDetails
+                join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
+                join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
+                join unit in DBEMSContext.Units on device.FkUnitId equals unit.Id
+                where detail.Address == "P"
+                      //&& detail.CreatedAt >= start
+                      //&& detail.CreatedAt < end
+                group detail by new
+                {
+                    UnitId = unit.Id,
+                    UnitName = unit.Name
+                } into unitGroup
+                select new UnitWiseAddressVariableSumDTO
+                {
+                    UnitId = unitGroup.Key.UnitId,
+                    UnitName = unitGroup.Key.UnitName,
+                    TotalAddressVariable = unitGroup.Sum(d => d.AddressVariable),
+                    Date = start // ⏱ optional: include the hour being reported
+                }
+            ).ToListAsync();
+
+            return result;
+        }
+
+
+
+
 
         // ✅ Helper Function for Time Grouping (LINQ Method Syntax)
         private List<DeviceDataDetailDTO> ApplyTimeRangeGrouping(List<DeviceDataDetailDTO> data, string timeRange)
@@ -511,25 +673,7 @@ namespace EMS.Repository
                 _ => data // 🛑 Return unmodified data if time range is invalid
             };
         }
-        private DateTime GetTimeGrouping(DateTime? createdAt, string timeRange)
-        {
-            if (!createdAt.HasValue)
-                return DateTime.MinValue;
 
-            DateTime date = createdAt.Value;
-
-            return timeRange.ToLower() switch
-            {
-                "15minutes" => new DateTime(date.Year, date.Month, date.Day, date.Hour, (date.Minute / 15) * 15, 0),
-                "hourly" => new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0),
-                "daily" => new DateTime(date.Year, date.Month, date.Day, 0, 0, 0),
-                "weekly" => date.AddDays(-(int)date.DayOfWeek).Date,
-                "monthly" => new DateTime(date.Year, date.Month, 1),
-                "quarterly" => new DateTime(date.Year, ((date.Month - 1) / 3) * 3 + 1, 1),
-                "yearly" => new DateTime(date.Year, 1, 1),
-                _ => date // Default: No grouping
-            };
-        }
 
     }
 

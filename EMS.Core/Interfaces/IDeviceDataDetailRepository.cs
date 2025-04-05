@@ -10,6 +10,7 @@ namespace EMS.Core.Interfaces
     public interface IDeviceDataDetailRepository
     {
         Task<List<DeviceDataDetailDTO>> GetDeviceDataDetailsAsync();
+        Task<List<DeviceDataDetailDTO>> Get(int id);
         Task<List<DeviceDataDetailDTO>> GetHistoricDeviceDataDetailsAsync(DateTime startDate, DateTime endDate);
         Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(
        IEnumerable<int> projectId,
@@ -18,5 +19,8 @@ namespace EMS.Core.Interfaces
        DateTime startDate,
        DateTime endDate,
        string timeRange);
+
+        Task<List<UnitWiseAddressVariableSumDTO>> Getpowerloadtoday();
+        Task<List<UnitWiseAddressVariableSumDTO>> Getpowerloadhourly();
     }
 }
