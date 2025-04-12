@@ -23,10 +23,10 @@ namespace EMS.Api.Controllers
         }
 
         [HttpGet("Login")]
-        public async Task<IActionResult> Login(string username,string password)
+        public async Task<IActionResult> Login(string username, string password)
         {
             ResponseModel resp = new ResponseModel();
-            
+
             try
             {
                 UserDTO userDTO = await UserRepository.Validate(username, password);
@@ -38,7 +38,7 @@ namespace EMS.Api.Controllers
                     resp.Data = userDTO;
                 }
                 else
-                { 
+                {
                     resp.IsSuccess = false;
                     resp.Message = ConstantMessages.UnauthroizedMessage;
                 }
@@ -67,7 +67,7 @@ namespace EMS.Api.Controllers
                 Expires = DateTime.UtcNow.AddHours(2), // Token expiry
                 Issuer = _config["Jwt:Issuer"],
                 Audience = _config["Jwt:Audience"],
-                
+
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

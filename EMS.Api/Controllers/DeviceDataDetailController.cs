@@ -33,35 +33,6 @@ namespace EMS.Api.Controllers
             return Ok(resp);
 
         }
-
-        [HttpGet("Get/{id}")]
-        public async Task<IActionResult> Get(int id)
-        {
-            ResponseModel resp = new ResponseModel();
-            try
-            {
-                List<DeviceDataDetailDTO> deviceDataDetailsDTO = await _dataDetailRrepository.Get(id);
-                if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
-                {
-                    resp.IsSuccess = true;
-                    resp.Message = ConstantMessages.DataSuccessMessage;
-                    resp.Data = deviceDataDetailsDTO;
-                }
-                else
-                {
-                    resp.IsSuccess = false;
-                    resp.Message = ConstantMessages.ErrorMessage;
-                    resp.Data = null;
-                }
-            }
-            catch (Exception ex)
-            {
-                resp.IsSuccess = false;
-                resp.Message = ConstantMessages.ErrorMessage;
-            }
-            return Ok(resp);
-        }
-
         [HttpGet("GetHistoricDeviceDataDetail")]
         public async Task<IActionResult> GetHistoricDeviceDataDetail(DateTime startDate, DateTime endDate)
         {
@@ -132,6 +103,5 @@ namespace EMS.Api.Controllers
 
         }
 
-    
     }
 }
