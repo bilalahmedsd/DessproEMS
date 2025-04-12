@@ -88,6 +88,7 @@ namespace EMS.Api.Controllers
             var response = new ResponseModel();
             try
             {
+                request.TimeRange = "daily";
                 var data = await _dataDetailRrepository.GetFilteredDeviceDataDetail2(request);
 
                 response.Data = data;
