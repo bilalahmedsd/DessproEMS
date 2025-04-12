@@ -60,137 +60,137 @@ namespace EMS.Repository
 
 
 
-    //    public async Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(
-    //IEnumerable<int> projectId,
-    //IEnumerable<int> unitId,
-    //Dictionary<int, List<int>> meterId,
-    //DateTime startDate,
-    //DateTime endDate,
-    //string timeRange)
-    //    {
-    //        // ✅ Ensure proper date range
-    //        startDate = startDate.Date;
-    //        endDate = endDate.Date.AddDays(1).AddTicks(-1);
+        //    public async Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(
+        //IEnumerable<int> projectId,
+        //IEnumerable<int> unitId,
+        //Dictionary<int, List<int>> meterId,
+        //DateTime startDate,
+        //DateTime endDate,
+        //string timeRange)
+        //    {
+        //        // ✅ Ensure proper date range
+        //        startDate = startDate.Date;
+        //        endDate = endDate.Date.AddDays(1).AddTicks(-1);
 
-    //        var validAddresses = new HashSet<string> { "EPI", "EPE", "EQL", "EQC" };
+        //        var validAddresses = new HashSet<string> { "EPI", "EPE", "EQL", "EQC" };
 
-    //        var query = (
-    //            from detail in DBEMSContext.DeviceDataDetails
-    //            join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
-    //            join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
-    //            join unit in DBEMSContext.Units on device.FkUnitId equals unit.Id
-    //            join project in DBEMSContext.ProjectManagements on unit.FkProjectManagement equals project.Id
-    //            where projectId.Contains(project.Id) &&
-    //                  unitId.Contains(unit.Id) &&
-    //                  detail.CreatedAt >= startDate &&
-    //                  detail.CreatedAt <= endDate &&
-    //                  validAddresses.Contains(detail.Address)
-    //            select new DeviceDataDetailDTO
-    //            {
-    //                Id = detail.Id,
-    //                FkDeviceDataMasterId = detail.FkDeviceDataMasterId,
-    //                Address = detail.Address,
-    //                AddressVariable = detail.AddressVariable,
-    //                CreatedAt = detail.CreatedAt,
-    //                DeviceDataMaster = new DeviceDataMasterDTO
-    //                {
-    //                    Id = master.Id,
-    //                    DeviceId = master.DeviceId,
-    //                    CreatedAt = master.CreatedAt,
-    //                    FkDeviceId = master.FkDeviceId,
-    //                    Device = new DeviceDTO
-    //                    {
-    //                        Id = device.Id,
-    //                        Name = device.Name,
-    //                        SerialNo = device.SerialNo,
-    //                        Status = device.Status,
-    //                        CreatedAt = device.CreatedAt,
-    //                        FkUnitId = device.FkUnitId,
-    //                        Unit = new UnitDTO
-    //                        {
-    //                            Id = unit.Id,
-    //                            Name = unit.Name,
-    //                            Status = unit.Status,
-    //                            FkProjectManagement = unit.FkProjectManagement,
-    //                            ProjectManagement = new ProjectManagementDTO
-    //                            {
-    //                                Id = project.Id,
-    //                                ProjectName = project.ProjectName,
-    //                                CustomerName = project.CustomerName
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //            }
-    //        );
+        //        var query = (
+        //            from detail in DBEMSContext.DeviceDataDetails
+        //            join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
+        //            join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
+        //            join unit in DBEMSContext.Units on device.FkUnitId equals unit.Id
+        //            join project in DBEMSContext.ProjectManagements on unit.FkProjectManagement equals project.Id
+        //            where projectId.Contains(project.Id) &&
+        //                  unitId.Contains(unit.Id) &&
+        //                  detail.CreatedAt >= startDate &&
+        //                  detail.CreatedAt <= endDate &&
+        //                  validAddresses.Contains(detail.Address)
+        //            select new DeviceDataDetailDTO
+        //            {
+        //                Id = detail.Id,
+        //                FkDeviceDataMasterId = detail.FkDeviceDataMasterId,
+        //                Address = detail.Address,
+        //                AddressVariable = detail.AddressVariable,
+        //                CreatedAt = detail.CreatedAt,
+        //                DeviceDataMaster = new DeviceDataMasterDTO
+        //                {
+        //                    Id = master.Id,
+        //                    DeviceId = master.DeviceId,
+        //                    CreatedAt = master.CreatedAt,
+        //                    FkDeviceId = master.FkDeviceId,
+        //                    Device = new DeviceDTO
+        //                    {
+        //                        Id = device.Id,
+        //                        Name = device.Name,
+        //                        SerialNo = device.SerialNo,
+        //                        Status = device.Status,
+        //                        CreatedAt = device.CreatedAt,
+        //                        FkUnitId = device.FkUnitId,
+        //                        Unit = new UnitDTO
+        //                        {
+        //                            Id = unit.Id,
+        //                            Name = unit.Name,
+        //                            Status = unit.Status,
+        //                            FkProjectManagement = unit.FkProjectManagement,
+        //                            ProjectManagement = new ProjectManagementDTO
+        //                            {
+        //                                Id = project.Id,
+        //                                ProjectName = project.ProjectName,
+        //                                CustomerName = project.CustomerName
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        );
 
-    //        // ✅ Convert query to list and filter based on meterId
-    //        var dataList = query.AsEnumerable()
-    //            .Where(d => d.DeviceDataMaster?.Device?.FkUnitId != null &&
-    //                        d.DeviceDataMaster?.FkDeviceId != null &&
-    //                        meterId.ContainsKey(d.DeviceDataMaster.Device.FkUnitId.Value) &&
-    //                        meterId[d.DeviceDataMaster.Device.FkUnitId.Value]
-    //                            .Contains(d.DeviceDataMaster.FkDeviceId.Value))
-    //            .ToList();
+        //        // ✅ Convert query to list and filter based on meterId
+        //        var dataList = query.AsEnumerable()
+        //            .Where(d => d.DeviceDataMaster?.Device?.FkUnitId != null &&
+        //                        d.DeviceDataMaster?.FkDeviceId != null &&
+        //                        meterId.ContainsKey(d.DeviceDataMaster.Device.FkUnitId.Value) &&
+        //                        meterId[d.DeviceDataMaster.Device.FkUnitId.Value]
+        //                            .Contains(d.DeviceDataMaster.FkDeviceId.Value))
+        //            .ToList();
 
-    //        // ✅ Ensure all requested meterId entries exist in the final result
-    //        var result = new List<DeviceDataDetailDTO>(dataList);
+        //        // ✅ Ensure all requested meterId entries exist in the final result
+        //        var result = new List<DeviceDataDetailDTO>(dataList);
 
-    //        foreach (var unitEntry in meterId)
-    //        {
-    //            int unitKey = unitEntry.Key;
-    //            foreach (var meter in unitEntry.Value)
-    //            {
-    //                bool exists = dataList.Any(d =>
-    //                    d.DeviceDataMaster.Device.FkUnitId == unitKey &&
-    //                    d.DeviceDataMaster.FkDeviceId == meter);
+        //        foreach (var unitEntry in meterId)
+        //        {
+        //            int unitKey = unitEntry.Key;
+        //            foreach (var meter in unitEntry.Value)
+        //            {
+        //                bool exists = dataList.Any(d =>
+        //                    d.DeviceDataMaster.Device.FkUnitId == unitKey &&
+        //                    d.DeviceDataMaster.FkDeviceId == meter);
 
-    //                if (!exists)
-    //                {
-    //                    result.Add(new DeviceDataDetailDTO
-    //                    {
-    //                        Id = 0,
-    //                        FkDeviceDataMasterId = 0,
-    //                        Address = "",
-    //                        AddressVariable = 0.00,
-    //                        CreatedAt = DateTime.MinValue,
-    //                        DeviceDataMaster = new DeviceDataMasterDTO
-    //                        {
-    //                            Id = 0,
-    //                            DeviceId = "",
-    //                            CreatedAt = DateTime.MinValue,
-    //                            FkDeviceId = meter,
-    //                            Device = new DeviceDTO
-    //                            {
-    //                                Id = 0,
-    //                                Name = "N/A",
-    //                                SerialNo = "N/A",
-    //                                Status = "N/A",
-    //                                CreatedAt = DateTime.MinValue,
-    //                                FkUnitId = unitKey,
-    //                                Unit = new UnitDTO
-    //                                {
-    //                                    Id = unitKey,
-    //                                    Name = "N/A",
-    //                                    Status = "N/A",
-    //                                    FkProjectManagement = 0,
-    //                                    ProjectManagement = new ProjectManagementDTO
-    //                                    {
-    //                                        Id = 0,
-    //                                        ProjectName = "N/A",
-    //                                        CustomerName = "N/A"
-    //                                    }
-    //                                }
-    //                            }
-    //                        }
-    //                    });
-    //                }
-    //            }
-    //        }
+        //                if (!exists)
+        //                {
+        //                    result.Add(new DeviceDataDetailDTO
+        //                    {
+        //                        Id = 0,
+        //                        FkDeviceDataMasterId = 0,
+        //                        Address = "",
+        //                        AddressVariable = 0.00,
+        //                        CreatedAt = DateTime.MinValue,
+        //                        DeviceDataMaster = new DeviceDataMasterDTO
+        //                        {
+        //                            Id = 0,
+        //                            DeviceId = "",
+        //                            CreatedAt = DateTime.MinValue,
+        //                            FkDeviceId = meter,
+        //                            Device = new DeviceDTO
+        //                            {
+        //                                Id = 0,
+        //                                Name = "N/A",
+        //                                SerialNo = "N/A",
+        //                                Status = "N/A",
+        //                                CreatedAt = DateTime.MinValue,
+        //                                FkUnitId = unitKey,
+        //                                Unit = new UnitDTO
+        //                                {
+        //                                    Id = unitKey,
+        //                                    Name = "N/A",
+        //                                    Status = "N/A",
+        //                                    FkProjectManagement = 0,
+        //                                    ProjectManagement = new ProjectManagementDTO
+        //                                    {
+        //                                        Id = 0,
+        //                                        ProjectName = "N/A",
+        //                                        CustomerName = "N/A"
+        //                                    }
+        //                                }
+        //                            }
+        //                        }
+        //                    });
+        //                }
+        //            }
+        //        }
 
-    //        // ✅ Apply Time Range Grouping
-    //        return ApplyTimeRangeGrouping(result, timeRange);
-    //    }
+        //        // ✅ Apply Time Range Grouping
+        //        return ApplyTimeRangeGrouping(result, timeRange);
+        //    }
 
         // ✅ Helper Function for Time Grouping (LINQ Method Syntax)
         //private List<DeviceDataDetailDTO> ApplyTimeRangeGrouping(List<DeviceDataDetailDTO> data, string timeRange)
@@ -230,8 +230,8 @@ namespace EMS.Repository
         //        _ => data // 🛑 Return unmodified data if time range is invalid
         //    };
         //}
-        
-       
+
+
         public async Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail2(ProjectDataRequest request)
         {
             // ✅ Extract values from request
@@ -369,7 +369,6 @@ namespace EMS.Repository
             return ApplyTimeRangeGrouping(result, timeRange);
         }
 
-
         // ✅ Helper Function for Time Grouping (LINQ Method Syntax)
         private List<DeviceDataDetailDTO> ApplyTimeRangeGrouping(List<DeviceDataDetailDTO> data, string timeRange)
         {
@@ -407,6 +406,11 @@ namespace EMS.Repository
 
                 _ => data // 🛑 Return unmodified data if time range is invalid
             };
+        }
+
+        public Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(IEnumerable<int> projectId, IEnumerable<int> unitId, Dictionary<int, List<int>> meterId, DateTime startDate, DateTime endDate, string timeRange)
+        {
+            throw new NotImplementedException();
         }
     }
 

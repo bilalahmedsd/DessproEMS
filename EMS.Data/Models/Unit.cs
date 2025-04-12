@@ -28,4 +28,7 @@ public partial class Unit
     public string? Status { get; set; }
 
     public int? FkCompanyId { get; set; }
+    public virtual ProjectManagement ProjectManagement { get; set; }
+    public virtual ICollection<Device> Devices { get; set; }
+
 }
