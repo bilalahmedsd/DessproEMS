@@ -14,4 +14,6 @@ public partial class DeviceDataDetail
     public double? AddressVariable { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+    public virtual DeviceDataMaster DeviceDataMaster { get; set; }
+
 }

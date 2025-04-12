@@ -16,4 +16,7 @@ public partial class DeviceDataMaster
     public int? FkGatewayId { get; set; }
 
     public int? FkCompanyId { get; set; }
+    public virtual Device? Device { get; set; }
+    public virtual ICollection<DeviceDataDetail> DeviceDataDetails { get; set; }
+
 }
