@@ -21,6 +21,82 @@ namespace EMS.Repository
             DBEMSContext = eMSContext;
         }
 
+            public async Task<List<DeviceDataDetailDTO>> Get(int id)
+            {
+                var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Pakistan Standard Time");
+                var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
+
+                var startOfToday = now.Date;
+                var startOfYesterday = startOfToday.AddDays(-1);
+
+                var todaySlots = new List<DateTime>();
+                var slot = startOfToday;
+
+                // ✅ Create 1-hour slots until the last full block
+                while (slot.AddHours(1) <= now)
+                {
+                    todaySlots.Add(slot);
+                    slot = slot.AddHours(1);
+                }
+
+                // ✅ Ensure the last block covers from the last full block **to NOW**
+                if (slot < now)
+                {
+                    todaySlots.Add(slot); // Add last partial block (e.g., 12:00 to 12:45)
+                }
+
+                var yesterdaySlots = todaySlots.Select(slot => slot.AddDays(-1)).ToList();
+
+                // 📦 Fetch all required data
+                var todayRaw = await DBEMSContext.DeviceDataDetails
+                    .Where(d =>
+                        d.Address == "P" &&
+                        d.CreatedAt >= startOfToday &&
+                        d.CreatedAt <= now) // Fetch data up to current time
+                    .ToListAsync();
+
+                var yesterdayRaw = await DBEMSContext.DeviceDataDetails
+                    .Where(d =>
+                        d.Address == "P" &&
+                        d.CreatedAt >= startOfYesterday &&
+                        d.CreatedAt <= startOfYesterday + (now - startOfToday))
+                    .ToListAsync();
+
+                // 📊 Group today's data
+                var todayGrouped = todaySlots.Select(slot =>
+                {
+                    var slotEnd = (slot.AddHours(1) > now) ? now : slot.AddHours(1); // Ensure last slot ends at current time
+                    var dataInSlot = todayRaw.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
+
+                    return new DeviceDataDetailDTO
+                    {
+                        CreatedAt = slot,
+                        Address = "P (Today)",
+                        AddressVariable = dataInSlot.Sum(d => d.AddressVariable),
+                    };
+                }).ToList();
+
+                // 📊 Group yesterday's data
+                var yesterdayGrouped = yesterdaySlots.Select(slot =>
+                {
+                    var slotEnd = (slot.AddHours(1) > now.AddDays(-1)) ? now.AddDays(-1) : slot.AddHours(1);
+                    var dataInSlot = yesterdayRaw.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
+
+                    return new DeviceDataDetailDTO
+                    {
+                        CreatedAt = slot,
+                        Address = "P (Yesterday)",
+                        AddressVariable = dataInSlot.Sum(d => d.AddressVariable),
+                    };
+                }).ToList();
+
+                return todayGrouped.Concat(yesterdayGrouped).ToList();
+            }
+
+
+
+
+
         public async Task<List<DeviceDataDetailDTO>> GetDeviceDataDetailsAsync()
         {
             try
