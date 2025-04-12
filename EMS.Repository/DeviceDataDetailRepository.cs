@@ -310,13 +310,14 @@ namespace EMS.Repository
 
         public async Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail2(ProjectDataRequest request)
         {
+            //await DBEMSContext.Database.SqlQueryRaw("",);
             // ✅ Extract values from request
             var projectIds = request.ProjectId != 0 ? new List<int> { request.ProjectId } : new List<int>();
             DateTime startDate = DateTime.ParseExact(request.StartDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             DateTime endDate = DateTime.ParseExact(request.EndDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)
                                          .Date.AddDays(1).AddTicks(-1);
             string timeRange = request.TimeRange;
-
+            
             // ✅ Build meterId dictionary from Units
             var meterId = request.Units
                 .Where(u => u.UnitId != 0)
@@ -484,10 +485,7 @@ namespace EMS.Repository
             };
         }
 
-        public Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(IEnumerable<int> projectId, IEnumerable<int> unitId, Dictionary<int, List<int>> meterId, DateTime startDate, DateTime endDate, string timeRange)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 
 }

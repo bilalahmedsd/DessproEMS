@@ -132,47 +132,6 @@ namespace EMS.Api.Controllers
 
         }
 
-        [HttpGet("Getpowerloadtoday")]
-        public async Task<IActionResult> Getpowerloadtoday()
-        {
-            var response = new ResponseModel();
-            try
-            {
-                var data = await _dataDetailRrepository.Getpowerloadtoday();
-
-                response.Data = data;
-                response.Message = "Successfully fetched!";
-                response.IsSuccess = true;
-            }
-            catch (Exception ex)
-            {
-                response.Message = $"Error: {ex.Message}";
-                response.IsSuccess = false;
-            }
-            return Ok(response);
-
-        }
-
-        [HttpGet("Getpowerloadhourly")]
-        public async Task<IActionResult> Getpowerloadhourly()
-        {
-            var response = new ResponseModel();
-            try
-            {
-                var data = await _dataDetailRrepository.Getpowerloadhourly();
-
-                response.Data = data;
-                response.Message = "Successfully fetched!";
-                response.IsSuccess = true;
-            }
-            catch (Exception ex)
-            {
-                response.Message = $"Error: {ex.Message}";
-                response.IsSuccess = false;
-            }
-            return Ok(response);
-
-        }
-
+    
     }
 }
