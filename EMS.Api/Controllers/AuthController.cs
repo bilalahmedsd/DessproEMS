@@ -17,7 +17,7 @@ namespace EMS.Api.Controllers
     {
         private readonly IConfiguration _config;
         private readonly IUsersRepository UserRepository;
-        public AuthController(IConfiguration config, IUsersRepository userRepository, IUserServices services) : base(services)
+        public AuthController(IConfiguration config, IUsersRepository userRepository, IUserServices services) 
         {
             _config = config;
             UserRepository = userRepository;
