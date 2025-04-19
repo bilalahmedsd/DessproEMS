@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace EMS.Repository
 {
-    public class DeviceRepository:BaseRepository,IDeviceRepository
+    public class DeviceRepository : BaseRepository, IDeviceRepository
     {
         public DeviceRepository(EMSContext eMSContext)
         {
@@ -23,12 +23,12 @@ namespace EMS.Repository
             return res.ToJson().FromJson<List<DeviceDTO>>();
         }
 
-        public async Task<DeviceDTO> GetWithId(int id,int companyId)
+        public async Task<DeviceDTO> GetWithId(int id, int companyId)
         {
-            var res = DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false  && x.FkCompanyId == companyId);
+            var res = DBEMSContext.Devices.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false && x.FkCompanyId == companyId);
             return res.ToJson().FromJson<DeviceDTO>();
         }
-       
+
 
         public async Task Insert(DeviceDTO obj)
         {
@@ -50,7 +50,7 @@ namespace EMS.Repository
 
 
             existingUnit.IsActive = obj.IsActive;
-           existingUnit.UpdatedAt = obj.UpdatedAt;
+            existingUnit.UpdatedAt = obj.UpdatedAt;
             existingUnit.UpdatedBy = obj.UpdatedBy;
             existingUnit.IsDeleted = obj.IsDeleted;
             existingUnit.Name = obj.Name;
@@ -64,7 +64,7 @@ namespace EMS.Repository
             existingUnit.SerialPort = obj.SerialPort;
             existingUnit.OfflineDuration = obj.OfflineDuration;
             existingUnit.OfflineTime = obj.OfflineTime;
-            
+
 
 
             // ✅ Instead of Update(), use Attach() to avoid tracking issues
@@ -86,13 +86,13 @@ namespace EMS.Repository
 
             await DBEMSContext.SaveChangesAsync();
         }
-        public async Task<List<DeviceDTO>> GetDevicesWithGateways(int GatewayId,int companyId)
+        public async Task<List<DeviceDTO>> GetDevicesWithGateways(int GatewayId, int companyId)
         {
             var result = await (from device in DBEMSContext.Devices
-                                
+
                                 join gateway in DBEMSContext.Gateways
                                 on device.FkGatewayId equals gateway.Id
-                                where device.IsDeleted != true && gateway.IsDeleted !=true
+                                where device.IsDeleted != true && gateway.IsDeleted != true
                                 && device.FkGatewayId == GatewayId && device.FkCompanyId == companyId
                                 select new DeviceDTO
                                 {
@@ -139,7 +139,7 @@ namespace EMS.Repository
             return result;
         }
 
-        public async Task<List<DeviceDTO>> GetDevicesWithoutGatewayId( int companyId)
+        public async Task<List<DeviceDTO>> GetDevicesWithoutGatewayId(int companyId)
         {
             var result = await (from device in DBEMSContext.Devices
 

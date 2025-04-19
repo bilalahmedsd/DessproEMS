@@ -10,7 +10,7 @@ namespace EMS.Api.Controllers
     {
         public DashboardController(IUserServices services) : base(services)
         {
-            
+
         }
         [HttpGet("Get")]
         public IActionResult Get()
