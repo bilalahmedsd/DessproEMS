@@ -16,6 +16,24 @@ namespace EMS.Api.Controllers
             _dataDetailRrepository = deviceDataDetailRepository;
         }
 
+        [HttpGet("GetEPIConsumptionData")]
+        public async Task<IActionResult> GetEPIConsumptionData(int deviceId, string range)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _dataDetailRrepository.GetEPIConspAsync(deviceId, range);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
+            return Ok(resp);
+        }
+
         [HttpGet("GetDeviceDataDetail/{deviceid}")]
         public async Task<IActionResult> GetDeviceDataDetail(int deviceid)
         {
