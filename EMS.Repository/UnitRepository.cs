@@ -43,24 +43,6 @@ namespace EMS.Repository
             await DBEMSContext.SaveChangesAsync();
         }
 
-
-        //public async Task Update(UnitDTO obj)
-        //{
-        //    var res = await Get(obj.Id.Value);
-        //    if (res == null)
-        //        throw new Exception("Unit not found!");
-        //    res.FkProjectManagement = obj.FkProjectManagement;
-        //    res.IsActive = obj.IsActive;
-        //    res.Name = obj.Name;
-        //    res.SerialNumber = obj.SerialNumber;
-        //    res.Status = obj.Status;
-        //    res.UpdatedAt = obj.UpdatedAt;
-        //    res.UpdatedBy = obj.UpdatedBy;
-        //    res.IsDeleted = obj.IsDeleted;
-        //    DBEMSContext.Update(res);
-        //    await DBEMSContext.SaveChangesAsync();
-        //}
-
         public async Task Update(UnitDTO obj)
         {
             var existingUnit = await DBEMSContext.Units.FirstOrDefaultAsync(x => x.Id == obj.Id && x.IsDeleted ==false);
@@ -129,6 +111,42 @@ namespace EMS.Repository
 
             return result;
         }
+        public async Task<List<UnitDTO>> GetUnitsWithoutProjectId( int companyId)
+        {
+            var result = await (from unit in DBEMSContext.Units
+                                join project in DBEMSContext.ProjectManagements
+                                on unit.FkProjectManagement equals project.Id
+                                where unit.IsDeleted == false && project.IsDeleted == false
+                                && unit.FkCompanyId == companyId
+                                select new UnitDTO
+                                {
+                                    Id = unit.Id,
+                                    Name = unit.Name,
+                                    SerialNumber = unit.SerialNumber,
+                                    Status = unit.Status,
+                                    FkProjectManagement = unit.FkProjectManagement,
+                                    IsActive = unit.IsActive,
+                                    CreatedAt = unit.CreatedAt,
+                                    UpdatedAt = unit.UpdatedAt,
 
+                                    ProjectManagement = new ProjectManagementDTO
+                                    {
+                                        Id = project.Id,
+                                        FkCompanyId = project.FkCompanyId,
+                                        ProjectName = project.ProjectName,
+                                        CustomerName = project.CustomerName,
+                                        Address = project.Address,
+                                        Principal = project.Principal,
+                                        IsDeleted = project.IsDeleted,
+                                        CreatedBy = project.CreatedBy,
+                                        CreatedAt = project.CreatedAt,
+                                        UpdatedBy = project.UpdatedBy,
+                                        UpdatedAt = project.UpdatedAt,
+                                        IsActive = project.IsActive
+                                    }
+                                }).ToListAsync();
+
+            return result;
+        }
     }
 }

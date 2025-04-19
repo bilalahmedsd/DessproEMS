@@ -16,5 +16,16 @@ namespace EMS.Core.Models
 
         public DateTime? CreatedAt { get; set; }
         public DeviceDataMasterDTO? DeviceDataMaster { get; set; }
+
+        public int? UnitId { get; set; }
+
+        public string? UnitName { get; set; }
+
+        public string? DeviceName { get; set; }
+
+        public int? DeviceId { get; set; }
+
+
+
     }
 }

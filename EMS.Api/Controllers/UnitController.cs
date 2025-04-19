@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.Api.Controllers
 {
-    
+    [Authorize]
     public class UnitController : BaseController
     {
         private readonly IUnitRepository _unitRepository;
@@ -18,7 +18,23 @@ namespace EMS.Api.Controllers
             _unitRepository = unitRepository;
             _deviceRawDataRepository = deviceRawDataRepository;
         }
-
+        [HttpGet("GetUnitsWithoutProjectId")]
+        public async Task<IActionResult> GetUnitsByProjectId()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _unitRepository.GetUnitsWithoutProjectId(userServices.GetUser().FkCompanyId.Value);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = "Error fetching data.";
+                resp.IsSuccess = false;
+            }
+            return Ok(resp);
+        }
         [HttpGet("GetUnitsByProjectId/{ProjectId}")]
         public async Task<IActionResult> GetUnitsByProjectId(int ProjectId)
         {

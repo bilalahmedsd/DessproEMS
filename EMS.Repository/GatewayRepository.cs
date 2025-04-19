@@ -26,7 +26,7 @@ namespace EMS.Repository
 
         public async Task<GatewayDTO> Get(int id,int companyId)
         {
-            var res = DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id && x.FkCompanyId == companyId);
+            var res = DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false && x.FkCompanyId == companyId);
             return res.ToJson().FromJson<GatewayDTO>();
         }
         public async Task<List<GatewayDTO>> GetGatewaybyUnitId(int unitId, int companyId)
@@ -36,7 +36,7 @@ namespace EMS.Repository
                              join unit in DBEMSContext.Units
                              on gateway.FkUnitId equals unit.Id
                              where gateway.IsDeleted == false && unit.IsDeleted == false
-                             && gateway.FkUnitId == unit.Id && unit.FkCompanyId == companyId
+                             && gateway.FkUnitId == unitId && unit.FkCompanyId == companyId
                              select new GatewayDTO
                              {
                                  Id = gateway.Id,
@@ -54,6 +54,57 @@ namespace EMS.Repository
                              }).ToListAsync();
             return res;
         }
+        public async Task<List<GatewayDTO>> GetGatewayWithoutUnitId(int companyId)
+        {
+            var res = await (from gateway in DBEMSContext.Gateways
+
+                             join unit in DBEMSContext.Units
+                             on gateway.FkUnitId equals unit.Id
+                             where gateway.IsDeleted == false && unit.IsDeleted == false
+                            && unit.FkCompanyId == companyId
+                             select new GatewayDTO
+                             {
+                                 Id = gateway.Id,
+                                 Name = gateway.Name,
+                                 ProtocolName = gateway.ProtocolName,
+                                 SerialNo = gateway.SerialNo,
+                                 InstantVariable = gateway.InstantVariable,
+                                 AccumulatedVariable = gateway.AccumulatedVariable,
+                                 Unit = new UnitDTO
+                                 {
+                                     Id = unit.Id,
+                                     Name = unit.Name,
+                                 }
+
+                             }).ToListAsync();
+            return res;
+        }
+        public async Task<List<GatewayDTO>> GetGatewaybyMultipleUnitIds(List<int> unitIds, int companyId)
+        {
+            var res = await (from gateway in DBEMSContext.Gateways
+                             join unit in DBEMSContext.Units
+                             on gateway.FkUnitId equals unit.Id
+                             where gateway.IsDeleted == false
+                             && unit.IsDeleted == false
+                             && unitIds.Contains(gateway.FkUnitId ?? 0) // ✅ Handle nullable int issue
+                             && unit.FkCompanyId == companyId
+                             select new GatewayDTO
+                             {
+                                 Id = gateway.Id,
+                                 Name = gateway.Name,
+                                 ProtocolName = gateway.ProtocolName,
+                                 SerialNo = gateway.SerialNo,
+                                 InstantVariable = gateway.InstantVariable,
+                                 AccumulatedVariable = gateway.AccumulatedVariable,
+                                 Unit = new UnitDTO
+                                 {
+                                     Id = unit.Id,
+                                     Name = unit.Name,
+                                 }
+                             }).ToListAsync();
+            return res;
+        }
+
 
         public async Task Insert(GatewayDTO obj)
         {
@@ -63,7 +114,7 @@ namespace EMS.Repository
 
         public async Task Update(GatewayDTO obj)
         {
-            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == obj.Id);
+            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == obj.Id && x.IsDeleted == false);
 
             if (existingUnit == null)
                 throw new Exception("Unit not found!");
@@ -89,7 +140,7 @@ namespace EMS.Repository
 
         public async Task Delete(int id)
         {
-            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id);
+            var existingUnit = await DBEMSContext.Gateways.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
 
             if (existingUnit == null)
                 throw new Exception("Gateway not found!");

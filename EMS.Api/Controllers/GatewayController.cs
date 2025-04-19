@@ -3,10 +3,12 @@ using EMS.Core.Interfaces;
 using EMS.Core.Models;
 using EMS.Core.Services;
 using EMS.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.Api.Controllers
 {
+    [Authorize]
     public class GatewayController : BaseController
     {
         private readonly IGatewayRepository _gatewayRepository;
@@ -54,6 +56,48 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
+        [HttpGet("GetGatewayWithoutUnitId")]
+        public async Task<IActionResult> GetGatewayWithoutUnitId()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _gatewayRepository.GetGatewayWithoutUnitId(userServices.GetUser().FkCompanyId.Value);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+
+            }
+
+            return Ok(resp);
+        }
+        [HttpGet("GetGatewaybyMultipleUnitId")]
+        public async Task<IActionResult> GetGatewaybyMultipleUnitId(string UnitId)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                // ✅ Convert comma-separated string to List<int>
+                List<int> unitIds = UnitId.Split(',').Select(int.Parse).ToList();
+
+                var companyId = userServices.GetUser().FkCompanyId.Value;
+                resp.Data = await _gatewayRepository.GetGatewaybyMultipleUnitIds(unitIds, companyId); // Call updated repository method
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
         [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] GatewayDTO gateway)
         {
