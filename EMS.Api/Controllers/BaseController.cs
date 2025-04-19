@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace EMS.Api.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class BaseController : ControllerBase
     {

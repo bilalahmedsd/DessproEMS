@@ -11,7 +11,7 @@ using System.Text;
 
 namespace EMS.Api.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {

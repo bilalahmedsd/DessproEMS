@@ -21,8 +21,8 @@ namespace EMS.Repository
             DBEMSContext = eMSContext;
         }
 
-            public async Task<List<DeviceDataDetailDTO>> Get(int id)
-            {
+        public async Task<List<DeviceDataDetailDTO>> Get(int id)
+        {
             var endTime = DateTime.Now;
             var startTime = endTime.AddHours(-5);
 
@@ -138,70 +138,70 @@ namespace EMS.Repository
                     if (dataMasterIds.Any())
                     {
 
-                    // Get the data from the last 2 hours
-                    var data = await DBEMSContext.DeviceDataDetails
-                .Where(detail =>
-                       detail.FkDeviceDataMasterId.HasValue
-                    && dataMasterIds.Contains(detail.FkDeviceDataMasterId.Value)
-                    && detail.Address == "EPI"
-                    && detail.CreatedAt >= startTime
-                    && detail.CreatedAt < endTime
-                    && detail.DeviceDataMaster.Device.FkUnitId == unit.Id)
-                .Select(detail => new
-                {
-                    detail.CreatedAt,
-                    detail.AddressVariable,
-                    UnitId = unit.Id
-                })
-                .ToListAsync();
-
-            // Multiply AddressVariable by 0.06 and group data into 15-minute slots
-            var adjustedData = data.Select((d, index) => new
-            {
-                d.CreatedAt,
-                AdjustedAddressVariable = d.AddressVariable * 0.06
-            })
- .OrderBy(d => d.CreatedAt)
- .Where((item, index) => index % 2 == 0) // This filters to get odd indexed items (0, 2, 4, 6, etc.)
- .ToList();
-
-
-            // Calculate the difference in AdjustedAddressVariable between consecutive slots
-            var groupedData = timeSlots.Select(slot =>
-            {
-                var slotEnd = slot.Add(slotDuration);
-
-                // Get the data for this 15-minute slot
-                var dataInSlot = adjustedData.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
-
-                if (dataInSlot.Count() > 1)
-                {
-                    var firstValue = dataInSlot.First().AdjustedAddressVariable;
-                    var lastValue = dataInSlot.Last().AdjustedAddressVariable;
-
-                    // Calculate the difference between the first and last adjusted value in the 15-min slot
-                    var difference = lastValue - firstValue;
-
-                    return new DeviceDataDetailDTO
+                        // Get the data from the last 2 hours
+                        var data = await DBEMSContext.DeviceDataDetails
+                    .Where(detail =>
+                           detail.FkDeviceDataMasterId.HasValue
+                        && dataMasterIds.Contains(detail.FkDeviceDataMasterId.Value)
+                        && detail.Address == "EPI"
+                        && detail.CreatedAt >= startTime
+                        && detail.CreatedAt < endTime
+                        && detail.DeviceDataMaster.Device.FkUnitId == unit.Id)
+                    .Select(detail => new
                     {
-                        CreatedAt = slot,
-                        Address = "EPI",
-                        AddressVariable = difference, // Difference between first and last adjusted value
+                        detail.CreatedAt,
+                        detail.AddressVariable,
                         UnitId = unit.Id
-                    };
-                }
-                else
-                {
-                    return null; // No data in this slot
-                }
-            }).Where(d => d != null).ToList();
+                    })
+                    .ToListAsync();
+
+                        // Multiply AddressVariable by 0.06 and group data into 15-minute slots
+                        var adjustedData = data.Select((d, index) => new
+                        {
+                            d.CreatedAt,
+                            AdjustedAddressVariable = d.AddressVariable * 0.06
+                        })
+             .OrderBy(d => d.CreatedAt)
+             .Where((item, index) => index % 2 == 0) // This filters to get odd indexed items (0, 2, 4, 6, etc.)
+             .ToList();
+
+
+                        // Calculate the difference in AdjustedAddressVariable between consecutive slots
+                        var groupedData = timeSlots.Select(slot =>
+                        {
+                            var slotEnd = slot.Add(slotDuration);
+
+                            // Get the data for this 15-minute slot
+                            var dataInSlot = adjustedData.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
+
+                            if (dataInSlot.Count() > 1)
+                            {
+                                var firstValue = dataInSlot.First().AdjustedAddressVariable;
+                                var lastValue = dataInSlot.Last().AdjustedAddressVariable;
+
+                                // Calculate the difference between the first and last adjusted value in the 15-min slot
+                                var difference = lastValue - firstValue;
+
+                                return new DeviceDataDetailDTO
+                                {
+                                    CreatedAt = slot,
+                                    Address = "EPI",
+                                    AddressVariable = difference, // Difference between first and last adjusted value
+                                    UnitId = unit.Id
+                                };
+                            }
+                            else
+                            {
+                                return null; // No data in this slot
+                            }
+                        }).Where(d => d != null).ToList();
 
                         result.AddRange(groupedData);
 
-            }
+                    }
                 }
 
-                    }
+            }
 
             return result;
 
@@ -314,7 +314,7 @@ namespace EMS.Repository
             }
 
             return result;
-           
+
 
         }
 
@@ -485,9 +485,9 @@ namespace EMS.Repository
         {
             var units = await DBEMSContext.Units.ToListAsync();
 
-            foreach(var unit in units)
+            foreach (var unit in units)
             {
-                if(unit != null)
+                if (unit != null)
                 {
 
                 }
@@ -651,7 +651,7 @@ namespace EMS.Repository
 
         public async Task<List<DeviceDTO>> GetDeviceStatus()
         {
-      
+
             var devices = await DBEMSContext.Devices.Where(x => x.IsDeleted == false).ToListAsync();
 
             return devices.ToJson().FromJson<List<DeviceDTO>>();
@@ -1127,32 +1127,34 @@ namespace EMS.Repository
         }
 
 
+        public async Task<List<UnitWiseAddressVariableSumDTO>> Getpowerloadtoday()
+        {
 
             var result = await (
-                from detail in DBEMSContext.DeviceDataDetails
-                join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
-                join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
-                join unit in DBEMSContext.Units on device.FkUnitId equals unit.Id
-                where detail.Address == "P"
-  //&& detail.CreatedAt >= start
-  //&& detail.CreatedAt < end
+                    from detail in DBEMSContext.DeviceDataDetails
+                    join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
+                    join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
+                    join unit in DBEMSContext.Units on device.FkUnitId equals unit.Id
+                    where detail.Address == "P"
+                    //&& detail.CreatedAt >= start
+                    //&& detail.CreatedAt < end
 
-                group detail by new
-                {
-                    UnitId = unit.Id,
-                    UnitName = unit.Name
-                } into unitGroup
-                select new UnitWiseAddressVariableSumDTO
-                {
-                    UnitId = unitGroup.Key.UnitId,
-                    UnitName = unitGroup.Key.UnitName,
-                    TotalAddressVariable = unitGroup.Sum(d => d.AddressVariable)
-                }
-            ).ToListAsync();
+                    group detail by new
+                    {
+                        UnitId = unit.Id,
+                        UnitName = unit.Name
+                    } into unitGroup
+                    select new UnitWiseAddressVariableSumDTO
+                    {
+                        UnitId = unitGroup.Key.UnitId,
+                        UnitName = unitGroup.Key.UnitName,
+                        TotalAddressVariable = unitGroup.Sum(d => d.AddressVariable)
+                    }
+                ).ToListAsync();
 
 
             return result;
-}
+        }
 
         public async Task<List<HourlyAddressVariableSumDTO>> GetPowerLoadTodayHourly()
         {
@@ -1250,8 +1252,8 @@ namespace EMS.Repository
                 join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
                 join unit in DBEMSContext.Units on device.FkUnitId equals unit.Id
                 where detail.Address == "P"
-                      //&& detail.CreatedAt >= start
-                      //&& detail.CreatedAt < end
+                //&& detail.CreatedAt >= start
+                //&& detail.CreatedAt < end
                 group detail by new
                 {
                     UnitId = unit.Id,
@@ -1298,7 +1300,8 @@ namespace EMS.Repository
                                 .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault())
                                 .ToList(),
 
-                "15minutes" => data.GroupBy(d => new {
+                "15minutes" => data.GroupBy(d => new
+                {
                     Year = d.CreatedAt?.Year,
                     Month = d.CreatedAt?.Month,
                     Day = d.CreatedAt?.Day,
@@ -1317,6 +1320,8 @@ namespace EMS.Repository
         {
             throw new NotImplementedException();
         }
+
+
     }
 
 }
