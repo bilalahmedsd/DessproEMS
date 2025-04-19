@@ -27,5 +27,6 @@ public partial class ProjectManagement
 
     public DateTime? UpdatedAt { get; set; }
 
+    public virtual ICollection<Unit> Units { get; set; }
     public bool? IsActive { get; set; }
 }

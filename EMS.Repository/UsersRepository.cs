@@ -29,7 +29,7 @@ namespace EMS.Repository
             var user = await DBEMSContext.Users.Where(x => x.Email== userName && x.Password == password && x.IsActive ==true && x.IsDeleted == false).FirstOrDefaultAsync();
             if (user == null)
                 return null;
-            user.Password = null;
+            //user.Password = null;
             return user.ToJson().FromJson<UserDTO>();
         }
     }

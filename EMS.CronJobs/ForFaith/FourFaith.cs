@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace EMS.CronJobs.ForFaith
@@ -32,30 +33,39 @@ namespace EMS.CronJobs.ForFaith
                     var gateway = await DBEMSContext.Gateways.Where(x => x.SerialNo == energyData.did && x.IsDeleted == false && x.IsActive == true).FirstOrDefaultAsync();
                     if (gateway != null)
                     {
-                        var master = new DeviceDataMaster
+                        var Sn = energyData.content.Where(x => x.addr.ToString().Contains("SN")).FirstOrDefault();
+                        if (Sn != null &&   Regex.IsMatch(Sn.addr, @"^SN-\d{4}$"))
                         {
-                            DeviceId = energyData.did,
-                            CreatedAt = DateTime.Now,
-                            FkGatewayId = gateway.Id,
-                            FkCompanyId = gateway.FkCompanyId
-                        };
-                        await DBEMSContext.DeviceDataMasters.AddAsync(master);
-                        await DBEMSContext.SaveChangesAsync();
-
-                        
-
-                        foreach (var item in energyData.content)
-                        {
-                            await DBEMSContext.DeviceDataDetails.AddAsync(new DeviceDataDetail()
+                            var device= await DBEMSContext.Devices.Where(x => "SN-" + x.SerialNo ==  Sn.addr).FirstOrDefaultAsync();
+                            if (device != null)
                             {
-                                Address = item.addr,
-                                AddressVariable = item.addrv,
-                                CreatedAt = DateTime.Now,
-                                FkDeviceDataMasterId = master.Id
+                                var master = new DeviceDataMaster
+                                {
+                                    DeviceId = energyData.did,
+                                    CreatedAt = DateTime.Now,
+                                    FkGatewayId = gateway.Id,
+                                    FkCompanyId = gateway.FkCompanyId,
+                                    FkDeviceId = device.Id
+                                };
+                                await DBEMSContext.DeviceDataMasters.AddAsync(master);
+                                await DBEMSContext.SaveChangesAsync();
 
-                            });
+                                foreach (var item in energyData.content)
+                                {
+                                    await DBEMSContext.DeviceDataDetails.AddAsync(new DeviceDataDetail()
+                                    {
+                                        Address = item.addr,
+                                        AddressVariable = item.addrv,
+                                        CreatedAt = DateTime.Now,
+                                        FkDeviceDataMasterId = master.Id
+
+                                    });
+                                }
+                                await DBEMSContext.SaveChangesAsync();
+                            }
+                           
                         }
-                        await DBEMSContext.SaveChangesAsync();
+                        
                     }
                 }
 

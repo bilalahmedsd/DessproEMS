@@ -1125,31 +1125,7 @@ namespace EMS.Repository
             // ✅ Apply Time Range Grouping
             return ApplyTimeRangeGrouping(result, timeRange);
         }
-        
-        private DateTime GetTimeGrouping(DateTime? createdAt, string timeRange)
-        {
-            if (!createdAt.HasValue)
-                return DateTime.MinValue;
 
-            DateTime date = createdAt.Value;
-
-            return timeRange.ToLower() switch
-            {
-                "15minutes" => new DateTime(date.Year, date.Month, date.Day, date.Hour, (date.Minute / 15) * 15, 0),
-                "hourly" => new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0),
-                "daily" => new DateTime(date.Year, date.Month, date.Day, 0, 0, 0),
-                "weekly" => date.AddDays(-(int)date.DayOfWeek).Date,
-                "monthly" => new DateTime(date.Year, date.Month, 1),
-                "quarterly" => new DateTime(date.Year, ((date.Month - 1) / 3) * 3 + 1, 1),
-                "yearly" => new DateTime(date.Year, 1, 1),
-                _ => date // Default: No grouping
-            };
-        }
-
-      public async Task<List<UnitWiseAddressVariableSumDTO>> Getpowerloadtoday()
-{
-            DateTime start = DateTime.Today;               // 2025-04-04 00:00:00
-            DateTime end = start.AddDays(1);               // 2025-04-05 00:00:00 (exclusive end)
 
 
             var result = await (

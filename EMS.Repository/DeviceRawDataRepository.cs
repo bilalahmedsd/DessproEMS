@@ -15,13 +15,13 @@ namespace EMS.Repository
     {
         public DeviceRawDataRepository(EMSContext eMSContext)
         {
-            DBEMSContext= eMSContext;
+            DBEMSContext = eMSContext;
         }
 
         public DeviceRawDatumDTO GetLatest()
         {
-            var res =  DBEMSContext.DeviceRawData.ToList().OrderByDescending(x=>x.Id).FirstOrDefault();
-            return res.ToJson().FromJson<DeviceRawDatumDTO>(); 
+            var res = DBEMSContext.DeviceRawData.ToList().OrderByDescending(x => x.Id).FirstOrDefault();
+            return res.ToJson().FromJson<DeviceRawDatumDTO>();
         }
 
         public async Task SaveData(DeviceRawDatumDTO obj)

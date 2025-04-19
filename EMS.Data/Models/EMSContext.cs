@@ -93,6 +93,30 @@ public partial class EMSContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
         });
+        modelBuilder.Entity<DeviceDataDetail>()
+    .HasOne(detail => detail.DeviceDataMaster)
+    .WithMany(master => master.DeviceDataDetails)
+    .HasForeignKey(detail => detail.FkDeviceDataMasterId)
+    .OnDelete(DeleteBehavior.NoAction); // optional: prevents cascade delete errors
+
+        modelBuilder.Entity<DeviceDataMaster>()
+            .HasOne(master => master.Device)
+            .WithMany(device => device.DeviceDataMasters)
+            .HasForeignKey(master => master.FkDeviceId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Device>()
+            .HasOne(device => device.Unit)
+            .WithMany(unit => unit.Devices)
+            .HasForeignKey(device => device.FkUnitId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Unit>()
+            .HasOne(unit => unit.ProjectManagement)
+            .WithMany(project => project.Units)
+            .HasForeignKey(unit => unit.FkProjectManagement)
+            .OnDelete(DeleteBehavior.NoAction);
+
 
         modelBuilder.Entity<DeviceDataMaster>(entity =>
         {
