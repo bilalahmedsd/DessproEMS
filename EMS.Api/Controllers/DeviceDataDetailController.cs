@@ -435,6 +435,50 @@ namespace EMS.Api.Controllers
         }
 
 
+        [HttpGet("GetPowerLoadTodayHourly")]
+        public async Task<IActionResult> GetPowerLoadTodayHourly()
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var data = await _dataDetailRrepository.GetPowerLoadTodayHourly();
+
+                response.Data = data;
+                response.Message = "Successfully fetched!";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Error: {ex.Message}";
+                response.IsSuccess = false;
+            }
+            return Ok(response);
+
+        }
+
+
+        [HttpGet("GetPowerConsumptionRealtime")]
+        public async Task<IActionResult> GetPowerConsumptionRealtime()
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var data = await _dataDetailRrepository.GetPowerConsumptionRealtime();
+
+                response.Data = data;
+                response.Message = "Successfully fetched!";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Error: {ex.Message}";
+                response.IsSuccess = false;
+            }
+            return Ok(response);
+
+        }
+
+
 
 
         [HttpGet("Getpowerloadhourly")]
