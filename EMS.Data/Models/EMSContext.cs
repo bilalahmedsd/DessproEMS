@@ -106,6 +106,19 @@ public partial class EMSContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<DeviceDataMaster>()
+    .HasOne(d => d.Device)
+    .WithMany(p => p.DeviceDataMasters)
+    .HasForeignKey(d => d.FkDeviceId)
+    .OnDelete(DeleteBehavior.ClientSetNull); // Or your preferred behavior
+
+        modelBuilder.Entity<DeviceDataDetail>()
+            .HasOne(d => d.DeviceDataMaster)
+            .WithMany(p => p.DeviceDataDetails)
+            .HasForeignKey(d => d.FkDeviceDataMasterId)
+            .OnDelete(DeleteBehavior.ClientSetNull);
+
+
         modelBuilder.Entity<DeviceRawDatum>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__DeviceRa__3214EC073E071B9E");

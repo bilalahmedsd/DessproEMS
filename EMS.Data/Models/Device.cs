@@ -42,4 +42,10 @@ public partial class Device
     public int? FkCompanyId { get; set; }
 
     public int? FkUnitId { get; set; }
+
+    //public virtual Unit Unit { get; set; }
+
+    public virtual ICollection<DeviceDataMaster> DeviceDataMasters { get; set; } = new List<DeviceDataMaster>();
+
+
 }
