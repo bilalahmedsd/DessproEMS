@@ -413,48 +413,48 @@ namespace EMS.Api.Controllers
         }
 
 
-        [HttpGet("GetPowerConsumptionRealtime")]
-        public async Task<IActionResult> GetPowerConsumptionRealtime()
-        {
-            var response = new ResponseModel();
-            try
-            {
-                var data = await _dataDetailRrepository.GetPowerConsumptionRealtime();
+        //[HttpGet("GetPowerConsumptionRealtime")]
+        //public async Task<IActionResult> GetPowerConsumptionRealtime()
+        //{
+        //    var response = new ResponseModel();
+        //    try
+        //    {
+        //        var data = await _dataDetailRrepository.GetPowerConsumptionRealtime();
 
-                response.Data = data;
-                response.Message = "Successfully fetched!";
-                response.IsSuccess = true;
-            }
-            catch (Exception ex)
-            {
-                response.Message = $"Error: {ex.Message}";
-                response.IsSuccess = false;
-            }
-            return Ok(response);
+        //        response.Data = data;
+        //        response.Message = "Successfully fetched!";
+        //        response.IsSuccess = true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.Message = $"Error: {ex.Message}";
+        //        response.IsSuccess = false;
+        //    }
+        //    return Ok(response);
 
-        }
+        //}
 
 
-        [HttpGet("GetPowerLoadTodayHourly")]
-        public async Task<IActionResult> GetPowerLoadTodayHourly()
-        {
-            var response = new ResponseModel();
-            try
-            {
-                var data = await _dataDetailRrepository.GetPowerLoadTodayHourly();
+        //[HttpGet("GetPowerLoadTodayHourly")]
+        //public async Task<IActionResult> GetPowerLoadTodayHourly()
+        //{
+        //    var response = new ResponseModel();
+        //    try
+        //    {
+        //        var data = await _dataDetailRrepository.GetPowerLoadTodayHourly();
 
-                response.Data = data;
-                response.Message = "Successfully fetched!";
-                response.IsSuccess = true;
-            }
-            catch (Exception ex)
-            {
-                response.Message = $"Error: {ex.Message}";
-                response.IsSuccess = false;
-            }
-            return Ok(response);
+        //        response.Data = data;
+        //        response.Message = "Successfully fetched!";
+        //        response.IsSuccess = true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.Message = $"Error: {ex.Message}";
+        //        response.IsSuccess = false;
+        //    }
+        //    return Ok(response);
 
-        }
+        //}
 
 
         [HttpGet("GetPowerConsumptionRealtime")]
