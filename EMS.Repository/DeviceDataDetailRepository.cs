@@ -741,18 +741,16 @@ namespace EMS.Repository
 
         public async Task<List<DeviceDataDetailDTO>> GetDeviceDataDetailsAsync(int deviceid)
         {
-
             var endTime = DateTime.Now;
             var startTime = endTime.AddMinutes(-11);
 
             var result = new List<DeviceDataDetailDTO>();
 
-            // ✅ Get first unit only
+            // ✅ Get units from DB
             var units = await DBEMSContext.Units.ToListAsync();
 
             foreach (var unit in units)
             {
-
                 if (unit != null)
                 {
                     var deviceIds = await DBEMSContext.Devices
@@ -763,11 +761,13 @@ namespace EMS.Repository
                     if (deviceIds.Any())
                     {
                         var dataMasterIds = await DBEMSContext.DeviceDataMasters
-                            .Where(dm => deviceIds.Contains(deviceid)).Select(dm => dm.Id)
-                      .ToListAsync();
+                            .Where(dm => deviceIds.Contains(deviceid))
+                            .Select(dm => dm.Id)
+                            .ToListAsync();
 
                         if (dataMasterIds.Any())
                         {
+                            // Fetch data from DB into memory
                             var data = await DBEMSContext.DeviceDataDetails
                                 .Where(d =>
                                     d.FkDeviceDataMasterId.HasValue &&
@@ -777,7 +777,7 @@ namespace EMS.Repository
                                 .Select(d => new DeviceDataDetailDTO
                                 {
                                     UnitId = unit.Id,
-                                    UnitName = unit.Name,
+                                    Address = d.Address,
                                     AddressVariable = d.AddressVariable,
                                     CreatedAt = d.CreatedAt,
                                     DeviceId = deviceid
@@ -790,8 +790,77 @@ namespace EMS.Repository
                 }
             }
 
-            return result;
+            // ✅ Group by 30-second intervals and AddressVariable
+            var groupedData = result
+                .Where(d => d.CreatedAt.HasValue)
+                .GroupBy(d => new
+                {
+                    TimeBucket = new DateTime(
+                        d.CreatedAt.Value.Year,
+                        d.CreatedAt.Value.Month,
+                        d.CreatedAt.Value.Day,
+                        d.CreatedAt.Value.Hour,
+                        d.CreatedAt.Value.Minute,
+                        (d.CreatedAt.Value.Second / 30) * 30
+                    ),
+                    d.Address
+                })
+                .OrderBy(g => g.Key.TimeBucket)
+                .Select(g =>
+                {
+                    var orderedGroup = g.OrderBy(x => x.CreatedAt).ToList();
+                    var first = orderedGroup.First();
+                    var last = orderedGroup.Last();
+
+                    double calculatedValue = 0;
+                    double lastValue = last.AddressVariable ?? 0; // Default to 0 if null
+                    double firstValue = first.AddressVariable ?? 0; // Default to 0 if null
+
+                    string addr = g.Key.Address?.ToLower() ?? "";
+
+                    switch (addr)
+                    {
+                        case "ua":
+                        case "ub":
+                        case "uc":
+                        case "p":
+                            // Ensure no divide by zero occurs
+                            if (lastValue != 0)
+                            {
+                                calculatedValue = lastValue / 10; // Divide by 20 as per original logic
+                            }
+                            else
+                            {
+                                calculatedValue = 0; // Handle case where lastValue is 0
+                            }
+                            break;
+
+                        case "epi":
+                            if (lastValue != 0 && firstValue != 0)
+                            {
+                                calculatedValue = (lastValue - firstValue) * 0.06; // EPI formula
+                            }
+                            break;
+
+                        default:
+                            calculatedValue = lastValue; // Default to last value
+                            break;
+                    }
+
+                    return new DeviceDataDetailDTO
+                    {
+                        UnitId = last.UnitId,
+                        Address = g.Key.Address,
+                        AddressVariable = calculatedValue,
+                        CreatedAt = g.Key.TimeBucket,
+                        DeviceId = last.DeviceId
+                    };
+                })
+                .ToList();
+
+            return groupedData;
         }
+
         public async Task<KeyValuePair<string, string>[]> GetHistoricDeviceDataDetailsAsync(DateTime startDate, DateTime endDate, string parameter)
         {
             // Log parameters before querying
@@ -1006,7 +1075,7 @@ namespace EMS.Repository
                     u => u.Meters.Where(m => m.MeterId != 0).Select(m => m.MeterId).ToList()
                 );
 
-            var validAddresses = new HashSet<string> { "EPI", "EPE", "EQL", "EQC" };
+            var validAddresses = new HashSet<string> { "EPI", "EPE" };
             //int EQL = request.Units[0].Meters[0].EQC;
             var query = (
                 from detail in DBEMSContext.DeviceDataDetails
