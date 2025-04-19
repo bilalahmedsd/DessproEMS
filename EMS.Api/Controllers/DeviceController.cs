@@ -18,8 +18,8 @@ namespace EMS.Api.Controllers
             _deviceRepository = deviceRepository;
         }
 
-        [HttpGet("Get")]
-        public async Task<IActionResult> Get()
+        [HttpGet("GetDeviceStatus")]
+        public async Task<IActionResult> GetDeviceStatus()
         {
             ResponseModel resp = new ResponseModel();
             try
@@ -37,6 +37,7 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
+
         [HttpGet("GetDevicesbyGatewayId/{GatewayId}")]
         public async Task<IActionResult> GetDevicesWithGateways(int GatewayId)
         {
