@@ -1076,123 +1076,131 @@ namespace EMS.Repository
                 );
 
             var validAddresses = new HashSet<string> { "EPI", "EPE" };
+            var meters = meterId.SelectMany(x => x.Value).ToList();
             //int EQL = request.Units[0].Meters[0].EQC;
-            var query = (
+            var maxCreatedPerDeviceDate =
+            from detail in DBEMSContext.DeviceDataDetails
+            join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
+            join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
+            where meters.Contains(device.Id) &&
+            detail.CreatedAt >= startDate &&
+            detail.CreatedAt <= endDate &&
+            validAddresses.Contains(detail.Address)
+           group detail by new { device.Id, Date = detail.CreatedAt.Value.Date } into g
+            select new
+            {
+                DeviceId = g.Key.Id,
+                Date = g.Key.Date,
+                MaxCreatedAt = g.Max(x => x.CreatedAt)
+            };
+
+            var filteredData =
                 from detail in DBEMSContext.DeviceDataDetails
                 join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
                 join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
                 join unit in DBEMSContext.Units on device.FkUnitId equals unit.Id
                 join project in DBEMSContext.ProjectManagements on unit.FkProjectManagement equals project.Id
+                join maxDetail in maxCreatedPerDeviceDate
+                    on new { DeviceId = device.Id, Date = detail.CreatedAt.Value.Date, CreatedAt = detail.CreatedAt }
+                    equals new { maxDetail.DeviceId, maxDetail.Date, CreatedAt = maxDetail.MaxCreatedAt }
                 where projectIds.Contains(project.Id) &&
                       meterId.Keys.Contains(unit.Id) &&
-                      detail.CreatedAt >= startDate &&
-                      detail.CreatedAt <= endDate &&
+                      meters.Contains(device.Id) &&
                       validAddresses.Contains(detail.Address)
-                select new DeviceDataDetailDTO
+                select new
                 {
-                    Id = detail.Id,
-                    FkDeviceDataMasterId = detail.FkDeviceDataMasterId,
-                    Address = detail.Address,
-                    AddressVariable = detail.AddressVariable,
-                    CreatedAt = detail.CreatedAt,
-                    DeviceDataMaster = new DeviceDataMasterDTO
-                    {
-                        Id = master.Id,
-                        DeviceId = master.DeviceId,
-                        CreatedAt = master.CreatedAt,
-                        FkDeviceId = master.FkDeviceId,
-                        Device = new DeviceDTO
-                        {
-                            Id = device.Id,
-                            Name = device.Name,
-                            SerialNo = device.SerialNo,
-                            Status = device.Status,
-                            CreatedAt = device.CreatedAt,
-                            FkUnitId = device.FkUnitId,
-                            Unit = new UnitDTO
-                            {
-                                Id = unit.Id,
-                                Name = unit.Name,
-                                Status = unit.Status,
-                                FkProjectManagement = unit.FkProjectManagement,
-                                ProjectManagement = new ProjectManagementDTO
-                                {
-                                    Id = project.Id,
-                                    ProjectName = project.ProjectName,
-                                    CustomerName = project.CustomerName
-                                }
-                            }
-                        }
-                    }
-                }
-            );
-
-            // ✅ Convert query to list and filter based on meterId
-            var dataList = query.AsEnumerable()
-                .Where(d => d.DeviceDataMaster?.Device?.FkUnitId != null &&
-                            d.DeviceDataMaster?.FkDeviceId != null &&
-                            meterId.ContainsKey(d.DeviceDataMaster.Device.FkUnitId.Value) &&
-                            meterId[d.DeviceDataMaster.Device.FkUnitId.Value]
-                                .Contains(d.DeviceDataMaster.FkDeviceId.Value))
-                .ToList();
+                    Detail = detail,
+                    Master = master,
+                    Device = device,
+                    Unit = unit,
+                    Project = project
+                };
 
             // ✅ Ensure all requested meterId entries exist in the final result
-            var result = new List<DeviceDataDetailDTO>(dataList);
-
-            foreach (var unitEntry in meterId)
+            var result = new List<DeviceDataDetailDTO>();
+            foreach (var item in filteredData)
             {
-                int unitKey = unitEntry.Key;
-                foreach (var meter in unitEntry.Value)
+                result.Add(new DeviceDataDetailDTO()
                 {
-                    bool exists = dataList.Any(d =>
-                        d.DeviceDataMaster.Device.FkUnitId == unitKey &&
-                        d.DeviceDataMaster.FkDeviceId == meter);
-
-                    if (!exists)
+                    Id = item.Detail.Id,
+                    FkDeviceDataMasterId = item.Detail.FkDeviceDataMasterId,
+                    Address = item.Detail.Address,
+                    AddressVariable = item.Detail.AddressVariable,
+                    CreatedAt = item.Detail.CreatedAt,
+                    DeviceId = item.Master.Id,
+                    UnitId = item.Device.FkUnitId,
+                    DeviceName = item.Device.Name,
+                    DeviceDataMaster = new DeviceDataMasterDTO()
                     {
-                        result.Add(new DeviceDataDetailDTO
+                        Id = item.Master.Id,
+                        FkDeviceId = item.Master.FkDeviceId,
+                        CreatedAt = item.Master.CreatedAt,
+                        Device = new DeviceDTO()
                         {
-                            Id = 0,
-                            FkDeviceDataMasterId = 0,
-                            Address = "",
-                            AddressVariable = 0.00,
-                            CreatedAt = DateTime.MinValue,
-                            DeviceDataMaster = new DeviceDataMasterDTO
-                            {
-                                Id = 0,
-                                DeviceId = "",
-                                CreatedAt = DateTime.MinValue,
-                                FkDeviceId = meter,
-                                Device = new DeviceDTO
-                                {
-                                    Id = 0,
-                                    Name = "N/A",
-                                    SerialNo = "N/A",
-                                    Status = "N/A",
-                                    CreatedAt = DateTime.MinValue,
-                                    FkUnitId = unitKey,
-                                    Unit = new UnitDTO
-                                    {
-                                        Id = unitKey,
-                                        Name = "N/A",
-                                        Status = "N/A",
-                                        FkProjectManagement = 0,
-                                        ProjectManagement = new ProjectManagementDTO
-                                        {
-                                            Id = 0,
-                                            ProjectName = "N/A",
-                                            CustomerName = "N/A"
-                                        }
-                                    }
-                                }
-                            }
-                        });
+                            Id = item.Device.Id,
+                            Name = item.Device.Name
+                        }
+
+
                     }
+
                 }
+                    );
             }
+            //foreach (var unitEntry in meterId)
+            //{
+            //    int unitKey = unitEntry.Key;
+            //    foreach (var meter in unitEntry.Value)
+            //    {
+            //        bool exists = dataList.Any(d =>
+            //            d.DeviceDataMaster.Device.FkUnitId == unitKey &&
+            //            d.DeviceDataMaster.FkDeviceId == meter);
+
+            //        if (!exists)
+            //        {
+            //            result.Add(new DeviceDataDetailDTO
+            //            {
+            //                Id = 0,
+            //                FkDeviceDataMasterId = 0,
+            //                Address = "",
+            //                AddressVariable = 0.00,
+            //                CreatedAt = DateTime.MinValue,
+            //                DeviceDataMaster = new DeviceDataMasterDTO
+            //                {
+            //                    Id = 0,
+            //                    DeviceId = "",
+            //                    CreatedAt = DateTime.MinValue,
+            //                    FkDeviceId = meter,
+            //                    Device = new DeviceDTO
+            //                    {
+            //                        Id = 0,
+            //                        Name = "N/A",
+            //                        SerialNo = "N/A",
+            //                        Status = "N/A",
+            //                        CreatedAt = DateTime.MinValue,
+            //                        FkUnitId = unitKey,
+            //                        Unit = new UnitDTO
+            //                        {
+            //                            Id = unitKey,
+            //                            Name = "N/A",
+            //                            Status = "N/A",
+            //                            FkProjectManagement = 0,
+            //                            ProjectManagement = new ProjectManagementDTO
+            //                            {
+            //                                Id = 0,
+            //                                ProjectName = "N/A",
+            //                                CustomerName = "N/A"
+            //                            }
+            //                        }
+            //                    }
+            //                }
+            //            });
+            //        }
+            //    }
+            //}
 
             // ✅ Apply Time Range Grouping
-            return ApplyTimeRangeGrouping(result, timeRange);
+            return result;
         }
 
 
