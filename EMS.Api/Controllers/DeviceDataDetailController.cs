@@ -319,33 +319,7 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
-        // [HttpGet("GetfilterDeviceDataDetail")]
-        // public async Task<IActionResult> GetfilterDeviceDataDetail(
-        //[FromQuery] IEnumerable<int> projectId,
-        //[FromQuery] IEnumerable<int> unitId,
-        //[FromQuery] Dictionary<string, List<int>> meterId,
-        //[FromQuery] DateTime startDate,
-        //[FromQuery] DateTime endDate,
-        //[FromQuery] string timeRange)
-        // {
-        //     var response = new ResponseModel();
-        //     try
-        //     {
-        //         var parsedMeterId = meterId.ToDictionary(k => int.Parse(k.Key), v => v.Value);
-        //         var data = await _dataDetailRrepository.GetFilteredDeviceDataDetail(
-        //             projectId.ToList(), unitId.ToList(), parsedMeterId, startDate, endDate, timeRange);
-
-        //         response.Data = data;
-        //         response.Message = "Successfully fetched!";
-        //         response.IsSuccess = true;
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         response.Message = $"Error: {ex.Message}";
-        //         response.IsSuccess = false;
-        //     }
-        //     return Ok(response);
-        // }
+      
         
         [HttpPost("GetfilterDeviceDataDetailv2")]
         public async Task<IActionResult> GetfilterDeviceDataDetailv2([FromBody] ProjectDataRequest request)
@@ -368,6 +342,29 @@ namespace EMS.Api.Controllers
             return Ok(response);
 
         }
+
+        [HttpPost("GetfilterConsumptionDeviceDataDetailv2")]
+        public async Task<IActionResult> GetfilterConsumptionDeviceDataDetailv2([FromBody] ProjectDataRequestMainMeter request)
+        {
+            var response = new ResponseModel();
+            try
+            {
+                request.TimeRange = "daily";
+                var data = await _dataDetailRrepository.GetFilteredConsumptionMainMeterData(request);
+
+                response.Data = data;
+                response.Message = "Successfully fetched!";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Error: {ex.Message}";
+                response.IsSuccess = false;
+            }
+            return Ok(response);
+
+        }
+
 
         [HttpGet("Getpowerloadtoday")]
         public async Task<IActionResult> Getpowerloadtoday()

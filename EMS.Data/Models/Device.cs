@@ -45,7 +45,6 @@ public partial class Device
     public virtual Unit Unit { get; set; }
     
     public virtual ICollection<DeviceDataMaster> DeviceDataMasters { get; set; } = new List<DeviceDataMaster>();
-
-
+    public bool? IsMainMeter { get; set; }
 }
 

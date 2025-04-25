@@ -1203,6 +1203,93 @@ namespace EMS.Repository
             return result;
         }
 
+        public async Task<List<DeviceDataDetailDTO>> GetFilteredConsumptionMainMeterData(ProjectDataRequestMainMeter request)
+        {
+            var projectIds = request.ProjectId != 0 ? new List<int> { request.ProjectId } : new List<int>();
+            DateTime startDate = DateTime.ParseExact(request.StartDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime endDate = DateTime.ParseExact(request.EndDate, "yyyy-MM-dd", CultureInfo.InvariantCulture).Date.AddDays(1).AddTicks(-1);
+            string timeRange = request.TimeRange;
+
+            // ✅ Units and main meter filter
+            var unitIds = request.Units.Where(u => u.UnitId != 0).Select(u => u.UnitId).ToList();
+            var validAddresses = new HashSet<string>();
+
+            if (request.Units.Any(u => u.EPI == 1)) validAddresses.Add("EPI");
+            if (request.Units.Any(u => u.EPE == 1)) validAddresses.Add("EPE");
+
+            var meters = await DBEMSContext.Devices
+              .Where(d => d.FkUnitId.HasValue && unitIds.Contains(d.FkUnitId.Value) && d.IsMainMeter == true)
+              .Select(d => d.Id)
+               .ToListAsync();
+
+
+            var maxCreatedPerDeviceDate =
+                from detail in DBEMSContext.DeviceDataDetails
+                join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
+                join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
+                where meters.Contains(device.Id)
+                      && detail.CreatedAt >= startDate
+                      && detail.CreatedAt <= endDate
+                      && validAddresses.Contains(detail.Address)
+                group detail by new { device.Id, Date = detail.CreatedAt.Value.Date } into g
+                select new
+                {
+                    DeviceId = g.Key.Id,
+                    Date = g.Key.Date,
+                    MaxCreatedAt = g.Max(x => x.CreatedAt)
+                };
+
+            var filteredData =
+                from detail in DBEMSContext.DeviceDataDetails
+                join master in DBEMSContext.DeviceDataMasters on detail.FkDeviceDataMasterId equals master.Id
+                join device in DBEMSContext.Devices on master.FkDeviceId equals device.Id
+                join unit in DBEMSContext.Units on device.FkUnitId equals unit.Id
+                join project in DBEMSContext.ProjectManagements on unit.FkProjectManagement equals project.Id
+                join maxDetail in maxCreatedPerDeviceDate
+                    on new { DeviceId = device.Id, Date = detail.CreatedAt.Value.Date, CreatedAt = detail.CreatedAt }
+                    equals new { maxDetail.DeviceId, maxDetail.Date, CreatedAt = maxDetail.MaxCreatedAt }
+                where projectIds.Contains(project.Id)
+                      && unitIds.Contains(unit.Id)
+                      && meters.Contains(device.Id)
+                      && validAddresses.Contains(detail.Address)
+                select new
+                {
+                    Detail = detail,
+                    Master = master,
+                    Device = device,
+                    Unit = unit,
+                    Project = project
+                };
+
+            var result = new List<DeviceDataDetailDTO>();
+            foreach (var item in filteredData)
+            {
+                result.Add(new DeviceDataDetailDTO()
+                {
+                    Id = item.Detail.Id,
+                    FkDeviceDataMasterId = item.Detail.FkDeviceDataMasterId,
+                    Address = item.Detail.Address,
+                    AddressVariable = item.Detail.AddressVariable,
+                    CreatedAt = item.Detail.CreatedAt,
+                    DeviceId = item.Master.Id,
+                    UnitId = item.Device.FkUnitId,
+                    DeviceName = item.Device.Name,
+                    DeviceDataMaster = new DeviceDataMasterDTO()
+                    {
+                        Id = item.Master.Id,
+                        FkDeviceId = item.Master.FkDeviceId,
+                        CreatedAt = item.Master.CreatedAt,
+                        Device = new DeviceDTO()
+                        {
+                            Id = item.Device.Id,
+                            Name = item.Device.Name
+                        }
+                    }
+                });
+            }
+
+            return result;
+        }
 
         public async Task<List<UnitWiseAddressVariableSumDTO>> Getpowerloadtoday()
         {

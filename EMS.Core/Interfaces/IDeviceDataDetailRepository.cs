@@ -50,6 +50,7 @@ namespace EMS.Core.Interfaces
 
 
         Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail2(ProjectDataRequest request);
+        Task<List<DeviceDataDetailDTO>> GetFilteredConsumptionMainMeterData(ProjectDataRequestMainMeter request);
 
     }
 }
