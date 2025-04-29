@@ -14,23 +14,38 @@ namespace EMS.Core.Interfaces
         Task<EPIConspDTO> GetEPIConspAsync(int deviceId, string range);
         Task<List<DeviceDataDetailDTO>> Get(int id);
 
-        Task<List<DeviceDataDetailDTO>> GetEnergyConspDatau1();
+        Task<List<PowerLoadDTO>> GetEnergyConspDatau1();
+
+        Task<List<UnitDTO>> GetUnitsDetails();
+        Task<List<PowerLoadDTO>> GetEnergyConspDatau2();
+
+        Task<List<PowerLoadDTO>> LoadProfile();
+
+        Task<List<PowerLoadDTO>> LoadProfilev1();
+
+        Task<List<PowerLoadDTO>> LoadProfilev2();
 
 
-        Task<List<DeviceDataDetailDTO>> GetEnergyConspDatau2();
+        Task<List<PowerLoadDTO>> GetEnergyConspDatau3();
 
-        Task<List<DeviceDataDetailDTO>> GetEnergyConspDatau3();
+        Task<List<PowerLoadDTO>> PowerConsumption();
+
+        Task<List<PowerLoadDTO>> PowerConsumptionv1();
+
+        Task<List<PowerLoadDTO>> PowerConsumptionv2();
+
+        //Task<List<PowerLoadDTO>> AllUnitsConsumption();
 
 
-        Task<List<DeviceDataDetailDTO>> GetkW();
+        Task<List<PowerLoadDTO>> GetkW();
 
         Task<List<DeviceDTO>> GetDeviceStatus();
 
-        Task<List<DeviceDataDetailDTO>> GetPowerLoadu1();
+        Task<List<PowerLoadDTO>> GetPowerLoadu1();
 
-        Task<List<DeviceDataDetailDTO>> GetPowerLoadu2();
+        Task<List<PowerLoadDTO>> GetPowerLoadu2();
 
-        Task<List<DeviceDataDetailDTO>> GetPowerLoadu3();
+        Task<List<PowerLoadDTO>> GetPowerLoadu3();
 
         Task<List<DeviceDataDetailDTO>> GetAlert();
         Task<KeyValuePair<string, string>[]> GetHistoricDeviceDataDetailsAsync(DateTime startDate, DateTime endDate, string parameter);

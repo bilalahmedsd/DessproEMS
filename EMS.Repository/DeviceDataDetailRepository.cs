@@ -237,346 +237,378 @@ namespace EMS.Repository
 
         }
 
-        public async Task<List<DeviceDataDetailDTO>> GetEnergyConspDatau1()
+        public async Task<List<PowerLoadDTO>> GetEnergyConspDatau1()
         {
             var endTime = DateTime.Now;
-            var startTime = endTime.AddHours(-12);
-
-            // Generate 15-minute slots between startTime and endTime
-            TimeSpan slotDuration = TimeSpan.FromHours(1);
-            var timeSlots = new List<DateTime>();
-            var current = startTime;
-
-            while (current < endTime)
-            {
-                timeSlots.Add(current);
-                current = current.Add(slotDuration);
-            }
-
-            var result = new List<DeviceDataDetailDTO>();
-
+            var startTime = endTime.AddHours(-12); // Last 12 hours
+            var result = new List<PowerLoadDTO>();
 
             var unit = await DBEMSContext.Units.OrderBy(u => u.Id).FirstOrDefaultAsync();
 
-
             if (unit != null)
             {
-
                 var deviceIds = await DBEMSContext.Devices
-                .Where(dev => dev.FkUnitId == unit.Id)
-                .Select(dev => dev.Id)
-                .ToListAsync();
+                    .Where(dev => dev.FkUnitId == unit.Id)
+                    .Select(dev => dev.Id)
+                    .ToListAsync();
 
                 if (deviceIds.Any())
                 {
+                    // Preload all DeviceDataMasters for these devices
+                var dataMasterIds = await DBEMSContext.DeviceDataMasters
+    .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value)
+    && dm.CreatedAt >= startTime && dm.CreatedAt <= endTime
+    )
+    .Select(dm => new { dm.Id, dm.FkDeviceId })
+    .ToListAsync();
 
-                    var dataMasterIds = await DBEMSContext.DeviceDataMasters
-                      .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                      .Select(dm => dm.Id)
-                      .ToListAsync();
 
-                    if (dataMasterIds.Any())
+                    // Preload all DeviceDataDetails for EPI address and time range
+                    var allDeviceData = await DBEMSContext.DeviceDataDetails
+                        .Where(d =>
+                            d.FkDeviceDataMasterId.HasValue &&
+                            dataMasterIds.Select(x => x.Id).Contains(d.FkDeviceDataMasterId.Value) &&
+                            d.Address == "EPI" &&
+                            d.CreatedAt >= startTime &&
+                            d.CreatedAt <= endTime
+                        )
+                        .OrderBy(d => d.CreatedAt)
+                        .ToListAsync();
+
+                    int totalHours = (int)(endTime - startTime).TotalHours;
+
+
+                    // Grouping by each hour
+                    for (int i = 0; i < totalHours; i++)
                     {
+                        var hourStart = startTime.AddHours(i);
+                        var hourEnd = hourStart.AddHours(1);
 
-                        // Get the data from the last 2 hours
-                        var data = await DBEMSContext.DeviceDataDetails
-                    .Where(detail =>
-                           detail.FkDeviceDataMasterId.HasValue
-                        && dataMasterIds.Contains(detail.FkDeviceDataMasterId.Value)
-                        && detail.Address == "EPI"
-                        && detail.CreatedAt >= startTime
-                        && detail.CreatedAt < endTime
-                        && detail.DeviceDataMaster.Device.FkUnitId == unit.Id)
-                    .Select(detail => new
-                    {
-                        detail.CreatedAt,
-                        detail.AddressVariable,
-                        UnitId = unit.Id
-                    })
-                    .ToListAsync();
+                        double? totalDifference = 0;
 
-                        // Multiply AddressVariable by 0.06 and group data into 15-minute slots
-                        var adjustedData = data.Select((d, index) => new
+                        foreach (var deviceId in deviceIds)
                         {
-                            d.CreatedAt,
-                            AdjustedAddressVariable = d.AddressVariable * 0.06
-                        })
-             .OrderBy(d => d.CreatedAt)
-             .Where((item, index) => index % 2 == 0) // This filters to get odd indexed items (0, 2, 4, 6, etc.)
-             .ToList();
+                            var currentDeviceMasterIds = dataMasterIds
+                                .Where(dm => dm.FkDeviceId == deviceId)
+                                .Select(dm => dm.Id)
+                                .ToList();
 
+                            var deviceData = allDeviceData
+                                .Where(d =>
+                                    currentDeviceMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
+                                    d.CreatedAt >= hourStart &&
+                                    d.CreatedAt < hourEnd
+                                )
+                                .OrderBy(d => d.CreatedAt)
+                                .ToList();
 
-                        // Calculate the difference in AdjustedAddressVariable between consecutive slots
-                        var groupedData = timeSlots.Select(slot =>
-                        {
-                            var slotEnd = slot.Add(slotDuration);
-
-                            // Get the data for this 15-minute slot
-                            var dataInSlot = adjustedData.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
-
-                            if (dataInSlot.Count() > 1)
+                            if (deviceData.Any())
                             {
-                                var firstValue = dataInSlot.First().AdjustedAddressVariable;
-                                var lastValue = dataInSlot.Last().AdjustedAddressVariable;
+                                var first = deviceData.FirstOrDefault();
+                                var last = deviceData.LastOrDefault();
 
-                                // Calculate the difference between the first and last adjusted value in the 15-min slot
-                                var difference = lastValue - firstValue;
-
-                                return new DeviceDataDetailDTO
+                                if (first != null && last != null)
                                 {
-                                    CreatedAt = slot,
-                                    Address = "EPI",
-                                    AddressVariable = difference, // Difference between first and last adjusted value
-                                    UnitId = unit.Id
-                                };
-                            }
-                            else
-                            {
-                                return null; // No data in this slot
-                            }
-                        }).Where(d => d != null).ToList();
+                                    var deviceDiff = last.AddressVariable - first.AddressVariable;
+                                    totalDifference += deviceDiff;
 
-                        result.AddRange(groupedData);
+                                }
+                            }
+                        }
 
+                        result.Add(new PowerLoadDTO
+                        {
+                            UnitName = unit.Name,
+                            AddressVariable = totalDifference * 0.06,
+                            CreatedAt = hourStart // Represent the start of the hour
+                        });
+
+                       
                     }
                 }
-
             }
 
             return result;
-
-
         }
 
-        public async Task<List<DeviceDataDetailDTO>> GetEnergyConspDatau2()
+
+        public async Task<List<PowerLoadDTO>> GetEnergyConspDatau2()
         {
             var endTime = DateTime.Now;
-            var startTime = endTime.AddHours(-12);
-
-            // Generate 15-minute slots between startTime and endTime
-            TimeSpan slotDuration = TimeSpan.FromMinutes(30);
-            var timeSlots = new List<DateTime>();
-            var current = startTime;
-
-            while (current < endTime)
-            {
-                timeSlots.Add(current);
-                current = current.Add(slotDuration);
-            }
-
-            var result = new List<DeviceDataDetailDTO>();
-
+            var startTime = endTime.AddHours(-12); // Last 12 hours
+            var result = new List<PowerLoadDTO>();
 
             var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(1).FirstOrDefaultAsync();
 
             if (unit != null)
             {
-
                 var deviceIds = await DBEMSContext.Devices
-                .Where(dev => dev.FkUnitId == unit.Id)
-                .Select(dev => dev.Id)
-                .ToListAsync();
+                    .Where(dev => dev.FkUnitId == unit.Id)
+                    .Select(dev => dev.Id)
+                    .ToListAsync();
 
                 if (deviceIds.Any())
                 {
-
+                    // Preload all DeviceDataMasters for these devices
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
-                      .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                      .Select(dm => dm.Id)
-                      .ToListAsync();
+        .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value)
+        && dm.CreatedAt >= startTime && dm.CreatedAt <= endTime
+        )
+        .Select(dm => new { dm.Id, dm.FkDeviceId })
+        .ToListAsync();
 
-                    if (dataMasterIds.Any())
+
+                    // Preload all DeviceDataDetails for EPI address and time range
+                    var allDeviceData = await DBEMSContext.DeviceDataDetails
+                        .Where(d =>
+                            d.FkDeviceDataMasterId.HasValue &&
+                            dataMasterIds.Select(x => x.Id).Contains(d.FkDeviceDataMasterId.Value) &&
+                            d.Address == "EPI" &&
+                            d.CreatedAt >= startTime &&
+                            d.CreatedAt <= endTime
+                        )
+                        .OrderBy(d => d.CreatedAt)
+                        .ToListAsync();
+
+                    int totalHours = (int)(endTime - startTime).TotalHours;
+
+
+                    // Grouping by each hour
+                    for (int i = 0; i < totalHours; i++)
                     {
+                        var hourStart = startTime.AddHours(i);
+                        var hourEnd = hourStart.AddHours(1);
 
-                        // Get the data from the last 2 hours
-                        var data = await DBEMSContext.DeviceDataDetails
-                    .Where(detail =>
-                           detail.FkDeviceDataMasterId.HasValue
-                        && dataMasterIds.Contains(detail.FkDeviceDataMasterId.Value)
-                        && detail.Address == "EPI"
-                        && detail.CreatedAt >= startTime
-                        && detail.CreatedAt < endTime
-                        && detail.DeviceDataMaster.Device.FkUnitId == unit.Id)
-                    .Select(detail => new
-                    {
-                        detail.CreatedAt,
-                        detail.AddressVariable,
-                        UnitId = unit.Id
-                    })
-                    .ToListAsync();
+                        double? totalDifference = 0;
 
-                        // Multiply AddressVariable by 0.06 and group data into 15-minute slots
-                        var adjustedData = data.Select((d, index) => new
+                        foreach (var deviceId in deviceIds)
                         {
-                            d.CreatedAt,
-                            AdjustedAddressVariable = d.AddressVariable * 0.06
-                        })
-             .OrderBy(d => d.CreatedAt)
-             .Where((item, index) => index % 2 == 0) // This filters to get odd indexed items (0, 2, 4, 6, etc.)
-             .ToList();
+                            var currentDeviceMasterIds = dataMasterIds
+                                .Where(dm => dm.FkDeviceId == deviceId)
+                                .Select(dm => dm.Id)
+                                .ToList();
 
+                            var deviceData = allDeviceData
+                                .Where(d =>
+                                    currentDeviceMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
+                                    d.CreatedAt >= hourStart &&
+                                    d.CreatedAt < hourEnd
+                                )
+                                .OrderBy(d => d.CreatedAt)
+                                .ToList();
 
-                        // Calculate the difference in AdjustedAddressVariable between consecutive slots
-                        var groupedData = timeSlots.Select(slot =>
-                        {
-                            var slotEnd = slot.Add(slotDuration);
-
-                            // Get the data for this 15-minute slot
-                            var dataInSlot = adjustedData.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
-
-                            if (dataInSlot.Count() > 1)
+                            if (deviceData.Any())
                             {
-                                var firstValue = dataInSlot.First().AdjustedAddressVariable;
-                                var lastValue = dataInSlot.Last().AdjustedAddressVariable;
+                                var first = deviceData.FirstOrDefault();
+                                var last = deviceData.LastOrDefault();
 
-                                // Calculate the difference between the first and last adjusted value in the 15-min slot
-                                var difference = lastValue - firstValue;
-
-                                return new DeviceDataDetailDTO
+                                if (first != null && last != null)
                                 {
-                                    CreatedAt = slot,
-                                    Address = "EPI",
-                                    AddressVariable = difference, // Difference between first and last adjusted value
-                                    UnitId = unit.Id
-                                };
-                            }
-                            else
-                            {
-                                return null; // No data in this slot
-                            }
-                        }).Where(d => d != null).ToList();
+                                    var deviceDiff = last.AddressVariable - first.AddressVariable;
+                                    totalDifference += deviceDiff;
 
-                        result.AddRange(groupedData);
+                                }
+                            }
+                        }
+
+                        result.Add(new PowerLoadDTO
+                        {
+                            UnitName = unit.Name,
+                            AddressVariable = totalDifference * 0.06,
+                            CreatedAt = hourStart // Represent the start of the hour
+                        });
+
 
                     }
                 }
-
             }
 
             return result;
 
-
         }
 
 
-        public async Task<List<DeviceDataDetailDTO>> GetEnergyConspDatau3()
+        public async Task<List<PowerLoadDTO>> GetEnergyConspDatau3()
         {
             var endTime = DateTime.Now;
-            var startTime = endTime.AddHours(-5);
-
-            // Generate 15-minute slots between startTime and endTime
-            TimeSpan slotDuration = TimeSpan.FromHours(1);
-            var timeSlots = new List<DateTime>();
-            var current = startTime;
-
-            while (current < endTime)
-            {
-                timeSlots.Add(current);
-                current = current.Add(slotDuration);
-            }
-
-            var result = new List<DeviceDataDetailDTO>();
-
+            var startTime = endTime.AddHours(-12); // Last 12 hours
+            var result = new List<PowerLoadDTO>();
 
             var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(2).FirstOrDefaultAsync();
 
             if (unit != null)
             {
-
                 var deviceIds = await DBEMSContext.Devices
-                .Where(dev => dev.FkUnitId == unit.Id)
-                .Select(dev => dev.Id)
-                .ToListAsync();
+                    .Where(dev => dev.FkUnitId == unit.Id)
+                    .Select(dev => dev.Id)
+                    .ToListAsync();
 
                 if (deviceIds.Any())
                 {
-
+                    // Preload all DeviceDataMasters for these devices
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
-                      .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                      .Select(dm => dm.Id)
-                      .ToListAsync();
+        .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value)
+        && dm.CreatedAt >= startTime && dm.CreatedAt <= endTime
+        )
+        .Select(dm => new { dm.Id, dm.FkDeviceId })
+        .ToListAsync();
 
-                    if (dataMasterIds.Any())
+
+                    // Preload all DeviceDataDetails for EPI address and time range
+                    var allDeviceData = await DBEMSContext.DeviceDataDetails
+                        .Where(d =>
+                            d.FkDeviceDataMasterId.HasValue &&
+                            dataMasterIds.Select(x => x.Id).Contains(d.FkDeviceDataMasterId.Value) &&
+                            d.Address == "EPI" &&
+                            d.CreatedAt >= startTime &&
+                            d.CreatedAt <= endTime
+                        )
+                        .OrderBy(d => d.CreatedAt)
+                        .ToListAsync();
+
+                    int totalHours = (int)(endTime - startTime).TotalHours;
+
+
+                    // Grouping by each hour
+                    for (int i = 0; i < totalHours; i++)
                     {
+                        var hourStart = startTime.AddHours(i);
+                        var hourEnd = hourStart.AddHours(1);
 
-                        // Get the data from the last 2 hours
-                        var data = await DBEMSContext.DeviceDataDetails
-                    .Where(detail =>
-                           detail.FkDeviceDataMasterId.HasValue
-                        && dataMasterIds.Contains(detail.FkDeviceDataMasterId.Value)
-                        && detail.Address == "EPI"
-                        && detail.CreatedAt >= startTime
-                        && detail.CreatedAt < endTime
-                        && detail.DeviceDataMaster.Device.FkUnitId == unit.Id)
-                    .Select(detail => new
-                    {
-                        detail.CreatedAt,
-                        detail.AddressVariable,
-                        UnitId = unit.Id
-                    })
-                    .ToListAsync();
+                        double? totalDifference = 0;
 
-                        // Multiply AddressVariable by 0.06 and group data into 15-minute slots
-                        var adjustedData = data.Select((d, index) => new
+                        foreach (var deviceId in deviceIds)
                         {
-                            d.CreatedAt,
-                            AdjustedAddressVariable = d.AddressVariable * 0.06
-                        })
-             .OrderBy(d => d.CreatedAt)
-             .Where((item, index) => index % 2 == 0) // This filters to get odd indexed items (0, 2, 4, 6, etc.)
-             .ToList();
+                            var currentDeviceMasterIds = dataMasterIds
+                                .Where(dm => dm.FkDeviceId == deviceId)
+                                .Select(dm => dm.Id)
+                                .ToList();
 
+                            var deviceData = allDeviceData
+                                .Where(d =>
+                                    currentDeviceMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
+                                    d.CreatedAt >= hourStart &&
+                                    d.CreatedAt < hourEnd
+                                )
+                                .OrderBy(d => d.CreatedAt)
+                                .ToList();
 
-                        // Calculate the difference in AdjustedAddressVariable between consecutive slots
-                        var groupedData = timeSlots.Select(slot =>
-                        {
-                            var slotEnd = slot.Add(slotDuration);
-
-                            // Get the data for this 15-minute slot
-                            var dataInSlot = adjustedData.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
-
-                            if (dataInSlot.Count() > 1)
+                            if (deviceData.Any())
                             {
-                                var firstValue = dataInSlot.First().AdjustedAddressVariable;
-                                var lastValue = dataInSlot.Last().AdjustedAddressVariable;
+                                var first = deviceData.FirstOrDefault();
+                                var last = deviceData.LastOrDefault();
 
-                                // Calculate the difference between the first and last adjusted value in the 15-min slot
-                                var difference = lastValue - firstValue;
-
-                                return new DeviceDataDetailDTO
+                                if (first != null && last != null)
                                 {
-                                    CreatedAt = slot,
-                                    Address = "EPI",
-                                    AddressVariable = difference, // Difference between first and last adjusted value
-                                    UnitId = unit.Id
-                                };
-                            }
-                            else
-                            {
-                                return null; // No data in this slot
-                            }
-                        }).Where(d => d != null).ToList();
+                                    var deviceDiff = last.AddressVariable - first.AddressVariable;
+                                    totalDifference += deviceDiff;
 
-                        result.AddRange(groupedData);
+                                }
+                            }
+                        }
+
+                        result.Add(new PowerLoadDTO
+                        {
+                            UnitName = unit.Name,
+                            AddressVariable = totalDifference * 0.06,
+                            CreatedAt = hourStart // Represent the start of the hour
+                        });
+
 
                     }
                 }
-
             }
 
             return result;
-
-
         }
 
-        public async Task<List<DeviceDataDetailDTO>> GetPowerLoadu1()
+        public async Task<List<PowerLoadDTO>> GetPowerLoadu1()
         {
             var endTime = DateTime.Now;
             var startTime = endTime.AddMinutes(-11);
+            var result = new List<PowerLoadDTO>();
 
-            var result = new List<DeviceDataDetailDTO>();
+            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).FirstOrDefaultAsync();
 
-            // ✅ Get first unit only
+            if (unit != null)
+            {
+                var deviceIds = await DBEMSContext.Devices
+                    .Where(dev => dev.FkUnitId == unit.Id)
+                    .Select(dev => dev.Id)
+                    .ToListAsync();
+
+                if (deviceIds.Any())
+                {
+                    var dataMasterIds = await DBEMSContext.DeviceDataMasters
+                        .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
+                        .Select(dm => new { dm.Id, dm.FkDeviceId })
+                        .ToListAsync();
+
+                    if (dataMasterIds.Any())
+                    {
+                        var rawData = await DBEMSContext.DeviceDataDetails
+                            .Where(d =>
+                                d.FkDeviceDataMasterId.HasValue &&
+                                dataMasterIds.Select(dm => dm.Id).Contains(d.FkDeviceDataMasterId.Value) &&
+                                d.Address == "P" &&
+                                d.CreatedAt >= startTime &&
+                                d.CreatedAt <= endTime)
+                            .ToListAsync();
+
+                        var minutes = Enumerable.Range(0, (int)(endTime - startTime).TotalMinutes + 1)
+                            .Select(i => startTime.AddMinutes(i))
+                            .ToList();
+
+                        foreach (var minute in minutes)
+                        {
+                            var minuteStart = new DateTime(minute.Year, minute.Month, minute.Day, minute.Hour, minute.Minute, 0);
+                            var minuteEnd = minuteStart.AddMinutes(1);
+
+                            double? sumPerMinute = 0;
+
+                            foreach (var deviceId in deviceIds)
+                            {
+                                var masterIdsForDevice = dataMasterIds
+                                    .Where(dm => dm.FkDeviceId == deviceId)
+                                    .Select(dm => dm.Id)
+                                    .ToList();
+
+                                var deviceDataInMinute = rawData
+                                    .Where(d =>
+                                        masterIdsForDevice.Contains(d.FkDeviceDataMasterId.Value) &&
+                                        d.CreatedAt >= minuteStart &&
+                                        d.CreatedAt < minuteEnd)
+                                    .OrderByDescending(d => d.CreatedAt)
+                                    .FirstOrDefault(); // Take latest value for this device in that minute
+
+                                if (deviceDataInMinute != null)
+                                {
+                                    sumPerMinute += deviceDataInMinute.AddressVariable;
+                                }
+                            }
+
+                            result.Add(new PowerLoadDTO
+                            {
+                                UnitName = unit.Name,
+                                AddressVariable = sumPerMinute / 10, // like before
+                                CreatedAt = minuteStart
+                            });
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+
+        public async Task<List<PowerLoadDTO>> LoadProfile()
+        {
+            var endTime = DateTime.Now;
+            var startTime = endTime.Date.AddDays(-6); // Last 7 days including today
+            var result = new List<PowerLoadDTO>();
+
             var unit = await DBEMSContext.Units.OrderBy(u => u.Id).FirstOrDefaultAsync();
 
             if (unit != null)
@@ -595,31 +627,488 @@ namespace EMS.Repository
 
                     if (dataMasterIds.Any())
                     {
-                        var data = await DBEMSContext.DeviceDataDetails
+                        var rawData = await DBEMSContext.DeviceDataDetails
                             .Where(d =>
                                 d.FkDeviceDataMasterId.HasValue &&
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "P" &&
                                 d.CreatedAt >= startTime &&
                                 d.CreatedAt <= endTime)
-                            .Select(d => new DeviceDataDetailDTO
-                            {
-                                UnitId = unit.Id,
-                                UnitName = unit.Name,
-                                AddressVariable = d.AddressVariable / 10,
-                                CreatedAt = d.CreatedAt
-                            })
+                            .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
-                        result.AddRange(data);
+                        var dailyGroups = rawData
+                            .GroupBy(d => d.CreatedAt.Value.Date) // Group by each day
+                            .ToList();
+
+                        foreach (var group in dailyGroups)
+                        {
+                            // Calculate average P(kW) for the day
+                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).ToList();
+
+                            if (validReadings.Any())
+                            {
+                                var avgPower = validReadings.Average() / 10.0; // Assuming AddressVariable is *10 (divide by 10)
+
+                                result.Add(new PowerLoadDTO
+                                {
+                                    UnitName = unit.Name,
+                                    AddressVariable = avgPower, // now it's average kW
+                                    CreatedAt = group.Key // the date
+                                });
+                            }
+                        }
                     }
                 }
             }
 
             return result;
-
-
         }
+
+
+
+        public async Task<List<PowerLoadDTO>> LoadProfilev1()
+        {
+            var endTime = DateTime.Now;
+            var startTime = endTime.Date.AddDays(-6); // Last 7 days including today
+            var result = new List<PowerLoadDTO>();
+
+            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(1).FirstOrDefaultAsync();
+
+            if (unit != null)
+            {
+                var deviceIds = await DBEMSContext.Devices
+                    .Where(dev => dev.FkUnitId == unit.Id)
+                    .Select(dev => dev.Id)
+                    .ToListAsync();
+
+                if (deviceIds.Any())
+                {
+                    var dataMasterIds = await DBEMSContext.DeviceDataMasters
+                        .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
+                        .Select(dm => dm.Id)
+                        .ToListAsync();
+
+                    if (dataMasterIds.Any())
+                    {
+                        var rawData = await DBEMSContext.DeviceDataDetails
+                            .Where(d =>
+                                d.FkDeviceDataMasterId.HasValue &&
+                                dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
+                                d.Address == "P" &&
+                                d.CreatedAt >= startTime &&
+                                d.CreatedAt <= endTime)
+                            .OrderBy(d => d.CreatedAt)
+                            .ToListAsync();
+
+                        var dailyGroups = rawData
+                            .GroupBy(d => d.CreatedAt.Value.Date) // Group by each day
+                            .ToList();
+
+                        foreach (var group in dailyGroups)
+                        {
+                            // Calculate average P(kW) for the day
+                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).ToList();
+
+                            if (validReadings.Any())
+                            {
+                                var avgPower = validReadings.Average() / 10.0; // Assuming AddressVariable is *10 (divide by 10)
+
+                                result.Add(new PowerLoadDTO
+                                {
+                                    UnitName = unit.Name,
+                                    AddressVariable = avgPower, // now it's average kW
+                                    CreatedAt = group.Key // the date
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+        public async Task<List<PowerLoadDTO>> LoadProfilev2()
+        {
+            var endTime = DateTime.Now;
+            var startTime = endTime.Date.AddDays(-6); // Last 7 days including today
+            var result = new List<PowerLoadDTO>();
+
+            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(2).FirstOrDefaultAsync();
+
+            if (unit != null)
+            {
+                var deviceIds = await DBEMSContext.Devices
+                    .Where(dev => dev.FkUnitId == unit.Id)
+                    .Select(dev => dev.Id)
+                    .ToListAsync();
+
+                if (deviceIds.Any())
+                {
+                    var dataMasterIds = await DBEMSContext.DeviceDataMasters
+                        .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
+                        .Select(dm => dm.Id)
+                        .ToListAsync();
+
+                    if (dataMasterIds.Any())
+                    {
+                        var rawData = await DBEMSContext.DeviceDataDetails
+                            .Where(d =>
+                                d.FkDeviceDataMasterId.HasValue &&
+                                dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
+                                d.Address == "P" &&
+                                d.CreatedAt >= startTime &&
+                                d.CreatedAt <= endTime)
+                            .OrderBy(d => d.CreatedAt)
+                            .ToListAsync();
+
+                        var dailyGroups = rawData
+                            .GroupBy(d => d.CreatedAt.Value.Date) // Group by each day
+                            .ToList();
+
+                        foreach (var group in dailyGroups)
+                        {
+                            // Calculate average P(kW) for the day
+                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).ToList();
+
+                            if (validReadings.Any())
+                            {
+                                var avgPower = validReadings.Average() / 10.0; // Assuming AddressVariable is *10 (divide by 10)
+
+                                result.Add(new PowerLoadDTO
+                                {
+                                    UnitName = unit.Name,
+                                    AddressVariable = avgPower, // now it's average kW
+                                    CreatedAt = group.Key // the date
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+
+
+
+        public async Task<List<PowerLoadDTO>> PowerConsumption()
+        {
+            var endTime = DateTime.Now;
+            var startTime = endTime.AddDays(-6); // Last 7 days
+            var result = new List<PowerLoadDTO>();
+
+            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).FirstOrDefaultAsync();
+
+            if (unit != null)
+            {
+                var deviceIds = await DBEMSContext.Devices
+                    .Where(dev => dev.FkUnitId == unit.Id)
+                    .Select(dev => dev.Id)
+                    .ToListAsync();
+
+                if (deviceIds != null && deviceIds.Count > 0)
+                {
+                    // Temporary dictionary to accumulate daily totals
+                    var dailyTotals = new Dictionary<DateTime, double>();
+
+                    foreach (var deviceId in deviceIds)
+                    {
+                        var dataMasterIds = await DBEMSContext.DeviceDataMasters
+                            .Where(dm => dm.FkDeviceId == deviceId &&
+                                         dm.CreatedAt >= startTime && dm.CreatedAt <= endTime)
+                            .Select(dm => new { dm.Id })
+                            .ToListAsync();
+
+                        if (dataMasterIds.Count == 0) continue;
+
+                        var allDeviceData = await DBEMSContext.DeviceDataDetails
+                            .Where(d =>
+                                d.FkDeviceDataMasterId.HasValue &&
+                                dataMasterIds.Select(x => x.Id).Contains(d.FkDeviceDataMasterId.Value) &&
+                                d.Address == "EPI" &&
+                                d.CreatedAt >= startTime &&
+                                d.CreatedAt <= endTime)
+                            .OrderBy(d => d.CreatedAt)
+                            .ToListAsync();
+
+                        var dailyGroups = allDeviceData
+                            .GroupBy(d => d.CreatedAt.Value.Date)
+                            .ToList();
+
+                        foreach (var group in dailyGroups)
+                        {
+                            var first = group.FirstOrDefault();
+                            var last = group.LastOrDefault();
+
+                            if (first != null && last != null)
+                            {
+                                var devicediff = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
+                                // apply multiplier here
+
+                                if (dailyTotals.ContainsKey(group.Key))
+                                {
+                                    dailyTotals[group.Key] += devicediff;
+                                }
+                                else
+                                {
+                                    dailyTotals[group.Key] = devicediff;
+                                }
+                            }
+                        }
+                    }
+
+                    // Now create the final result from the dailyTotals dictionary
+                    foreach (var kvp in dailyTotals.OrderBy(x => x.Key))
+                    {
+                        result.Add(new PowerLoadDTO
+                        {
+                            UnitName = unit.Name,
+                            AddressVariable = kvp.Value,
+                            CreatedAt = kvp.Key
+                        });
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+
+
+        public async Task<List<PowerLoadDTO>> PowerConsumptionv1()
+        {
+            var endTime = DateTime.Now;
+            var startTime = endTime.AddDays(-6); // Last 7 days
+            var result = new List<PowerLoadDTO>();
+
+            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(1).FirstOrDefaultAsync();
+
+            if (unit != null)
+            {
+                var deviceIds = await DBEMSContext.Devices
+                    .Where(dev => dev.FkUnitId == unit.Id)
+                    .Select(dev => dev.Id)
+                    .ToListAsync();
+
+                if (deviceIds != null && deviceIds.Count > 0)
+                {
+                    // Temporary dictionary to accumulate daily totals
+                    var dailyTotals = new Dictionary<DateTime, double>();
+
+                    foreach (var deviceId in deviceIds)
+                    {
+                        var dataMasterIds = await DBEMSContext.DeviceDataMasters
+                            .Where(dm => dm.FkDeviceId == deviceId &&
+                                         dm.CreatedAt >= startTime && dm.CreatedAt <= endTime)
+                            .Select(dm => new { dm.Id })
+                            .ToListAsync();
+
+                        if (dataMasterIds.Count == 0) continue;
+
+                        var allDeviceData = await DBEMSContext.DeviceDataDetails
+                            .Where(d =>
+                                d.FkDeviceDataMasterId.HasValue &&
+                                dataMasterIds.Select(x => x.Id).Contains(d.FkDeviceDataMasterId.Value) &&
+                                d.Address == "EPI" &&
+                                d.CreatedAt >= startTime &&
+                                d.CreatedAt <= endTime)
+                            .OrderBy(d => d.CreatedAt)
+                            .ToListAsync();
+
+                        var dailyGroups = allDeviceData
+                            .GroupBy(d => d.CreatedAt.Value.Date)
+                            .ToList();
+
+                        foreach (var group in dailyGroups)
+                        {
+                            var first = group.FirstOrDefault();
+                            var last = group.LastOrDefault();
+
+                            if (first != null && last != null)
+                            {
+                                var devicediff = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
+                                // apply multiplier here
+
+                                if (dailyTotals.ContainsKey(group.Key))
+                                {
+                                    dailyTotals[group.Key] += devicediff;
+                                }
+                                else
+                                {
+                                    dailyTotals[group.Key] = devicediff;
+                                }
+                            }
+                        }
+                    }
+
+                    // Now create the final result from the dailyTotals dictionary
+                    foreach (var kvp in dailyTotals.OrderBy(x => x.Key))
+                    {
+                        result.Add(new PowerLoadDTO
+                        {
+                            UnitName = unit.Name,
+                            AddressVariable = kvp.Value,
+                            CreatedAt = kvp.Key
+                        });
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+
+        public async Task<List<PowerLoadDTO>> PowerConsumptionv2()
+        {
+            var endTime = DateTime.Now;
+            var startTime = endTime.AddDays(-6); // Last 7 days
+            var result = new List<PowerLoadDTO>();
+
+            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(2).FirstOrDefaultAsync();
+
+            if (unit != null)
+            {
+                var deviceIds = await DBEMSContext.Devices
+                    .Where(dev => dev.FkUnitId == unit.Id)
+                    .Select(dev => dev.Id)
+                    .ToListAsync();
+
+                if (deviceIds != null && deviceIds.Count > 0)
+                {
+                    // Temporary dictionary to accumulate daily totals
+                    var dailyTotals = new Dictionary<DateTime, double>();
+
+                    foreach (var deviceId in deviceIds)
+                    {
+                        var dataMasterIds = await DBEMSContext.DeviceDataMasters
+                            .Where(dm => dm.FkDeviceId == deviceId &&
+                                         dm.CreatedAt >= startTime && dm.CreatedAt <= endTime)
+                            .Select(dm => new { dm.Id })
+                            .ToListAsync();
+
+                        if (dataMasterIds.Count == 0) continue;
+
+                        var allDeviceData = await DBEMSContext.DeviceDataDetails
+                            .Where(d =>
+                                d.FkDeviceDataMasterId.HasValue &&
+                                dataMasterIds.Select(x => x.Id).Contains(d.FkDeviceDataMasterId.Value) &&
+                                d.Address == "EPI" &&
+                                d.CreatedAt >= startTime &&
+                                d.CreatedAt <= endTime)
+                            .OrderBy(d => d.CreatedAt)
+                            .ToListAsync();
+
+                        var dailyGroups = allDeviceData
+                            .GroupBy(d => d.CreatedAt.Value.Date)
+                            .ToList();
+
+                        foreach (var group in dailyGroups)
+                        {
+                            var first = group.FirstOrDefault();
+                            var last = group.LastOrDefault();
+
+                            if (first != null && last != null)
+                            {
+                                var devicediff = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
+                                // apply multiplier here
+
+                                if (dailyTotals.ContainsKey(group.Key))
+                                {
+                                    dailyTotals[group.Key] += devicediff;
+                                }
+                                else
+                                {
+                                    dailyTotals[group.Key] = devicediff;
+                                }
+                            }
+                        }
+                    }
+
+                    // Now create the final result from the dailyTotals dictionary
+                    foreach (var kvp in dailyTotals.OrderBy(x => x.Key))
+                    {
+                        result.Add(new PowerLoadDTO
+                        {
+                            UnitName = unit.Name,
+                            AddressVariable = kvp.Value,
+                            CreatedAt = kvp.Key
+                        });
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        //public async Task<List<PowerLoadDTO>> AllUnitsConsumption()
+        //{
+        //    var endTime = DateTime.Now;
+        //    var startTime = endTime.Date.AddDays(-6); // Last 7 days including today
+        //    var result = new List<PowerLoadDTO>();
+
+        //    var units = await DBEMSContext.Units.ToListAsync();
+
+        //    foreach (var unit in units)
+        //    {
+        //        var deviceIds = await DBEMSContext.Devices
+        //            .Where(dev => dev.FkUnitId == unit.Id)
+        //            .Select(dev => dev.Id)
+        //            .ToListAsync();
+
+        //        if (!deviceIds.Any())
+        //            continue;
+
+        //        var dataMasterIds = await DBEMSContext.DeviceDataMasters
+        //            .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
+        //            .Select(dm => dm.Id)
+        //            .ToListAsync();
+
+        //        if (!dataMasterIds.Any())
+        //            continue;
+
+        //        var rawData = await DBEMSContext.DeviceDataDetails
+        //            .Where(d =>
+        //                d.FkDeviceDataMasterId.HasValue &&
+        //                dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
+        //                d.Address == "EPI" &&
+        //                d.CreatedAt >= startTime &&
+        //                d.CreatedAt <= endTime)
+        //            .OrderBy(d => d.CreatedAt)
+        //            .ToListAsync();
+
+        //        var dailyGroups = rawData
+        //            .GroupBy(d => d.CreatedAt.Value.Date)
+        //            .ToList();
+
+        //        foreach (var group in dailyGroups)
+        //        {
+        //            var first = group.OrderBy(d => d.CreatedAt).FirstOrDefault();
+        //            var last = group.OrderByDescending(d => d.CreatedAt).FirstOrDefault();
+
+        //            if (first != null && last != null && last.AddressVariable >= first.AddressVariable)
+        //            {
+        //                result.Add(new PowerLoadDTO
+        //                {
+        //                    UnitName = unit.Name,
+        //                    AddressVariable = (last.AddressVariable - first.AddressVariable) * 0.06,
+        //                    CreatedAt = group.Key
+        //                });
+        //            }
+        //        }
+        //    }
+
+        //    return result;
+        //}
+
+
+
 
         public async void getdata()
         {
@@ -634,14 +1123,12 @@ namespace EMS.Repository
             }
         }
 
-        public async Task<List<DeviceDataDetailDTO>> GetPowerLoadu3()
+        public async Task<List<PowerLoadDTO>> GetPowerLoadu3()
         {
             var endTime = DateTime.Now;
             var startTime = endTime.AddMinutes(-11);
+            var result = new List<PowerLoadDTO>();
 
-            var result = new List<DeviceDataDetailDTO>();
-
-            // ✅ Get first unit only
             var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(2).FirstOrDefaultAsync();
 
             if (unit != null)
@@ -655,49 +1142,76 @@ namespace EMS.Repository
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => dm.Id)
+                        .Select(dm => new { dm.Id, dm.FkDeviceId })
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
                     {
-                        var data = await DBEMSContext.DeviceDataDetails
+                        var rawData = await DBEMSContext.DeviceDataDetails
                             .Where(d =>
                                 d.FkDeviceDataMasterId.HasValue &&
-                                dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
+                                dataMasterIds.Select(dm => dm.Id).Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "P" &&
                                 d.CreatedAt >= startTime &&
                                 d.CreatedAt <= endTime)
-                            .Select(d => new DeviceDataDetailDTO
-                            {
-                                UnitId = unit.Id,
-                                UnitName = unit.Name,
-                                AddressVariable = d.AddressVariable / 10,
-                                CreatedAt = d.CreatedAt
-                            })
                             .ToListAsync();
 
-                        result.AddRange(data);
+                        var minutes = Enumerable.Range(0, (int)(endTime - startTime).TotalMinutes + 1)
+                            .Select(i => startTime.AddMinutes(i))
+                            .ToList();
+
+                        foreach (var minute in minutes)
+                        {
+                            var minuteStart = new DateTime(minute.Year, minute.Month, minute.Day, minute.Hour, minute.Minute, 0);
+                            var minuteEnd = minuteStart.AddMinutes(1);
+
+                            double? sumPerMinute = 0;
+
+                            foreach (var deviceId in deviceIds)
+                            {
+                                var masterIdsForDevice = dataMasterIds
+                                    .Where(dm => dm.FkDeviceId == deviceId)
+                                    .Select(dm => dm.Id)
+                                    .ToList();
+
+                                var deviceDataInMinute = rawData
+                                    .Where(d =>
+                                        masterIdsForDevice.Contains(d.FkDeviceDataMasterId.Value) &&
+                                        d.CreatedAt >= minuteStart &&
+                                        d.CreatedAt < minuteEnd)
+                                    .OrderByDescending(d => d.CreatedAt)
+                                    .FirstOrDefault(); // Take latest value for this device in that minute
+
+                                if (deviceDataInMinute != null)
+                                {
+                                    sumPerMinute += deviceDataInMinute.AddressVariable;
+                                }
+                            }
+
+                            result.Add(new PowerLoadDTO
+                            {
+                                UnitName = unit.Name,
+                                AddressVariable = sumPerMinute / 10, // like before
+                                CreatedAt = minuteStart
+                            });
+                        }
                     }
                 }
             }
 
             return result;
 
-
         }
 
 
 
-        public async Task<List<DeviceDataDetailDTO>> GetPowerLoadu2()
+        public async Task<List<PowerLoadDTO>> GetPowerLoadu2()
         {
             var endTime = DateTime.Now;
-            var startTime = endTime.AddMinutes(-1);
+            var startTime = endTime.AddMinutes(-11);
+            var result = new List<PowerLoadDTO>();
 
-            var result = new List<DeviceDataDetailDTO>();
-
-            // ✅ Get first unit only
             var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(1).FirstOrDefaultAsync();
-
 
             if (unit != null)
             {
@@ -710,38 +1224,66 @@ namespace EMS.Repository
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => dm.Id)
+                        .Select(dm => new { dm.Id, dm.FkDeviceId })
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
                     {
-                        var data = await DBEMSContext.DeviceDataDetails
-       .Where(d =>
-           d.FkDeviceDataMasterId.HasValue &&
-           dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
-           d.Address == "P" &&
-           d.CreatedAt >= startTime &&
-           d.CreatedAt <= endTime)
-       .OrderBy(d => d.CreatedAt) // 👈 THIS sorts the data by time
-       .Select(d => new DeviceDataDetailDTO
-       {
-           UnitId = unit.Id,
-           UnitName = unit.Name,
-           AddressVariable = d.AddressVariable / 10,
-           CreatedAt = d.CreatedAt
-       })
-       .ToListAsync();
+                        var rawData = await DBEMSContext.DeviceDataDetails
+                            .Where(d =>
+                                d.FkDeviceDataMasterId.HasValue &&
+                                dataMasterIds.Select(dm => dm.Id).Contains(d.FkDeviceDataMasterId.Value) &&
+                                d.Address == "P" &&
+                                d.CreatedAt >= startTime &&
+                                d.CreatedAt <= endTime)
+                            .ToListAsync();
 
+                        var minutes = Enumerable.Range(0, (int)(endTime - startTime).TotalMinutes + 1)
+                            .Select(i => startTime.AddMinutes(i))
+                            .ToList();
 
-                        result.AddRange(data);
+                        foreach (var minute in minutes)
+                        {
+                            var minuteStart = new DateTime(minute.Year, minute.Month, minute.Day, minute.Hour, minute.Minute, 0);
+                            var minuteEnd = minuteStart.AddMinutes(1);
+
+                            double? sumPerMinute = 0;
+
+                            foreach (var deviceId in deviceIds)
+                            {
+                                var masterIdsForDevice = dataMasterIds
+                                    .Where(dm => dm.FkDeviceId == deviceId)
+                                    .Select(dm => dm.Id)
+                                    .ToList();
+
+                                var deviceDataInMinute = rawData
+                                    .Where(d =>
+                                        masterIdsForDevice.Contains(d.FkDeviceDataMasterId.Value) &&
+                                        d.CreatedAt >= minuteStart &&
+                                        d.CreatedAt < minuteEnd)
+                                    .OrderByDescending(d => d.CreatedAt)
+                                    .FirstOrDefault(); // Take latest value for this device in that minute
+
+                                if (deviceDataInMinute != null)
+                                {
+                                    sumPerMinute += deviceDataInMinute.AddressVariable;
+                                }
+                            }
+
+                            result.Add(new PowerLoadDTO
+                            {
+                                UnitName = unit.Name,
+                                AddressVariable = sumPerMinute / 10, // like before
+                                CreatedAt = minuteStart
+                            });
+                        }
                     }
                 }
             }
 
             return result;
-
-
         }
+
 
         public async Task<List<DeviceDataDetailDTO>> GetAlert()
         {
@@ -798,13 +1340,10 @@ namespace EMS.Repository
         }
 
 
-        public async Task<List<DeviceDataDetailDTO>> GetkW()
+        public async Task<List<PowerLoadDTO>> GetkW()
         {
-            var endTime = DateTime.Now;
-            var startTime = endTime.AddSeconds(-5);
             var units = await DBEMSContext.Units.ToListAsync();
-
-            var result = new List<DeviceDataDetailDTO>();
+            var result = new List<PowerLoadDTO>();
 
             foreach (var unit in units)
             {
@@ -815,63 +1354,47 @@ namespace EMS.Repository
 
                 if (!deviceIds.Any())
                 {
-                    result.Add(new DeviceDataDetailDTO { UnitId = unit.Id, UnitName = unit.Name, AddressVariable = 0 });
+                    result.Add(new PowerLoadDTO { UnitName = unit.Name, AddressVariable = 0 });
                     continue;
                 }
 
-                var dataMasterIds = await DBEMSContext.DeviceDataMasters
-                    .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                    .Select(dm => dm.Id)
+                // Fetch the latest DeviceDataMaster for each device in the unit
+                var latestDeviceDataMasters = await DBEMSContext.DeviceDataMasters
+                    .Where(dm => deviceIds.Contains(dm.FkDeviceId.Value))
+                    .GroupBy(dm => dm.FkDeviceId)
+                    .Select(g => g.OrderByDescending(dm => dm.CreatedAt).FirstOrDefault()) // Get the latest DeviceDataMaster for each device
                     .ToListAsync();
 
-                if (!dataMasterIds.Any())
+                if (!latestDeviceDataMasters.Any())
                 {
-                    result.Add(new DeviceDataDetailDTO { UnitId = unit.Id, UnitName = unit.Name, AddressVariable = 0 });
+                    result.Add(new PowerLoadDTO { UnitName = unit.Name, AddressVariable = 0 });
                     continue;
                 }
 
-                var data = await DBEMSContext.DeviceDataDetails
+                // Fetch the latest data for each device's DeviceDataMaster
+                var latestValues = await DBEMSContext.DeviceDataDetails
                     .Where(d =>
-                        d.FkDeviceDataMasterId.HasValue &&
-                        dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
-                        d.Address == "P" &&
-                        d.CreatedAt >= startTime &&
-                        d.CreatedAt <= endTime)
-                    .Select(d => new DeviceDataDetailDTO
-                    {
-                        UnitId = unit.Id,
-                        UnitName = unit.Name,
-                        AddressVariable = d.AddressVariable / 10,
-                        CreatedAt = d.CreatedAt
-                    })
+                        latestDeviceDataMasters.Select(dm => dm.Id).Contains(d.FkDeviceDataMasterId.Value) && // Match DeviceDataMasters
+                        d.Address == "P") // Filter for the "P" parameter
                     .ToListAsync();
 
-                if (!data.Any())
+                // Sum the AddressVariable for all devices' latest readings
+                var totalPower = latestValues.Sum(d => d.AddressVariable ?? 0); // Sum of the latest readings for all devices
+
+                // Convert the total power to kW (assuming AddressVariable is in 10ths, so divide by 10)
+                var totalPowerInKW = totalPower / 10;
+
+                result.Add(new PowerLoadDTO
                 {
-                    result.Add(new DeviceDataDetailDTO { UnitId = unit.Id, UnitName = unit.Name, AddressVariable = 0 });
-                }
-                else
-                {
-                    var latestValue = data
-                        .OrderByDescending(d => d.CreatedAt) // Assuming you want the latest by time
-                        .FirstOrDefault();
-
-                    if (latestValue != null)
-                    {
-                        result.Add(new DeviceDataDetailDTO
-                        {
-                            UnitId = unit.Id,
-                            UnitName = unit.Name,
-                            AddressVariable = latestValue.AddressVariable
-                        });
-                    }
-                }
-
-
+                    UnitName = unit.Name,
+                    AddressVariable = totalPowerInKW, // Sum of all devices' latest readings in kW
+                    CreatedAt = DateTime.Now // Use the latest date or any specific time
+                });
             }
 
             return result;
         }
+
 
 
 
@@ -1021,6 +1544,21 @@ namespace EMS.Repository
                 .ToArrayAsync();
 
             // Return data
+            return data;
+        }
+
+        public async Task<List<UnitDTO>> GetUnitsDetails()
+        {
+            var data = await DBEMSContext.Units
+                .Where(x => x.IsDeleted == false)
+                .Select(x => new UnitDTO
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    // Map other fields as needed
+                })
+                .ToListAsync();
+
             return data;
         }
 
