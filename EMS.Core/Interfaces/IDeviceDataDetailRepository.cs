@@ -11,6 +11,7 @@ namespace EMS.Core.Interfaces
     public interface IDeviceDataDetailRepository
     {
         Task<List<DeviceDataDetailDTO>> GetDeviceDataDetailsAsync(int deviceid);
+        Task<EPIConspDTO> GetEPIConspAsync(int deviceId, string range);
         Task<List<DeviceDataDetailDTO>> Get(int id);
 
         Task<List<DeviceDataDetailDTO>> GetEnergyConspDatau1();

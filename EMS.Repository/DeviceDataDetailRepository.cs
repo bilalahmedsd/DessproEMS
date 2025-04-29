@@ -21,8 +21,148 @@ namespace EMS.Repository
             DBEMSContext = eMSContext;
         }
 
-        public async Task<List<DeviceDataDetailDTO>> Get(int id)
+        // EPI CHART DATA
+        public async Task<EPIConspDTO> GetEPIConspAsync(int deviceId, string range)
         {
+            DateTime now = DateTime.UtcNow;
+            DateTime start, end;
+
+            if (range == "weekly")
+            {
+                int diff = (7 + (now.DayOfWeek - DayOfWeek.Monday)) % 7;
+                start = now.Date.AddDays(-diff); // This week's Monday
+                end = start.AddDays(7).AddSeconds(-1); // This week's Sunday 11:59:59
+            }
+            else // monthly
+            {
+                start = new DateTime(now.Year, 1, 1);
+                end = new DateTime(now.Year, 12, 31, 23, 59, 59);
+            }
+
+            var deviceMasterIds = await DBEMSContext.DeviceDataMasters
+                .Where(d => d.FkDeviceId == deviceId)
+                .Select(d => d.Id)
+                .ToListAsync();
+
+            if (!deviceMasterIds.Any())
+                return null;
+
+            double previousValue = await DBEMSContext.DeviceDataDetails
+                .Where(d => deviceMasterIds.Contains((int)d.FkDeviceDataMasterId) &&
+                            d.CreatedAt < start &&
+                            d.Address == "EPI")
+                .OrderByDescending(d => d.CreatedAt)
+                .Select(d => (double?)d.AddressVariable)
+                .FirstOrDefaultAsync() ?? 0;
+
+            double latestValue = await DBEMSContext.DeviceDataDetails
+                .Where(d => deviceMasterIds.Contains((int)d.FkDeviceDataMasterId) &&
+                            d.CreatedAt >= start &&
+                            d.CreatedAt <= end &&
+                            d.Address == "EPI")
+                .OrderByDescending(d => d.CreatedAt)
+                .Select(d => (double?)d.AddressVariable)
+                .FirstOrDefaultAsync() ?? 0;
+
+            double totalConsumed = (latestValue - previousValue) * 0.06;
+
+            List<EPIConspData> result;
+
+            if (range == "weekly")
+            {
+                var datesToFetch = Enumerable.Range(-1, 8)
+                    .Select(i => start.AddDays(i).Date)
+                    .ToList();
+
+                var weeklyData = await DBEMSContext.DeviceDataDetails
+                    .Where(d => deviceMasterIds.Contains((int)d.FkDeviceDataMasterId) &&
+                                d.CreatedAt.HasValue &&
+                                datesToFetch.Contains(d.CreatedAt.Value.Date) &&
+                                d.Address == "EPI")
+                    .ToListAsync();
+
+                result = Enumerable.Range(0, 7)
+                    .Select(i =>
+                    {
+                        var currentDay = start.AddDays(i).Date;
+                        var previousDay = currentDay.AddDays(-1);
+
+                        var currentValue = weeklyData
+                            .Where(d => d.CreatedAt.Value.Date == currentDay)
+                            .OrderByDescending(d => d.CreatedAt.Value)
+                            .Select(d => (double?)d.AddressVariable)
+                            .FirstOrDefault() ?? 0;
+
+                        var previousValueDay = weeklyData
+                            .Where(d => d.CreatedAt.Value.Date == previousDay)
+                            .OrderByDescending(d => d.CreatedAt.Value)
+                            .Select(d => (double?)d.AddressVariable)
+                            .FirstOrDefault() ?? 0;
+
+                        var safeDiff = Math.Max(currentValue - previousValueDay, 0);
+
+                        return new EPIConspData
+                        {
+                            Name = currentDay.DayOfWeek.ToString(),
+                            Value = Math.Round(safeDiff * 0.06, 2),
+                            CreatedAt = currentDay.AddDays(1).AddMilliseconds(-1)
+                        };
+                    })
+                    .ToList();
+            }
+            else // monthly
+            {
+                result = new List<EPIConspData>();
+
+                for (int month = 1; month <= 12; month++)
+                {
+                    var firstDay = new DateTime(now.Year, month, 1);
+                    var lastDay = new DateTime(now.Year, month, DateTime.DaysInMonth(now.Year, month))
+                                    .AddDays(1).AddMilliseconds(-1); // End of the last day
+
+                    // Get last value BEFORE this month starts
+                    double prevValue = await DBEMSContext.DeviceDataDetails
+                        .Where(d => deviceMasterIds.Contains((int)d.FkDeviceDataMasterId) &&
+                                    d.CreatedAt.HasValue &&
+                                    d.CreatedAt.Value < firstDay &&
+                                    d.Address == "EPI")
+                        .OrderByDescending(d => d.CreatedAt.Value)
+                        .Select(d => (double?)d.AddressVariable)
+                        .FirstOrDefaultAsync() ?? 0;
+
+                    // Get last value of this month
+                    double currValue = await DBEMSContext.DeviceDataDetails
+                        .Where(d => deviceMasterIds.Contains((int)d.FkDeviceDataMasterId) &&
+                                    d.CreatedAt.HasValue &&
+                                    d.CreatedAt.Value >= firstDay &&
+                                    d.CreatedAt.Value <= lastDay &&
+                                    d.Address == "EPI")
+                        .OrderByDescending(d => d.CreatedAt.Value)
+                        .Select(d => (double?)d.AddressVariable)
+                        .FirstOrDefaultAsync() ?? 0;
+
+                    double safeDiff = Math.Max(currValue - prevValue, 0);
+
+                    result.Add(new EPIConspData
+                    {
+                        Name = firstDay.ToString("MMMM"),
+                        Value = Math.Round(safeDiff * 0.06, 2),
+                        CreatedAt = lastDay
+                    });
+                }
+
+            }
+
+            return new EPIConspDTO
+            {
+                UnitId = deviceId,
+                Data = result,
+                CreatedAt = DateTime.UtcNow
+            };
+        }
+
+        public async Task<List<DeviceDataDetailDTO>> Get(int id)
+            {
             var endTime = DateTime.Now;
             var startTime = endTime.AddHours(-5);
 
@@ -551,7 +691,7 @@ namespace EMS.Repository
         public async Task<List<DeviceDataDetailDTO>> GetPowerLoadu2()
         {
             var endTime = DateTime.Now;
-            var startTime = endTime.AddMinutes(-11);
+            var startTime = endTime.AddMinutes(-1);
 
             var result = new List<DeviceDataDetailDTO>();
 
