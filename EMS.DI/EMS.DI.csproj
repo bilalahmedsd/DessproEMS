@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EMS.Core\EMS.Core.csproj" />
-    <ProjectReference Include="..\EMS.CronJobs\EMS.CronJobs.csproj" />
     <ProjectReference Include="..\EMS.Repository\EMS.Repository.csproj" />
     
   </ItemGroup>
