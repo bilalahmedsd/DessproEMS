@@ -212,12 +212,13 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                List<DeviceDataDetailDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetAlert();
-                if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
+                string result = await _dataDetailRrepository.GetAlert();
+
+                if (!string.IsNullOrEmpty(result))
                 {
                     resp.IsSuccess = true;
-                    resp.Message = ConstantMessages.DataSuccessMessage;
-                    resp.Data = deviceDataDetailsDTO;
+                    resp.Message = result; // "Data saved successfully"
+                    resp.Data = null;
                 }
                 else
                 {
@@ -230,6 +231,38 @@ namespace EMS.Api.Controllers
             {
                 resp.IsSuccess = false;
                 resp.Message = ConstantMessages.ErrorMessage;
+                resp.Data = null;
+            }
+            return Ok(resp);
+        }
+
+
+        [HttpGet("GetAlertsNotices")]
+        public async Task<IActionResult> GetAlertsNotices()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                List<AlertCenterDTO> alertCenterDTOs = await _dataDetailRrepository.GetAlertsNotices();
+
+                if (alertCenterDTOs != null && alertCenterDTOs.Count > 0)
+                {
+                    resp.IsSuccess = true;
+                    resp.Message = ConstantMessages.DataSuccessMessage; // "Data saved successfully"
+                    resp.Data = alertCenterDTOs;
+                }
+                else
+                {
+                    resp.IsSuccess = false;
+                    resp.Message = ConstantMessages.ErrorMessage;
+                    resp.Data = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                resp.IsSuccess = false;
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.Data = null;
             }
             return Ok(resp);
         }

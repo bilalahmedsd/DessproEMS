@@ -1285,18 +1285,18 @@ namespace EMS.Repository
         }
 
 
-        public async Task<List<DeviceDataDetailDTO>> GetAlert()
+        public async Task<string> GetAlert()
         {
             var endTime = DateTime.Now;
             var startTime = endTime.AddMinutes(-1);
 
             var targetAddresses = new[] { "Ua", "Ub", "Uc" };
-            var targetUnitIds = new[] { 246, 247, 248 };
+            var targetUnitIds = new List<int> { 246, 247, 248 };
 
             var rawData = await DBEMSContext.DeviceDataDetails
                 .Where(d =>
                     targetAddresses.Contains(d.Address) &&
-                    (d.DeviceDataMaster.Device.FkUnitId == 246) &&
+                    (targetUnitIds.Contains(d.DeviceDataMaster.Device.FkUnitId.Value)) &&
                     d.CreatedAt >= startTime &&
                     d.CreatedAt <= endTime)
                 .Select(d => new
@@ -1304,31 +1304,38 @@ namespace EMS.Repository
                     d.CreatedAt,
                     d.Address,
                     Value = d.AddressVariable / 10,
-                    FkUnitId = d.DeviceDataMaster.Device.FkUnitId, // ✔️ Use this instead of UnitId
-                    //UnitName = d.DeviceDataMaster.Device.Unit.Name,
-                    DeviceName = d.DeviceDataMaster.Device.Name
+                    FkUnitId = d.DeviceDataMaster.Device.FkUnitId,
+                    DeviceId = d.DeviceDataMaster.FkDeviceId
                 })
                 .ToListAsync();
 
             var filtered = rawData
-                .GroupBy(d => new { d.FkUnitId, d.Address }) // ✔️ Updated key
-                .Where(group =>
-                    group.Any(d => d.Value < 220 || d.Value > 240))
-                .SelectMany(group => group)
-                .OrderBy(d => d.CreatedAt)
-                .Select(d => new DeviceDataDetailDTO
-                {
-                    CreatedAt = d.CreatedAt,
-                    Address = d.Address,
-                    AddressVariable = d.Value,
-                    UnitId = d.FkUnitId, // ✔️ Mapping it properly now
-                    //UnitName = d.UnitName,
-                    DeviceName = d.DeviceName
-                })
+                .GroupBy(d => new { d.FkUnitId, d.DeviceId, d.Address })
+                .Where(group => group.All(d => d.Value < 220 || d.Value > 240))
                 .ToList();
 
-            return filtered;
+            foreach (var group in filtered)
+            {
+                var anyRecord = group.First();
+
+                var alert = new AlertCenter
+                {
+                    FkDeviceId = anyRecord.DeviceId,
+                    FkUnitId = anyRecord.FkUnitId.Value,
+                    AlertLevel = "High",
+                    Event = "Voltage Outage",
+                    createdAt = DateTime.Now
+                };
+
+                DBEMSContext.AlertCenter.Add(alert);
+            }
+
+            await DBEMSContext.SaveChangesAsync();
+
+            return "Data saved successfully";
         }
+
+
 
 
         public async Task<List<DeviceDTO>> GetDeviceStatus()
@@ -1391,6 +1398,28 @@ namespace EMS.Repository
                     CreatedAt = DateTime.Now // Use the latest date or any specific time
                 });
             }
+
+            return result;
+        }
+
+
+        public async Task<List<AlertCenterDTO>> GetAlertsNotices()
+        {
+            var result = await (from alert in DBEMSContext.AlertCenter
+                                join device in DBEMSContext.Devices
+                                on alert.FkDeviceId equals device.Id
+                                join unit in DBEMSContext.Units
+                                on alert.FkUnitId equals unit.Id
+                                select new AlertCenterDTO
+                                {
+                                    //DeviceId = alert.FkDeviceId,
+                                    DeviceName = device.Name,
+                                    //UnitId = alert.FkUnitId,
+                                    UnitName = unit.Name,
+                                    AlertLevel = alert.AlertLevel,
+                                    Event = alert.Event,
+                                    CreatedAt = alert.createdAt
+                                }).ToListAsync();
 
             return result;
         }
