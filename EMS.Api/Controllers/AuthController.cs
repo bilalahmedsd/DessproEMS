@@ -17,11 +17,12 @@ namespace EMS.Api.Controllers
     {
         private readonly IConfiguration _config;
         private readonly IUsersRepository UserRepository;
-        public AuthController(IConfiguration config, IUsersRepository userRepository, IUserServices services) 
+        private readonly ILoggerService _loggerService;
+        public AuthController(IConfiguration config, IUsersRepository userRepository, IUserServices services, ILoggerService loggerService) 
         {
             _config = config;
             UserRepository = userRepository;
-
+            _loggerService = loggerService;
         }
 
         [HttpGet("Login")]
@@ -47,6 +48,7 @@ namespace EMS.Api.Controllers
             }
             catch (Exception ex)
             {
+                await _loggerService.LogErrorAsync(ex);
                 resp.Message = ConstantMessages.ErrorMessage;
                 resp.IsSuccess = false;
             }
