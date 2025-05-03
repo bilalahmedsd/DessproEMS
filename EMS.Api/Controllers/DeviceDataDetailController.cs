@@ -2,6 +2,7 @@
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
 using EMS.Core.Services;
+using EMS.Data.Models;
 using EMS.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -92,6 +93,72 @@ namespace EMS.Api.Controllers
 
             return Ok(resp);
         }
+
+
+        [HttpGet("Getdevices")]
+        public async Task<IActionResult> Getdevices(int unitid)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _dataDetailRrepository.Getdevices(unitid);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+
+            }
+
+            return Ok(resp);
+        }
+
+
+        [HttpGet("GetAddresses")]
+        public async Task<IActionResult> GetAddresses()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _dataDetailRrepository.GetAddresses();
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+
+            }
+
+            return Ok(resp);
+        }
+
+        [HttpPost("AddAlertCenterData")]
+        public async Task<IActionResult> AddAlertCenterData([FromBody] AlertCenterData model)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                await _dataDetailRrepository.AddAlertCenterData(model);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
+
+
+
+
 
 
         [HttpGet("Get/{id}")]
@@ -785,6 +852,28 @@ namespace EMS.Api.Controllers
             try
             {
                 var data = await _dataDetailRrepository.GetkW();
+
+                response.Data = data;
+                response.Message = "Successfully fetched!";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Error: {ex.Message}";
+                response.IsSuccess = false;
+            }
+            return Ok(response);
+
+        }
+
+
+        [HttpGet("GetAllAlertCenterData")]
+        public async Task<IActionResult> GetAllAlertCenterData()
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var data = await _dataDetailRrepository.GetAllAlertCenterData();
 
                 response.Data = data;
                 response.Message = "Successfully fetched!";

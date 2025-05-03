@@ -1,4 +1,5 @@
 ﻿using EMS.Core.Models;
+using EMS.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,16 @@ namespace EMS.Core.Interfaces
         Task<List<PowerLoadDTO>> GetEnergyConspDatau1();
 
         Task<List<UnitDTO>> GetUnitsDetails();
+
+        Task<List<DeviceDTO>> Getdevices(int unitid);
+
+        Task<List<DeviceDataDetailDTO>> GetAddresses();
+
+        Task<bool> AddAlertCenterData(AlertCenterData model);
+
+        Task<List<AlertCenterData>> GetAllAlertCenterData();
+
+
         Task<List<PowerLoadDTO>> GetEnergyConspDatau2();
 
         Task<List<PowerLoadDTO>> LoadProfile();
