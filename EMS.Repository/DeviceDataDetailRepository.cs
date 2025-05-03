@@ -1107,6 +1107,36 @@ namespace EMS.Repository
         //    return result;
         //}
 
+        public async Task<List<AlertCenterData>> GetAllAlertCenterData()
+        {
+
+            var result = await DBEMSContext.AlertCenterData
+                .Where(x => x.IsDeleted == false)
+                .ToListAsync();
+
+            return result;
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1590,6 +1620,49 @@ namespace EMS.Repository
 
             return data;
         }
+
+
+        public async Task<List<DeviceDTO>> Getdevices(int unitid)
+        {
+            var data = await DBEMSContext.Devices
+                .Where(x => x.IsDeleted == false && x.FkUnitId == unitid)
+                .Select(x => new DeviceDTO
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    // Map other fields as needed
+                })
+                .ToListAsync();
+
+            return data;
+        }
+
+        public async Task<List<DeviceDataDetailDTO>> GetAddresses()
+        {
+            var data = await DBEMSContext.DeviceDataDetails
+                
+                .Select(x => new DeviceDataDetailDTO
+                {
+                        Address = x.Address
+                    // Map other fields as needed
+                })
+                .Take(13)
+                .ToListAsync();
+
+            return data;
+        }
+
+        public async Task<bool> AddAlertCenterData(AlertCenterData model)
+        {
+            model.CreatedAt = DateTime.Now;
+            await DBEMSContext.AlertCenterData.AddAsync(model);
+            await DBEMSContext.SaveChangesAsync();
+            return true;
+        }
+
+
+
+
 
 
 
