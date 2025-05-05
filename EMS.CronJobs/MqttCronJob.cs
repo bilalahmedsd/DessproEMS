@@ -3,17 +3,17 @@ using MQTTnet;
 using MQTTnet.Server;
 using System.Text.Json;
 using System.Text;
-using EMS.Core.Interfaces;
 using System.Diagnostics;
+using EMS.CronJobs.ForFaith;
 
 namespace EMS.CronJobs
 
 {
-    public class MqttCronJob(IFourFaith fourFaith) : BackgroundService
+    public class MqttCronJob(FourFaith fourFaith) : BackgroundService
     {
         private MqttServer? mqttServer;
         
-        private readonly IFourFaith _FourFaith = fourFaith;
+        private readonly FourFaith _FourFaith = fourFaith;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

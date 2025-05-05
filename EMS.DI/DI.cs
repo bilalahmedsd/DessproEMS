@@ -1,6 +1,6 @@
 ﻿using EMS.Core.Interfaces;
 using EMS.Core.Services;
-using EMS.CronJobs.ForFaith;
+
 using EMS.Repository;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -25,7 +25,7 @@ namespace EMS.DI
                 .AddTransient<IDeviceRepository, DeviceRepository>()
                 .AddTransient<IGatewayRepository, GatewayRepository>()
                 .AddTransient<ICompanyRepository, CompanyRepository>()
-                .AddSingleton<IFourFaith, FourFaith>()
+               // .AddSingleton<IFourFaith, FourFaith>()
                 .AddTransient<IUserServices, UserService>();
                 
         }

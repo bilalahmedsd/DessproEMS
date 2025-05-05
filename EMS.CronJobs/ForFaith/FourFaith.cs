@@ -1,20 +1,13 @@
-﻿using EMS.Core.Helpers;
-using EMS.Core.Interfaces;
-using EMS.Core.Models.ForFaith;
+﻿
 using EMS.Data.Models;
-using EMS.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Newtonsoft.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace EMS.CronJobs.ForFaith
 {
-    public class FourFaith : IFourFaith
+    public class FourFaith 
     {
         private readonly IServiceScopeFactory _scopeFactory;
         public FourFaith(IServiceScopeFactory scopeFactory)
@@ -28,15 +21,15 @@ namespace EMS.CronJobs.ForFaith
                 using (var scope = _scopeFactory.CreateScope()) // Create a new scope
                 {
                     var DBEMSContext = scope.ServiceProvider.GetRequiredService<EMSContext>();
-                    var energyData = data.FromJson<FourFaithMqttPayloadDTO>();
+                    var energyData = JsonConvert.DeserializeObject<FourFaithMqttPayloadDTO>(data);
                    
                     var gateway = await DBEMSContext.Gateways.Where(x => x.SerialNo == energyData.did && x.IsDeleted == false && x.IsActive == true).FirstOrDefaultAsync();
                     if (gateway != null)
                     {
                         var Sn = energyData.content.Where(x => x.addr.ToString().Contains("SN")).FirstOrDefault();
-                        if (Sn != null &&   Regex.IsMatch(Sn.addr, @"^SN-\d{4}$"))
+                        if (Sn != null && Regex.IsMatch(Sn.addr, @"^SN-\d{4}$"))
                         {
-                            var device= await DBEMSContext.Devices.Where(x => "SN-" + x.SerialNo ==  Sn.addr).FirstOrDefaultAsync();
+                            var device = await DBEMSContext.Devices.Where(x => "SN-" + x.SerialNo == Sn.addr).FirstOrDefaultAsync();
                             if (device != null)
                             {
                                 var master = new DeviceDataMaster
@@ -63,10 +56,12 @@ namespace EMS.CronJobs.ForFaith
                                 }
                                 await DBEMSContext.SaveChangesAsync();
                             }
-                           
+
                         }
-                        
+
                     }
+                    else
+                    { }
                 }
 
             }
