@@ -67,7 +67,11 @@ namespace EMS.Core.Interfaces
         Task<string> GetAlert();
 
         Task<List<AlertCenterDTO>> GetAlertsNotices();
-        Task<KeyValuePair<string, string>[]> GetHistoricDeviceDataDetailsAsync(DateTime startDate, DateTime endDate, string parameter);
+
+
+        //Task<List<DeviceDataDetailDTO>> GetAlert();
+        Task<List<DeviceDataDetailsHistorical>> GetHistoricDeviceDataDetailsAsync(
+         DateTime startDate, DateTime endDate, string parameter, int deviceID);
         Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(
        IEnumerable<int> projectId,
        IEnumerable<int> unitId,
