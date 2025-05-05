@@ -679,7 +679,7 @@ namespace EMS.Api.Controllers
                 DateTime utcEndDate = endDate.ToUniversalTime();
 
                 // Fetch data from database
-                var data = await _dataDetailRrepository.GetHistoricDeviceDataDetailsAsync(utcStartDate, utcEndDate, parameter,deviceid);
+                var data = await _dataDetailRrepository.GetHistoricDeviceDataDetailsAsync(utcStartDate, utcEndDate, parameter, deviceid);
 
                 // Log the number of records retrieved
                 //  Console.WriteLine($"Records Found: {data.Count}");
