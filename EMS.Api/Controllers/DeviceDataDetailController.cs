@@ -156,7 +156,44 @@ namespace EMS.Api.Controllers
         }
 
 
+        [HttpPost("UpdateAlertCenterData/{id}")]
+        public async Task<IActionResult> UpdateAlertCenterData([FromBody] AlertCenterData model,int id)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                await _dataDetailRrepository.UpdateAlertCenterData(model,id);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
 
+            return Ok(resp);
+        }
+
+
+        [HttpDelete("DeleteAlertCenterData/{id}")]
+        public async Task<IActionResult> DeleteAlertCenterData(int id)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                await _dataDetailRrepository.DeleteAlertCenterData(id);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
 
 
 

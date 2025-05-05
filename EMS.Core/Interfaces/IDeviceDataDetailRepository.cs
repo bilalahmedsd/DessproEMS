@@ -25,6 +25,12 @@ namespace EMS.Core.Interfaces
 
         Task<bool> AddAlertCenterData(AlertCenterData model);
 
+        Task<bool> UpdateAlertCenterData(AlertCenterData model,int id);
+
+        Task<bool> DeleteAlertCenterData(int id);
+
+
+
         Task<List<AlertCenterData>> GetAllAlertCenterData();
 
 

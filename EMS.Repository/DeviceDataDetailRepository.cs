@@ -1320,15 +1320,14 @@ namespace EMS.Repository
             var endTime = DateTime.Now;
             var startTime = endTime.AddMinutes(-1);
 
-            var targetAddresses = new[] { "Ua", "Ub", "Uc" };
-            var targetUnitIds = new List<int> { 246, 247, 248 };
+            // Fetch all non-deleted alert rules
+            var alertRules = await DBEMSContext.AlertCenterData
+                .Where(a => !a.IsDeleted)
+                .ToListAsync();
 
+            // Fetch all relevant DeviceDataDetails for the last 1 minute
             var rawData = await DBEMSContext.DeviceDataDetails
-                .Where(d =>
-                    targetAddresses.Contains(d.Address) &&
-                    (targetUnitIds.Contains(d.DeviceDataMaster.Device.FkUnitId.Value)) &&
-                    d.CreatedAt >= startTime &&
-                    d.CreatedAt <= endTime)
+                .Where(d => d.CreatedAt >= startTime && d.CreatedAt <= endTime)
                 .Select(d => new
                 {
                     d.CreatedAt,
@@ -1339,31 +1338,40 @@ namespace EMS.Repository
                 })
                 .ToListAsync();
 
-            var filtered = rawData
-                .GroupBy(d => new { d.FkUnitId, d.DeviceId, d.Address })
-                .Where(group => group.All(d => d.Value < 220 || d.Value > 240))
-                .ToList();
-
-            foreach (var group in filtered)
+            // Check against alert rules
+            foreach (var rule in alertRules)
             {
-                var anyRecord = group.First();
+                var matchingData = rawData
+                    .Where(d =>
+                        d.FkUnitId == rule.FkUnitId &&
+                        d.DeviceId == rule.FkDeviceId &&
+                        d.Address == rule.Address &&
+                        (d.Value < rule.Min || d.Value > rule.Max))
+                    .ToList();
 
-                var alert = new AlertCenter
+                if (matchingData.Any())
                 {
-                    FkDeviceId = anyRecord.DeviceId,
-                    FkUnitId = anyRecord.FkUnitId.Value,
-                    AlertLevel = "High",
-                    Event = "Voltage Outage",
-                    createdAt = DateTime.Now
-                };
+                    // Insert only one alert per rule violation
+                    var first = matchingData.First();
 
-                DBEMSContext.AlertCenter.Add(alert);
+                    var alert = new AlertCenter
+                    {
+                        FkDeviceId = rule.FkDeviceId,
+                        FkUnitId = rule.FkUnitId,
+                        AlertLevel = rule.AlertLevel,
+                        Event = "Voltage Outage", // Or make this dynamic if needed
+                        createdAt = DateTime.Now
+                    };
+
+                    DBEMSContext.AlertCenter.Add(alert);
+                }
             }
 
             await DBEMSContext.SaveChangesAsync();
 
             return "Data saved successfully";
         }
+
 
 
 
@@ -1658,6 +1666,39 @@ namespace EMS.Repository
             await DBEMSContext.AlertCenterData.AddAsync(model);
             await DBEMSContext.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<bool> UpdateAlertCenterData(AlertCenterData model, int id)
+        {
+            var data = DBEMSContext.AlertCenterData.FirstOrDefault(x => x.Id == id);
+            if (data != null)
+            {
+                data.AlertLevel = model.AlertLevel;
+                data.Address = model.Address;
+                data.Max = model.Max;
+                data.Min = model.Min;
+                data.FkDeviceId = model.FkDeviceId;
+                data.FkUnitId = model.FkUnitId;
+               
+
+                await DBEMSContext.SaveChangesAsync(); // Only save here
+                return true;
+            }
+
+            return false; // No record found to update
+        }
+
+        public async Task<bool> DeleteAlertCenterData(int id)
+        {
+            var data = await DBEMSContext.AlertCenterData.FindAsync(id); // Slightly faster than FirstOrDefault for keys
+            if (data != null)
+            {
+                DBEMSContext.AlertCenterData.Remove(data); // Explicitly remove from correct DbSet
+                await DBEMSContext.SaveChangesAsync();
+                return true;
+            }
+
+            return false; // No record found
         }
 
 
