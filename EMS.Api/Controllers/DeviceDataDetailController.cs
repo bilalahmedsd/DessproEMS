@@ -665,7 +665,7 @@ namespace EMS.Api.Controllers
 
 
         [HttpGet("GetHistoricDeviceDataDetail")]
-        public async Task<IActionResult> GetHistoricDeviceDataDetail(DateTime startDate, DateTime endDate, string parameter)
+        public async Task<IActionResult> GetHistoricDeviceDataDetail(DateTime startDate, DateTime endDate, string parameter,int deviceid)
         {
             ResponseModel resp = new ResponseModel();
 
@@ -679,7 +679,7 @@ namespace EMS.Api.Controllers
                 DateTime utcEndDate = endDate.ToUniversalTime();
 
                 // Fetch data from database
-                var data = await _dataDetailRrepository.GetHistoricDeviceDataDetailsAsync(utcStartDate, utcEndDate, parameter);
+                var data = await _dataDetailRrepository.GetHistoricDeviceDataDetailsAsync(utcStartDate, utcEndDate, parameter, deviceid);
 
                 // Log the number of records retrieved
                 //  Console.WriteLine($"Records Found: {data.Count}");
