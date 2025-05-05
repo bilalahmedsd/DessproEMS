@@ -25,8 +25,10 @@ namespace EMS.DI
                 .AddTransient<IDeviceRepository, DeviceRepository>()
                 .AddTransient<IGatewayRepository, GatewayRepository>()
                 .AddTransient<ICompanyRepository, CompanyRepository>()
+                .AddSingleton<ILoggerService,LoggerService>()
                // .AddSingleton<IFourFaith, FourFaith>()
                 .AddTransient<IUserServices, UserService>();
+                
                 
         }
     }
