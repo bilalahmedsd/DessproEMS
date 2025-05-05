@@ -16,7 +16,8 @@ builder.Services.AddServices();
 builder.Services.AddDbContext<EMSContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlServerOptions => sqlServerOptions.CommandTimeout(300))
 );
-//builder.Services.AddHostedService<MqttCronJob>();
+builder.Services.AddSingleton < ILoggerService, LoggerService>();
+builder.Services.AddHostedService<MqttCronJob>();
 
 var myJwtSetting = builder.Configuration;
 var key = Encoding.UTF8.GetBytes(myJwtSetting["Jwt:Key"]);

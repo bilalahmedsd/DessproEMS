@@ -2,6 +2,7 @@
 using EMS.Core.Interfaces;
 using EMS.Core.Models;
 using EMS.Core.Services;
+using EMS.Data.Models;
 using EMS.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -73,6 +74,127 @@ namespace EMS.Api.Controllers
             return Ok(resp);
         }
 
+        [HttpGet("GetUnitsDetails")]
+        public async Task<IActionResult> GetUnitsDetails()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _dataDetailRrepository.GetUnitsDetails();
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;   
+                resp.IsSuccess = false;
+
+            }
+
+            return Ok(resp);
+        }
+
+
+        [HttpGet("Getdevices")]
+        public async Task<IActionResult> Getdevices(int unitid)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _dataDetailRrepository.Getdevices(unitid);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+
+            }
+
+            return Ok(resp);
+        }
+
+
+        [HttpGet("GetAddresses")]
+        public async Task<IActionResult> GetAddresses()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                resp.Data = await _dataDetailRrepository.GetAddresses();
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+
+            }
+
+            return Ok(resp);
+        }
+
+        [HttpPost("AddAlertCenterData")]
+        public async Task<IActionResult> AddAlertCenterData([FromBody] AlertCenterData model)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                await _dataDetailRrepository.AddAlertCenterData(model);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
+
+        [HttpPost("UpdateAlertCenterData/{id}")]
+        public async Task<IActionResult> UpdateAlertCenterData([FromBody] AlertCenterData model,int id)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                await _dataDetailRrepository.UpdateAlertCenterData(model,id);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
+
+        [HttpDelete("DeleteAlertCenterData/{id}")]
+        public async Task<IActionResult> DeleteAlertCenterData(int id)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                await _dataDetailRrepository.DeleteAlertCenterData(id);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
 
 
 
@@ -110,7 +232,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                List<DeviceDataDetailDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetEnergyConspDatau1();
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetEnergyConspDatau1();
                 if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
                 {
                     resp.IsSuccess = true;
@@ -138,7 +260,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                List<DeviceDataDetailDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetEnergyConspDatau2();
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetEnergyConspDatau2();
                 if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
                 {
                     resp.IsSuccess = true;
@@ -166,7 +288,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                List<DeviceDataDetailDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetEnergyConspDatau3();
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetEnergyConspDatau3();
                 if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
                 {
                     resp.IsSuccess = true;
@@ -194,12 +316,13 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                List<DeviceDataDetailDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetAlert();
-                if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
+                string result = await _dataDetailRrepository.GetAlert();
+
+                if (!string.IsNullOrEmpty(result))
                 {
                     resp.IsSuccess = true;
-                    resp.Message = ConstantMessages.DataSuccessMessage;
-                    resp.Data = deviceDataDetailsDTO;
+                    resp.Message = result; // "Data saved successfully"
+                    resp.Data = null;
                 }
                 else
                 {
@@ -212,6 +335,38 @@ namespace EMS.Api.Controllers
             {
                 resp.IsSuccess = false;
                 resp.Message = ConstantMessages.ErrorMessage;
+                resp.Data = null;
+            }
+            return Ok(resp);
+        }
+
+
+        [HttpGet("GetAlertsNotices")]
+        public async Task<IActionResult> GetAlertsNotices()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                List<AlertCenterDTO> alertCenterDTOs = await _dataDetailRrepository.GetAlertsNotices();
+
+                if (alertCenterDTOs != null && alertCenterDTOs.Count > 0)
+                {
+                    resp.IsSuccess = true;
+                    resp.Message = ConstantMessages.DataSuccessMessage; // "Data saved successfully"
+                    resp.Data = alertCenterDTOs;
+                }
+                else
+                {
+                    resp.IsSuccess = false;
+                    resp.Message = ConstantMessages.ErrorMessage;
+                    resp.Data = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                resp.IsSuccess = false;
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.Data = null;
             }
             return Ok(resp);
         }
@@ -223,7 +378,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                List<DeviceDataDetailDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetPowerLoadu3();
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetPowerLoadu3();
                 if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
                 {
                     resp.IsSuccess = true;
@@ -253,7 +408,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                List<DeviceDataDetailDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetPowerLoadu1();
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetPowerLoadu1();
                 if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
                 {
                     resp.IsSuccess = true;
@@ -281,7 +436,7 @@ namespace EMS.Api.Controllers
             ResponseModel resp = new ResponseModel();
             try
             {
-                List<DeviceDataDetailDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetPowerLoadu2();
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.GetPowerLoadu2();
                 if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
                 {
                     resp.IsSuccess = true;
@@ -302,6 +457,211 @@ namespace EMS.Api.Controllers
             }
             return Ok(resp);
         }
+
+
+        [HttpGet("LoadProfile")]
+        public async Task<IActionResult> LoadProfile()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.LoadProfile();
+                if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
+                {
+                    resp.IsSuccess = true;
+                    resp.Message = ConstantMessages.DataSuccessMessage;
+                    resp.Data = deviceDataDetailsDTO;
+                }
+                else
+                {
+                    resp.IsSuccess = false;
+                    resp.Message = ConstantMessages.ErrorMessage;
+                    resp.Data = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                resp.IsSuccess = false;
+                resp.Message = ConstantMessages.ErrorMessage;
+            }
+            return Ok(resp);
+        }
+
+
+        [HttpGet("LoadProfilev1")]
+        public async Task<IActionResult> LoadProfilev1()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.LoadProfilev1();
+                if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
+                {
+                    resp.IsSuccess = true;
+                    resp.Message = ConstantMessages.DataSuccessMessage;
+                    resp.Data = deviceDataDetailsDTO;
+                }
+                else
+                {
+                    resp.IsSuccess = false;
+                    resp.Message = ConstantMessages.ErrorMessage;
+                    resp.Data = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                resp.IsSuccess = false;
+                resp.Message = ConstantMessages.ErrorMessage;
+            }
+            return Ok(resp);
+        }
+
+
+        [HttpGet("LoadProfilev2")]
+        public async Task<IActionResult> LoadProfilev2()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.LoadProfilev2();
+                if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
+                {
+                    resp.IsSuccess = true;
+                    resp.Message = ConstantMessages.DataSuccessMessage;
+                    resp.Data = deviceDataDetailsDTO;
+                }
+                else
+                {
+                    resp.IsSuccess = false;
+                    resp.Message = ConstantMessages.ErrorMessage;
+                    resp.Data = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                resp.IsSuccess = false;
+                resp.Message = ConstantMessages.ErrorMessage;
+            }
+            return Ok(resp);
+        }
+
+
+
+
+        [HttpGet("PowerConsumption")]
+        public async Task<IActionResult> PowerConsumption()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.PowerConsumption();
+                if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
+                {
+                    resp.IsSuccess = true;
+                    resp.Message = ConstantMessages.DataSuccessMessage;
+                    resp.Data = deviceDataDetailsDTO;
+                }
+                else
+                {
+                    resp.IsSuccess = false;
+                    resp.Message = ConstantMessages.ErrorMessage;
+                    resp.Data = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                resp.IsSuccess = false;
+                resp.Message = ConstantMessages.ErrorMessage;
+            }
+            return Ok(resp);
+        }
+
+        [HttpGet("PowerConsumptionv1")]
+        public async Task<IActionResult> PowerConsumptionv1()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.PowerConsumptionv1();
+                if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
+                {
+                    resp.IsSuccess = true;
+                    resp.Message = ConstantMessages.DataSuccessMessage;
+                    resp.Data = deviceDataDetailsDTO;
+                }
+                else
+                {
+                    resp.IsSuccess = false;
+                    resp.Message = ConstantMessages.ErrorMessage;
+                    resp.Data = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                resp.IsSuccess = false;
+                resp.Message = ConstantMessages.ErrorMessage;
+            }
+            return Ok(resp);
+        }
+
+        [HttpGet("PowerConsumptionv2")]
+        public async Task<IActionResult> PowerConsumptionv2()
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.PowerConsumptionv2();
+                if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
+                {
+                    resp.IsSuccess = true;
+                    resp.Message = ConstantMessages.DataSuccessMessage;
+                    resp.Data = deviceDataDetailsDTO;
+                }
+                else
+                {
+                    resp.IsSuccess = false;
+                    resp.Message = ConstantMessages.ErrorMessage;
+                    resp.Data = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                resp.IsSuccess = false;
+                resp.Message = ConstantMessages.ErrorMessage;
+            }
+            return Ok(resp);
+        }
+
+        //[HttpGet("AllUnitsConsumption")]
+        //public async Task<IActionResult> AllUnitsConsumption()
+        //{
+        //    ResponseModel resp = new ResponseModel();
+        //    try
+        //    {
+        //        List<PowerLoadDTO> deviceDataDetailsDTO = await _dataDetailRrepository.AllUnitsConsumption();
+        //        if (deviceDataDetailsDTO != null && deviceDataDetailsDTO.Count > 0)
+        //        {
+        //            resp.IsSuccess = true;
+        //            resp.Message = ConstantMessages.DataSuccessMessage;
+        //            resp.Data = deviceDataDetailsDTO;
+        //        }
+        //        else
+        //        {
+        //            resp.IsSuccess = false;
+        //            resp.Message = ConstantMessages.ErrorMessage;
+        //            resp.Data = null;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        resp.IsSuccess = false;
+        //        resp.Message = ConstantMessages.ErrorMessage;
+        //    }
+        //    return Ok(resp);
+        //}
+
+
+
 
 
         [HttpGet("GetHistoricDeviceDataDetail")]
@@ -529,6 +889,28 @@ namespace EMS.Api.Controllers
             try
             {
                 var data = await _dataDetailRrepository.GetkW();
+
+                response.Data = data;
+                response.Message = "Successfully fetched!";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Error: {ex.Message}";
+                response.IsSuccess = false;
+            }
+            return Ok(response);
+
+        }
+
+
+        [HttpGet("GetAllAlertCenterData")]
+        public async Task<IActionResult> GetAllAlertCenterData()
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var data = await _dataDetailRrepository.GetAllAlertCenterData();
 
                 response.Data = data;
                 response.Message = "Successfully fetched!";
