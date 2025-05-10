@@ -24,14 +24,14 @@ namespace EMS.Repository
         // EPI CHART DATA
         public async Task<EPIConspDTO> GetEPIConspAsync(int deviceId, string range)
         {
-            DateTime now = DateTime.UtcNow;
+            DateTime now = DateTime.UtcNow.Date;
             DateTime start, end;
 
             if (range == "weekly")
             {
-                int diff = (7 + (now.DayOfWeek - DayOfWeek.Monday)) % 7;
-                start = now.Date.AddDays(-diff); // This week's Monday
-                end = start.AddDays(7).AddSeconds(-1); // This week's Sunday 11:59:59
+                // Exclude today
+                end = now.AddDays(-1); // Yesterday
+                start = end.AddDays(-6); // 6 days before yesterday = 7-day total range
             }
             else // monthly
             {
@@ -103,7 +103,7 @@ namespace EMS.Repository
 
                         return new EPIConspData
                         {
-                            Name = currentDay.DayOfWeek.ToString(),
+                            Name = currentDay.DayOfWeek.ToString(), // e.g., "Sunday"
                             Value = Math.Round(safeDiff * 0.06, 2),
                             CreatedAt = currentDay.AddDays(1).AddMilliseconds(-1)
                         };
@@ -120,7 +120,6 @@ namespace EMS.Repository
                     var lastDay = new DateTime(now.Year, month, DateTime.DaysInMonth(now.Year, month))
                                     .AddDays(1).AddMilliseconds(-1); // End of the last day
 
-                    // Get last value BEFORE this month starts
                     double prevValue = await DBEMSContext.DeviceDataDetails
                         .Where(d => deviceMasterIds.Contains((int)d.FkDeviceDataMasterId) &&
                                     d.CreatedAt.HasValue &&
@@ -130,7 +129,6 @@ namespace EMS.Repository
                         .Select(d => (double?)d.AddressVariable)
                         .FirstOrDefaultAsync() ?? 0;
 
-                    // Get last value of this month
                     double currValue = await DBEMSContext.DeviceDataDetails
                         .Where(d => deviceMasterIds.Contains((int)d.FkDeviceDataMasterId) &&
                                     d.CreatedAt.HasValue &&
@@ -150,7 +148,6 @@ namespace EMS.Repository
                         CreatedAt = lastDay
                     });
                 }
-
             }
 
             return new EPIConspDTO
@@ -160,7 +157,6 @@ namespace EMS.Repository
                 CreatedAt = DateTime.UtcNow
             };
         }
-
         public async Task<List<DeviceDataDetailDTO>> Get(int id)
             {
             var endTime = DateTime.Now;
