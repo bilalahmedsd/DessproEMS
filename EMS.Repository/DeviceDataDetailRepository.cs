@@ -529,77 +529,74 @@ namespace EMS.Repository
             var result = new List<PowerLoadDTO>();
 
             var unit = await DBEMSContext.Units.OrderBy(u => u.Id).FirstOrDefaultAsync();
+            if (unit == null) return result;
 
-            if (unit != null)
-            {
-                var deviceIds = await DBEMSContext.Devices
-                    .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
-                    .ToListAsync();
+            var deviceIds = await DBEMSContext.Devices
+                .Where(dev => dev.FkUnitId == unit.Id)
+                .Select(dev => dev.Id)
+                .ToListAsync();
+            if (!deviceIds.Any()) return result;
 
-                if (deviceIds.Any())
+            var dataMasterMap = await DBEMSContext.DeviceDataMasters
+                .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
+                .Select(dm => new { dm.Id, DeviceId = dm.FkDeviceId.Value })
+                .ToListAsync();
+            if (!dataMasterMap.Any()) return result;
+
+            var dataMasterIds = dataMasterMap.Select(dm => dm.Id).ToList();
+
+            var rawData = await DBEMSContext.DeviceDataDetails
+                .Where(d =>
+                    d.FkDeviceDataMasterId.HasValue &&
+                    dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
+                    d.Address == "P" &&
+                    d.CreatedAt.HasValue &&
+                    d.CreatedAt >= startTime &&
+                    d.CreatedAt <= endTime)
+                .Select(d => new
                 {
-                    var dataMasterIds = await DBEMSContext.DeviceDataMasters
-                        .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => new { dm.Id, dm.FkDeviceId })
-                        .ToListAsync();
+                    d.FkDeviceDataMasterId,
+                    d.AddressVariable,
+                    d.CreatedAt
+                })
+                .ToListAsync();
 
-                    if (dataMasterIds.Any())
-                    {
-                        var rawData = await DBEMSContext.DeviceDataDetails
-                            .Where(d =>
-                                d.FkDeviceDataMasterId.HasValue &&
-                                dataMasterIds.Select(dm => dm.Id).Contains(d.FkDeviceDataMasterId.Value) &&
-                                d.Address == "P" &&
-                                d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime)
-                            .ToListAsync();
+            // Group raw data by minute and device
+            var groupedData = rawData
+                .GroupBy(d => new
+                {
+                    Minute = new DateTime(d.CreatedAt.Value.Year, d.CreatedAt.Value.Month, d.CreatedAt.Value.Day, d.CreatedAt.Value.Hour, d.CreatedAt.Value.Minute, 0),
+                    DeviceId = dataMasterMap.First(dm => dm.Id == d.FkDeviceDataMasterId.Value).DeviceId
+                })
+                .Select(g => new
+                {
+                    g.Key.Minute,
+                    g.Key.DeviceId,
+                    Value = g.OrderByDescending(x => x.CreatedAt).First().AddressVariable ?? 0
+                })
+                .ToList();
 
-                        var minutes = Enumerable.Range(0, (int)(endTime - startTime).TotalMinutes + 1)
-                            .Select(i => startTime.AddMinutes(i))
-                            .ToList();
+            var minutes = Enumerable.Range(0, (int)(endTime - startTime).TotalMinutes + 1)
+                .Select(i => startTime.AddMinutes(i))
+                .ToList();
 
-                        foreach (var minute in minutes)
-                        {
-                            var minuteStart = new DateTime(minute.Year, minute.Month, minute.Day, minute.Hour, minute.Minute, 0);
-                            var minuteEnd = minuteStart.AddMinutes(1);
+            foreach (var minute in minutes)
+            {
+                double sum = groupedData
+                    .Where(d => d.Minute == minute)
+                    .Sum(d => d.Value);
 
-                            double? sumPerMinute = 0;
-
-                            foreach (var deviceId in deviceIds)
-                            {
-                                var masterIdsForDevice = dataMasterIds
-                                    .Where(dm => dm.FkDeviceId == deviceId)
-                                    .Select(dm => dm.Id)
-                                    .ToList();
-
-                                var deviceDataInMinute = rawData
-                                    .Where(d =>
-                                        masterIdsForDevice.Contains(d.FkDeviceDataMasterId.Value) &&
-                                        d.CreatedAt >= minuteStart &&
-                                        d.CreatedAt < minuteEnd)
-                                    .OrderByDescending(d => d.CreatedAt)
-                                    .FirstOrDefault(); // Take latest value for this device in that minute
-
-                                if (deviceDataInMinute != null)
-                                {
-                                    sumPerMinute += deviceDataInMinute.AddressVariable;
-                                }
-                            }
-
-                            result.Add(new PowerLoadDTO
-                            {
-                                UnitName = unit.Name,
-                                AddressVariable = sumPerMinute / 10, // like before
-                                CreatedAt = minuteStart
-                            });
-                        }
-                    }
-                }
+                result.Add(new PowerLoadDTO
+                {
+                    UnitName = unit.Name,
+                    AddressVariable = sum / 10,
+                    CreatedAt = minute
+                });
             }
 
             return result;
         }
+
 
 
 
@@ -1118,6 +1115,27 @@ namespace EMS.Repository
 
         }
 
+     public async Task<List<AlertCenterDTO>> GetResolveCenter()
+{
+    var result = await (
+        from alert in DBEMSContext.AlertCenter
+        join device in DBEMSContext.Devices on alert.FkDeviceId equals device.Id
+        join unit in DBEMSContext.Units on alert.FkUnitId equals unit.Id
+        orderby alert.createdAt descending
+        select new AlertCenterDTO
+        {
+            id = alert.id,
+            DeviceName = device.Name,
+            UnitName = unit.Name,
+            AlertLevel = alert.AlertLevel,
+            Event = alert.Event,
+            CreatedAt = alert.createdAt,
+            isDeleted = alert.isDeleted 
+        }).ToListAsync();
+
+    return result;
+}
+
 
 
 
@@ -1325,7 +1343,7 @@ namespace EMS.Repository
                 .Where(a => !a.IsDeleted)
                 .ToListAsync();
 
-            // Fetch all relevant DeviceDataDetails for the last 1 minute
+            // Fetch recent raw data
             var rawData = await DBEMSContext.DeviceDataDetails
                 .Where(d => d.CreatedAt >= startTime && d.CreatedAt <= endTime)
                 .Select(d => new
@@ -1338,37 +1356,55 @@ namespace EMS.Repository
                 })
                 .ToListAsync();
 
-            // Check against alert rules
             foreach (var rule in alertRules)
             {
-                var matchingData = rawData
+                var matches = rawData
                     .Where(d =>
                         d.FkUnitId == rule.FkUnitId &&
                         d.DeviceId == rule.FkDeviceId &&
-                        d.Address == rule.Address &&
-                        (d.Value < rule.Min || d.Value > rule.Max))
+                        d.Address == rule.Address)
                     .ToList();
 
-                if (matchingData.Any())
+                foreach (var data in matches)
                 {
-                    // Insert only one alert per rule violation
-                    var first = matchingData.First();
+                    string eventName = null;
+                    bool isAlert = false;
 
-                    var alert = new AlertCenter
+                    if (data.Address == "Ua" || data.Address == "Ub" || data.Address == "Uc")
                     {
-                        FkDeviceId = rule.FkDeviceId,
-                        FkUnitId = rule.FkUnitId,
-                        AlertLevel = rule.AlertLevel,
-                        Event = "Voltage Outage", // Or make this dynamic if needed
-                        createdAt = DateTime.Now
-                    };
+                        if (data.Value < rule.Min || data.Value > rule.Max)
+                        {
+                            isAlert = true;
+                            eventName = "Voltage Threshold";
+                        }
+                    }
+                    else if (data.Address == "P")
+                    {
+                        if (data.Value > rule.Max && data.Value > 10)
+                        {
+                            isAlert = true;
+                            eventName = "Power Surge";
+                        }
+                    }
 
-                    DBEMSContext.AlertCenter.Add(alert);
+                    if (isAlert)
+                    {
+                        var alert = new AlertCenter
+                        {
+                            FkDeviceId = rule.FkDeviceId,
+                            FkUnitId = rule.FkUnitId,
+                            AlertLevel = rule.AlertLevel,
+                            Event = eventName,
+                            createdAt = DateTime.Now
+                        };
+
+                        DBEMSContext.AlertCenter.Add(alert);
+                        break; // Only one alert per rule per cycle
+                    }
                 }
             }
 
             await DBEMSContext.SaveChangesAsync();
-
             return "Data saved successfully";
         }
 
@@ -1444,6 +1480,7 @@ namespace EMS.Repository
         public async Task<List<AlertCenterDTO>> GetAlertsNotices()
         {
             var result = await (from alert in DBEMSContext.AlertCenter
+                                where alert.isDeleted == false
                                 join device in DBEMSContext.Devices
                                 on alert.FkDeviceId equals device.Id
                                 join unit in DBEMSContext.Units
@@ -1829,6 +1866,18 @@ namespace EMS.Repository
 
 
 
+        public async Task<bool> SetResolveCenter(int id)
+        {
+            var data = await DBEMSContext.AlertCenter.FindAsync(id); // Efficient for primary key lookups
+            if (data != null)
+            {
+                data.isDeleted = true;
+                await DBEMSContext.SaveChangesAsync();
+                return true;
+            }
+
+            return false; // No record found
+        }
 
 
 

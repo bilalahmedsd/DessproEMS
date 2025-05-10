@@ -9,6 +9,7 @@ namespace EMS.Core.Models
     public class AlertCenterDTO
     {
 
+        public int id { get; set; }
         public string AlertLevel { get; set; }
         public string Event { get; set; }
 
@@ -21,6 +22,8 @@ namespace EMS.Core.Models
         public string? DeviceName { get; set; }
 
         public int? DeviceId { get; set; }
+
+        public bool isDeleted { get; set; }
 
     }
 }

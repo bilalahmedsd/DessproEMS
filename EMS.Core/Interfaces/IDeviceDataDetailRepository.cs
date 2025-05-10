@@ -23,6 +23,9 @@ namespace EMS.Core.Interfaces
 
         Task<List<DeviceDataDetailDTO>> GetAddresses();
 
+        Task<List<AlertCenterDTO>> GetResolveCenter();
+
+        Task<bool> SetResolveCenter(int id);
         Task<bool> AddAlertCenterData(AlertCenterData model);
 
         Task<bool> UpdateAlertCenterData(AlertCenterData model,int id);

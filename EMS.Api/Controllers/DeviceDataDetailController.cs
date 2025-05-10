@@ -195,6 +195,25 @@ namespace EMS.Api.Controllers
             return Ok(resp);
         }
 
+        [HttpDelete("SetResolveCenter/{id}")]
+        public async Task<IActionResult> SetResolveCenter(int id)
+        {
+            ResponseModel resp = new ResponseModel();
+            try
+            {
+                await _dataDetailRrepository.SetResolveCenter(id);
+                resp.Message = ConstantMessages.DataSuccessMessage;
+                resp.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                resp.Message = ConstantMessages.ErrorMessage;
+                resp.IsSuccess = false;
+            }
+
+            return Ok(resp);
+        }
+
 
 
 
@@ -911,6 +930,27 @@ namespace EMS.Api.Controllers
             try
             {
                 var data = await _dataDetailRrepository.GetAllAlertCenterData();
+
+                response.Data = data;
+                response.Message = "Successfully fetched!";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Error: {ex.Message}";
+                response.IsSuccess = false;
+            }
+            return Ok(response);
+
+        }
+
+        [HttpGet("GetResolveCenter")]
+        public async Task<IActionResult> GetResolveCenter()
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var data = await _dataDetailRrepository.GetResolveCenter();
 
                 response.Data = data;
                 response.Message = "Successfully fetched!";
