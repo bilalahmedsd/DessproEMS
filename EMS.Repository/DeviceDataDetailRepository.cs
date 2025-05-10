@@ -1704,7 +1704,7 @@ namespace EMS.Repository
                         case "eql":
                             if (lastValue != 0 && firstValue != 0)
                             {
-                                calculatedValue = (lastValue - firstValue) * 0.06;
+                                calculatedValue = lastValue  * 0.06;
                             }
                             else
                             {
