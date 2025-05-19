@@ -53,6 +53,8 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
+builder.Services.AddHostedService<AlertCheckerService>();
 var app = builder.Build();
 IoC.InitServices(app.Services);
 

@@ -23,6 +23,9 @@ namespace EMS.Core.Interfaces
 
         Task<List<DeviceDataDetailDTO>> GetAddresses();
 
+        Task<List<AlertCenterDTO>> GetResolveCenter();
+
+        Task<bool> SetResolveCenter(int id);
         Task<bool> AddAlertCenterData(AlertCenterData model);
 
         Task<bool> UpdateAlertCenterData(AlertCenterData model,int id);
@@ -66,9 +69,14 @@ namespace EMS.Core.Interfaces
 
         Task<string> GetAlert();
 
-        Task<List<DeviceDataDetailDTO>> GetAlert();
+        Task<List<AlertCenterDTO>> GetAlertsNotices();
+
+
+        //Task<List<DeviceDataDetailDTO>> GetAlert();
         Task<List<DeviceDataDetailsHistorical>> GetHistoricDeviceDataDetailsAsync(
          DateTime startDate, DateTime endDate, string parameter, int deviceID);
+        Task<KeyValuePair<string, string>[]> GetHistoricDeviceDataDetailsAsync(DateTime startDate, DateTime endDate, string parameter);
+>>>>>>>>> Temporary merge branch 2
         Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(
        IEnumerable<int> projectId,
        IEnumerable<int> unitId,
@@ -86,6 +94,10 @@ namespace EMS.Core.Interfaces
 
 
         Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail2(ProjectDataRequest request);
+        //Methods Use In Consumption Details  Page  
+        Task<List<UnitDTO>> getUnits();
+        Task<List<DeviceDTO>> getDevices();
+        Task<List<ConsumptionDetailsDTO>> GetConsumptions(DateTime selectedDate, int? selectedUnit, int? selectedDevices, string selectedRange);
 
     }
 }
