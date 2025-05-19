@@ -24,3 +24,4 @@ Host.CreateDefaultBuilder(args)
     })
     .Build()
     .Run();
+Console.WriteLine("Running...");

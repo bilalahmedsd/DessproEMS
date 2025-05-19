@@ -76,7 +76,6 @@ namespace EMS.Core.Interfaces
         Task<List<DeviceDataDetailsHistorical>> GetHistoricDeviceDataDetailsAsync(
          DateTime startDate, DateTime endDate, string parameter, int deviceID);
         Task<KeyValuePair<string, string>[]> GetHistoricDeviceDataDetailsAsync(DateTime startDate, DateTime endDate, string parameter);
->>>>>>>>> Temporary merge branch 2
         Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(
        IEnumerable<int> projectId,
        IEnumerable<int> unitId,
