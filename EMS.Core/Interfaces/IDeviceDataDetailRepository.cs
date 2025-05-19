@@ -92,6 +92,10 @@ namespace EMS.Core.Interfaces
 
 
         Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail2(ProjectDataRequest request);
+        //Methods Use In Consumption Details  Page  
+        Task<List<UnitDTO>> getUnits();
+        Task<List<DeviceDTO>> getDevices();
+        Task<List<ConsumptionDetailsDTO>> GetConsumptions(DateTime selectedDate, int? selectedUnit, int? selectedDevices, string selectedRange);
 
     }
 }

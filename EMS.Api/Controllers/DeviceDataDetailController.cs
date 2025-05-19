@@ -95,25 +95,25 @@ namespace EMS.Api.Controllers
         }
 
 
-        [HttpGet("Getdevices")]
-        public async Task<IActionResult> Getdevices(int unitid)
-        {
-            ResponseModel resp = new ResponseModel();
-            try
-            {
-                resp.Data = await _dataDetailRrepository.Getdevices(unitid);
-                resp.Message = ConstantMessages.DataSuccessMessage;
-                resp.IsSuccess = true;
-            }
-            catch (Exception ex)
-            {
-                resp.Message = ConstantMessages.ErrorMessage;
-                resp.IsSuccess = false;
+        //[HttpGet("Getdevices")]
+        //public async Task<IActionResult> Getdevices(int unitid)
+        //{
+        //    ResponseModel resp = new ResponseModel();
+        //    try
+        //    {
+        //        resp.Data = await _dataDetailRrepository.Getdevices(unitid);
+        //        resp.Message = ConstantMessages.DataSuccessMessage;
+        //        resp.IsSuccess = true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        resp.Message = ConstantMessages.ErrorMessage;
+        //        resp.IsSuccess = false;
 
-            }
+        //    }
 
-            return Ok(resp);
-        }
+        //    return Ok(resp);
+        //}
 
 
         [HttpGet("GetAddresses")]
@@ -898,7 +898,76 @@ namespace EMS.Api.Controllers
             return Ok(response);
 
         }
+        [HttpGet("GetConsumptions")]
+public async Task<IActionResult> GetConsumptions(DateTime selectedDate, string? selectedUnit, string? selectedDevices, string selectedRange)
+{
+    var response = new ResponseModel();
+    try
+    {
+        int? selectedTargetUnit =
+         string.IsNullOrWhiteSpace(selectedUnit) || selectedUnit == "null"
+         ? (int?)null
+         : int.Parse(selectedUnit);
 
+        int? selectedTargetDevices =
+            string.IsNullOrWhiteSpace(selectedDevices) || selectedDevices == "null"
+            ? (int?)null
+            : int.Parse(selectedDevices);
+
+
+        var result = await _dataDetailRrepository.GetConsumptions(selectedDate, selectedTargetUnit, selectedTargetDevices, selectedRange);
+
+        response.Data = result;
+        response.Message = "Successfully fetched!";
+        response.IsSuccess = true;
+    }
+    catch (Exception ex)
+    {
+        response.Message = $"Error: {ex.Message}";
+        response.IsSuccess = false;
+    }
+    return Ok(response);
+}
+
+
+[HttpGet("getUnits")]
+public async Task<IActionResult> getUnits()
+{
+    var response = new ResponseModel();
+    try
+    {
+        var result = await _dataDetailRrepository.getUnits();
+
+        response.Data = result;
+        response.Message = "Successfully fetched!";
+        response.IsSuccess = true;
+    }
+    catch (Exception ex)
+    {
+        response.Message = $"Error: {ex.Message}";
+        response.IsSuccess = false;
+    }
+    return Ok(response);
+}
+[HttpGet("getDevices")]
+public async Task<IActionResult> getDevices()
+{
+    var response = new ResponseModel();
+    try
+    {
+        var result = await _dataDetailRrepository.getDevices();
+
+        response.Data = result;
+        response.Message = "Successfully fetched!";
+        response.IsSuccess = true;
+    }
+    catch (Exception ex)
+    {
+        response.Message = $"Error: {ex.Message}";
+        response.IsSuccess = false;
+    }
+    return Ok(response);
+}
 
 
         [HttpGet("GetkW")]
