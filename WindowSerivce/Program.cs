@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-
+Console.WriteLine("Running...");
 Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((hostingContext, config) =>
     {
@@ -24,4 +24,3 @@ Host.CreateDefaultBuilder(args)
     })
     .Build()
     .Run();
-Console.WriteLine("Running...");
