@@ -31,6 +31,7 @@ namespace EMS.Core.Models
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string TimeRange { get; set; }
+        public Boolean IncludePreviousDay { get; set; }
         public List<Unit2> Units { get; set; } = new List<Unit2>();
     }
 }

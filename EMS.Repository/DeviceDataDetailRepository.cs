@@ -2844,6 +2844,10 @@ namespace EMS.Repository
             // ✅ Extract values from request
             var projectIds = request.ProjectId != 0 ? new List<int> { request.ProjectId } : new List<int>();
             DateTime startDate = DateTime.ParseExact(request.StartDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            if (request.IncludePreviousDay)
+            {
+                startDate = startDate.AddDays(-1);
+            }
             DateTime endDate = DateTime.ParseExact(request.EndDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)
                                          .Date.AddDays(1).AddTicks(-1);
             string timeRange = request.TimeRange;
@@ -3127,44 +3131,44 @@ namespace EMS.Repository
 
 
         // ✅ Helper Function for Time Grouping (LINQ Method Syntax)
-        private List<DeviceDataDetailDTO> ApplyTimeRangeGrouping(List<DeviceDataDetailDTO> data, string timeRange)
-        {
-            if (string.IsNullOrEmpty(timeRange))
-                return data;
-
-            return timeRange.ToLower() switch
+            private List<DeviceDataDetailDTO> ApplyTimeRangeGrouping(List<DeviceDataDetailDTO> data, string timeRange)
             {
-                "yearly" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, d.Address })
-                                .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
-                                .ToList(),
+                if (string.IsNullOrEmpty(timeRange))
+                    return data;
 
-                "monthly" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, Month = d.CreatedAt?.Month, d.Address })
-                                 .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
-                                 .ToList(),
-
-                "daily" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, Month = d.CreatedAt?.Month, Day = d.CreatedAt?.Day, d.Address })
-                               .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
-                               .ToList(),
-
-                "hourly" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, Month = d.CreatedAt?.Month, Day = d.CreatedAt?.Day, Hour = d.CreatedAt?.Hour, d.Address })
-                                .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
-                                .ToList(),
-
-                "15minutes" => data.GroupBy(d => new
+                return timeRange.ToLower() switch
                 {
-                    Year = d.CreatedAt?.Year,
-                    Month = d.CreatedAt?.Month,
-                    Day = d.CreatedAt?.Day,
-                    Hour = d.CreatedAt?.Hour,
-                    Quarter = d.CreatedAt?.Minute / 15,
-                    d.Address
-                })
+                    "yearly" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, d.Address })
+                                    .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
+                                    .ToList(),
+
+                    "monthly" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, Month = d.CreatedAt?.Month, d.Address })
+                                     .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
+                                     .ToList(),
+
+                    "daily" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, Month = d.CreatedAt?.Month, Day = d.CreatedAt?.Day, d.Address })
                                    .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
                                    .ToList(),
 
-                _ => data // 🛑 Return unmodified data if time range is invalid
-            };
-        }
+                    "hourly" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, Month = d.CreatedAt?.Month, Day = d.CreatedAt?.Day, Hour = d.CreatedAt?.Hour, d.Address })
+                                    .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
+                                    .ToList(),
+
+                    "15minutes" => data.GroupBy(d => new
+                    {
+                        Year = d.CreatedAt?.Year,
+                        Month = d.CreatedAt?.Month,
+                        Day = d.CreatedAt?.Day,
+                        Hour = d.CreatedAt?.Hour,
+                        Quarter = d.CreatedAt?.Minute / 15,
+                        d.Address
+                    })
+                                       .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
+                                       .ToList(),
+
+                    _ => data // 🛑 Return unmodified data if time range is invalid
+                };
+            }
 
         public Task<List<DeviceDataDetailDTO>> GetFilteredDeviceDataDetail(IEnumerable<int> projectId, IEnumerable<int> unitId, Dictionary<int, List<int>> meterId, DateTime startDate, DateTime endDate, string timeRange)
         {

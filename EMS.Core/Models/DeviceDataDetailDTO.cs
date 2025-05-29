@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EMS.Core.Models
 {
-    public class DeviceDataDetailDTO : BaseDTO
+    public class    DeviceDataDetailDTO : BaseDTO
     {
         public int? FkDeviceDataMasterId { get; set; }
 
