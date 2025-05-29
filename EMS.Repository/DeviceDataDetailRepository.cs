@@ -29,19 +29,18 @@ namespace EMS.Repository
 
             if (range == "weekly")
             {
-                // Exclude today
-                end = now.AddDays(-1); // Yesterday
+                end = now.AddDays(0); // Today
                 start = end.AddDays(-6); // 6 days before yesterday = 7-day total range
             }
             else // monthly
             {
-                start = new DateTime(now.Year, 1, 1);
-                end = new DateTime(now.Year, 12, 31, 23, 59, 59);
+                start = new DateTime(now.Year, now.Month, 1);
+                end = new DateTime(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month), 23, 59, 59);
             }
 
             var deviceMasterIds = await DBEMSContext.DeviceDataMasters
                 .Where(d => d.FkDeviceId == deviceId)
-                .Select(d => d.Id)
+                .Select(d => d.Id).AsQueryable()
                 .ToListAsync();
 
             if (!deviceMasterIds.Any())
@@ -68,17 +67,17 @@ namespace EMS.Repository
 
             List<EPIConspData> result;
 
-            if (range == "weekly")
+            if (range.ToLower() == "weekly")
             {
                 var datesToFetch = Enumerable.Range(-1, 8)
-                    .Select(i => start.AddDays(i).Date)
+                    .Select(i => start.AddDays(i).Date).AsQueryable()
                     .ToList();
 
                 var weeklyData = await DBEMSContext.DeviceDataDetails
                     .Where(d => deviceMasterIds.Contains((int)d.FkDeviceDataMasterId) &&
                                 d.CreatedAt.HasValue &&
                                 datesToFetch.Contains(d.CreatedAt.Value.Date) &&
-                                d.Address == "EPI")
+                                d.Address == "EPI").AsQueryable()
                     .ToListAsync();
 
                 result = Enumerable.Range(0, 7)
@@ -86,18 +85,29 @@ namespace EMS.Repository
                     {
                         var currentDay = start.AddDays(i).Date;
                         var previousDay = currentDay.AddDays(-1);
+                        var previousValueDay = 0.00;
 
                         var currentValue = weeklyData
-                            .Where(d => d.CreatedAt.Value.Date == currentDay)
+                            .Where(d => d.CreatedAt.Value.Date == currentDay).AsQueryable()
                             .OrderByDescending(d => d.CreatedAt.Value)
                             .Select(d => (double?)d.AddressVariable)
                             .FirstOrDefault() ?? 0;
+                        for (global::System.Int32 j = 1; j <= 7; j++)
+                        {
+                            var tempPrev = weeklyData
+                            .Where(d => d.CreatedAt.Value.Date == currentDay.AddDays(-j))
+                            .OrderByDescending(d => d.CreatedAt.Value)
+                            .Select(d => (double?)d.AddressVariable)
+                            .FirstOrDefault();
 
-                        var previousValueDay = weeklyData
-                            .Where(d => d.CreatedAt.Value.Date == previousDay)
-                            .OrderByDescending(d => d.CreatedAt.Value)
-                            .Select(d => (double?)d.AddressVariable)
-                            .FirstOrDefault() ?? 0;
+                            if (tempPrev.HasValue)
+                            {
+                                previousValueDay = tempPrev.Value;
+                                break;
+                            }
+                        }
+
+
 
                         var safeDiff = Math.Max(currentValue - previousValueDay, 0);
 
@@ -117,8 +127,8 @@ namespace EMS.Repository
                 for (int month = 1; month <= 12; month++)
                 {
                     var firstDay = new DateTime(now.Year, month, 1);
-                    var lastDay = new DateTime(now.Year, month, DateTime.DaysInMonth(now.Year, month))
-                                    .AddDays(1).AddMilliseconds(-1); // End of the last day
+                    var lastDay = new DateTime(now.Year, month, DateTime.DaysInMonth(now.Year, month), 23, 59, 59); // Last Day
+
 
                     double prevValue = await DBEMSContext.DeviceDataDetails
                         .Where(d => deviceMasterIds.Contains((int)d.FkDeviceDataMasterId) &&
@@ -158,7 +168,7 @@ namespace EMS.Repository
             };
         }
         public async Task<List<DeviceDataDetailDTO>> Get(int id)
-            {
+        {
             var endTime = DateTime.Now;
             var startTime = endTime.AddHours(-5);
 
@@ -184,7 +194,7 @@ namespace EMS.Repository
                     detail.CreatedAt,
                     detail.AddressVariable,
                     UnitId = id
-                })
+                }).AsQueryable()
                 .ToListAsync();
 
             // Multiply AddressVariable by 0.06 and group data into 15-minute slots
@@ -192,7 +202,7 @@ namespace EMS.Repository
             {
                 d.CreatedAt,
                 AdjustedAddressVariable = d.AddressVariable * 0.06
-            })
+            }).AsQueryable()
  .OrderBy(d => d.CreatedAt)
  .Where((item, index) => index % 2 == 0) // This filters to get odd indexed items (0, 2, 4, 6, etc.)
  .ToList();
@@ -204,7 +214,7 @@ namespace EMS.Repository
                 var slotEnd = slot.Add(slotDuration);
 
                 // Get the data for this 15-minute slot
-                var dataInSlot = adjustedData.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).ToList();
+                var dataInSlot = adjustedData.Where(d => d.CreatedAt >= slot && d.CreatedAt < slotEnd).AsQueryable().ToList();
 
                 if (dataInSlot.Count() > 1)
                 {
@@ -226,7 +236,7 @@ namespace EMS.Repository
                 {
                     return null; // No data in this slot
                 }
-            }).Where(d => d != null).ToList();
+            }).Where(d => d != null).AsQueryable().ToList();
 
             return groupedData;
 
@@ -245,18 +255,18 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds.Any())
                 {
                     // Preload all DeviceDataMasters for these devices
-                var dataMasterIds = await DBEMSContext.DeviceDataMasters
-    .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value)
-    && dm.CreatedAt >= startTime && dm.CreatedAt <= endTime
-    )
-    .Select(dm => new { dm.Id, dm.FkDeviceId })
-    .ToListAsync();
+                    var dataMasterIds = await DBEMSContext.DeviceDataMasters
+        .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value)
+        && dm.CreatedAt >= startTime && dm.CreatedAt <= endTime
+        )
+        .Select(dm => new { dm.Id, dm.FkDeviceId }).AsQueryable()
+        .ToListAsync();
 
 
                     // Preload all DeviceDataDetails for EPI address and time range
@@ -267,7 +277,7 @@ namespace EMS.Repository
                             d.Address == "EPI" &&
                             d.CreatedAt >= startTime &&
                             d.CreatedAt <= endTime
-                        )
+                        ).AsQueryable()
                         .OrderBy(d => d.CreatedAt)
                         .ToListAsync();
 
@@ -286,7 +296,7 @@ namespace EMS.Repository
                         {
                             var currentDeviceMasterIds = dataMasterIds
                                 .Where(dm => dm.FkDeviceId == deviceId)
-                                .Select(dm => dm.Id)
+                                .Select(dm => dm.Id).AsQueryable()
                                 .ToList();
 
                             var deviceData = allDeviceData
@@ -294,7 +304,7 @@ namespace EMS.Repository
                                     currentDeviceMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                     d.CreatedAt >= hourStart &&
                                     d.CreatedAt < hourEnd
-                                )
+                                ).AsQueryable()
                                 .OrderBy(d => d.CreatedAt)
                                 .ToList();
 
@@ -319,7 +329,7 @@ namespace EMS.Repository
                             CreatedAt = hourStart // Represent the start of the hour
                         });
 
-                       
+
                     }
                 }
             }
@@ -340,7 +350,7 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds.Any())
@@ -350,7 +360,7 @@ namespace EMS.Repository
         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value)
         && dm.CreatedAt >= startTime && dm.CreatedAt <= endTime
         )
-        .Select(dm => new { dm.Id, dm.FkDeviceId })
+        .Select(dm => new { dm.Id, dm.FkDeviceId }).AsQueryable()
         .ToListAsync();
 
 
@@ -362,7 +372,7 @@ namespace EMS.Repository
                             d.Address == "EPI" &&
                             d.CreatedAt >= startTime &&
                             d.CreatedAt <= endTime
-                        )
+                        ).AsQueryable()
                         .OrderBy(d => d.CreatedAt)
                         .ToListAsync();
 
@@ -381,7 +391,7 @@ namespace EMS.Repository
                         {
                             var currentDeviceMasterIds = dataMasterIds
                                 .Where(dm => dm.FkDeviceId == deviceId)
-                                .Select(dm => dm.Id)
+                                .Select(dm => dm.Id).AsQueryable()
                                 .ToList();
 
                             var deviceData = allDeviceData
@@ -389,7 +399,7 @@ namespace EMS.Repository
                                     currentDeviceMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                     d.CreatedAt >= hourStart &&
                                     d.CreatedAt < hourEnd
-                                )
+                                ).AsQueryable()
                                 .OrderBy(d => d.CreatedAt)
                                 .ToList();
 
@@ -436,7 +446,7 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds.Any())
@@ -446,7 +456,7 @@ namespace EMS.Repository
         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value)
         && dm.CreatedAt >= startTime && dm.CreatedAt <= endTime
         )
-        .Select(dm => new { dm.Id, dm.FkDeviceId })
+        .Select(dm => new { dm.Id, dm.FkDeviceId }).AsQueryable()
         .ToListAsync();
 
 
@@ -458,7 +468,7 @@ namespace EMS.Repository
                             d.Address == "EPI" &&
                             d.CreatedAt >= startTime &&
                             d.CreatedAt <= endTime
-                        )
+                        ).AsQueryable()
                         .OrderBy(d => d.CreatedAt)
                         .ToListAsync();
 
@@ -477,7 +487,7 @@ namespace EMS.Repository
                         {
                             var currentDeviceMasterIds = dataMasterIds
                                 .Where(dm => dm.FkDeviceId == deviceId)
-                                .Select(dm => dm.Id)
+                                .Select(dm => dm.Id).AsQueryable()
                                 .ToList();
 
                             var deviceData = allDeviceData
@@ -485,7 +495,7 @@ namespace EMS.Repository
                                     currentDeviceMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                     d.CreatedAt >= hourStart &&
                                     d.CreatedAt < hourEnd
-                                )
+                                ).AsQueryable()
                                 .OrderBy(d => d.CreatedAt)
                                 .ToList();
 
@@ -524,18 +534,18 @@ namespace EMS.Repository
             var startTime = endTime.AddMinutes(-11);
             var result = new List<PowerLoadDTO>();
 
-            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).FirstOrDefaultAsync();
+            var unit = await DBEMSContext.Units.AsQueryable().OrderBy(u => u.Id).FirstOrDefaultAsync();
             if (unit == null) return result;
 
             var deviceIds = await DBEMSContext.Devices
                 .Where(dev => dev.FkUnitId == unit.Id)
-                .Select(dev => dev.Id)
+                .Select(dev => dev.Id).AsQueryable()
                 .ToListAsync();
             if (!deviceIds.Any()) return result;
 
             var dataMasterMap = await DBEMSContext.DeviceDataMasters
                 .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                .Select(dm => new { dm.Id, DeviceId = dm.FkDeviceId.Value })
+                .Select(dm => new { dm.Id, DeviceId = dm.FkDeviceId.Value }).AsQueryable()
                 .ToListAsync();
             if (!dataMasterMap.Any()) return result;
 
@@ -554,7 +564,7 @@ namespace EMS.Repository
                     d.FkDeviceDataMasterId,
                     d.AddressVariable,
                     d.CreatedAt
-                })
+                }).AsQueryable()
                 .ToListAsync();
 
             // Group raw data by minute and device
@@ -569,17 +579,17 @@ namespace EMS.Repository
                     g.Key.Minute,
                     g.Key.DeviceId,
                     Value = g.OrderByDescending(x => x.CreatedAt).First().AddressVariable ?? 0
-                })
+                }).AsQueryable()
                 .ToList();
 
             var minutes = Enumerable.Range(0, (int)(endTime - startTime).TotalMinutes + 1)
-                .Select(i => startTime.AddMinutes(i))
+                .Select(i => startTime.AddMinutes(i)).AsQueryable()
                 .ToList();
 
             foreach (var minute in minutes)
             {
                 double sum = groupedData
-                    .Where(d => d.Minute == minute)
+                    .Where(d => d.Minute == minute).AsQueryable()
                     .Sum(d => d.Value);
 
                 result.Add(new PowerLoadDTO
@@ -602,20 +612,20 @@ namespace EMS.Repository
             var startTime = endTime.Date.AddDays(-6); // Last 7 days including today
             var result = new List<PowerLoadDTO>();
 
-            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).FirstOrDefaultAsync();
+            var unit = await DBEMSContext.Units.AsQueryable().OrderBy(u => u.Id).FirstOrDefaultAsync();
 
             if (unit != null)
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds.Any())
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => dm.Id)
+                        .Select(dm => dm.Id).AsQueryable()
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
@@ -626,18 +636,18 @@ namespace EMS.Repository
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "P" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime)
+                                d.CreatedAt <= endTime).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
                         var dailyGroups = rawData
-                            .GroupBy(d => d.CreatedAt.Value.Date) // Group by each day
+                            .GroupBy(d => d.CreatedAt.Value.Date).AsQueryable()// Group by each day
                             .ToList();
 
                         foreach (var group in dailyGroups)
                         {
                             // Calculate average P(kW) for the day
-                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).ToList();
+                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).AsQueryable().ToList();
 
                             if (validReadings.Any())
                             {
@@ -666,20 +676,20 @@ namespace EMS.Repository
             var startTime = endTime.Date.AddDays(-6); // Last 7 days including today
             var result = new List<PowerLoadDTO>();
 
-            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(1).FirstOrDefaultAsync();
+            var unit = await DBEMSContext.Units.AsQueryable().OrderBy(u => u.Id).Skip(1).FirstOrDefaultAsync();
 
             if (unit != null)
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds.Any())
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => dm.Id)
+                        .Select(dm => dm.Id).AsQueryable()
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
@@ -690,18 +700,18 @@ namespace EMS.Repository
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "P" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime)
+                                d.CreatedAt <= endTime).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
                         var dailyGroups = rawData
-                            .GroupBy(d => d.CreatedAt.Value.Date) // Group by each day
+                            .GroupBy(d => d.CreatedAt.Value.Date).AsQueryable() // Group by each day
                             .ToList();
 
                         foreach (var group in dailyGroups)
                         {
                             // Calculate average P(kW) for the day
-                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).ToList();
+                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).AsQueryable().ToList();
 
                             if (validReadings.Any())
                             {
@@ -729,20 +739,20 @@ namespace EMS.Repository
             var startTime = endTime.Date.AddDays(-6); // Last 7 days including today
             var result = new List<PowerLoadDTO>();
 
-            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).Skip(2).FirstOrDefaultAsync();
+            var unit = await DBEMSContext.Units.AsQueryable().OrderBy(u => u.Id).Skip(2).FirstOrDefaultAsync();
 
             if (unit != null)
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds.Any())
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => dm.Id)
+                        .Select(dm => dm.Id).AsQueryable()
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
@@ -753,18 +763,18 @@ namespace EMS.Repository
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "P" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime)
+                                d.CreatedAt <= endTime).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
                         var dailyGroups = rawData
-                            .GroupBy(d => d.CreatedAt.Value.Date) // Group by each day
+                            .GroupBy(d => d.CreatedAt.Value.Date).AsQueryable()// Group by each day
                             .ToList();
 
                         foreach (var group in dailyGroups)
                         {
                             // Calculate average P(kW) for the day
-                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).ToList();
+                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).AsQueryable().ToList();
 
                             if (validReadings.Any())
                             {
@@ -996,7 +1006,7 @@ namespace EMS.Repository
 
                             var deviceIds = await DBEMSContext.Devices
                                 .Where(dev => dev.FkUnitId == selectedUnit.Value)
-                                .Select(dev => dev.Id)
+                                .Select(dev => dev.Id).AsQueryable()
                                 .ToListAsync();
 
                             if (deviceIds.Any())
@@ -1006,7 +1016,7 @@ namespace EMS.Repository
                                                  dm.CreatedAt.HasValue &&
                                                  ((dm.CreatedAt.Value.Date >= monthStart && dm.CreatedAt.Value.Date < monthEnd) ||
                                                   (dm.CreatedAt.Value.Date >= prevMonthStart && dm.CreatedAt.Value.Date < prevMonthEnd)))
-                                    .Select(dm => dm.Id)
+                                    .Select(dm => dm.Id).AsQueryable()
                                     .ToListAsync();
 
                                 if (dataMasterIds.Any())
@@ -1018,7 +1028,7 @@ namespace EMS.Repository
                                             ((d.CreatedAt.Value.Date >= prevMonthStart && d.CreatedAt.Value.Date < prevMonthEnd && d.Address == "EPI") || // Prev month only EPI
                                              (d.CreatedAt.Value.Date >= monthStart && d.CreatedAt.Value.Date < monthEnd && addressList.Contains(d.Address))) // Selected month all addresses
                                             &&
-                                            d.CreatedAt.HasValue)
+                                            d.CreatedAt.HasValue).AsQueryable()
                                         .OrderBy(d => d.CreatedAt)
                                         .ToListAsync();
                                 }
@@ -1097,7 +1107,7 @@ namespace EMS.Repository
                                                  dm.CreatedAt.HasValue &&
                                                  ((dm.CreatedAt.Value.Date >= yearStart && dm.CreatedAt.Value.Date < yearEnd) ||
                                                   (dm.CreatedAt.Value.Date >= prevYearStart && dm.CreatedAt.Value.Date < prevYearEnd)))
-                                    .Select(dm => dm.Id)
+                                    .Select(dm => dm.Id).AsQueryable()
                                     .ToListAsync();
 
                                 if (dataMasterIds.Any())
@@ -1109,7 +1119,7 @@ namespace EMS.Repository
                                             ((d.CreatedAt.Value.Date >= prevYearStart && d.CreatedAt.Value.Date < prevYearEnd && d.Address == "EPI") ||  // Prev year only EPI
                                              (d.CreatedAt.Value.Date >= yearStart && d.CreatedAt.Value.Date < yearEnd && addressList.Contains(d.Address))) // Current year all addresses
                                             &&
-                                            d.CreatedAt.HasValue)
+                                            d.CreatedAt.HasValue).AsQueryable()
                                         .OrderBy(d => d.CreatedAt)
                                         .ToListAsync();
                                 }
@@ -1117,7 +1127,7 @@ namespace EMS.Repository
 
                             // Group current year data by month and address
                             var currentYearGroups = allDeviceData
-                                .Where(d => d.CreatedAt.Value.Date >= yearStart && d.CreatedAt.Value.Date < yearEnd)
+                                .Where(d => d.CreatedAt.Value.Date >= yearStart && d.CreatedAt.Value.Date < yearEnd).AsQueryable()
                                 .GroupBy(d => new { Month = new DateTime(d.CreatedAt.Value.Year, d.CreatedAt.Value.Month, 1), d.Address });
 
                             var currentYearTotals = new Dictionary<(DateTime Month, string Address), double>();
@@ -1136,7 +1146,7 @@ namespace EMS.Repository
 
                             // Group previous year EPI data by month
                             var prevYearEpiGroups = allDeviceData
-                                .Where(d => d.CreatedAt.Value.Date >= prevYearStart && d.CreatedAt.Value.Date < prevYearEnd && d.Address == "EPI")
+                                .Where(d => d.CreatedAt.Value.Date >= prevYearStart && d.CreatedAt.Value.Date < prevYearEnd && d.Address == "EPI").AsQueryable()
                                 .GroupBy(d => new DateTime(d.CreatedAt.Value.Year, d.CreatedAt.Value.Month, 1));
 
                             var prevYearEpiTotals = new Dictionary<DateTime, double>();
@@ -1211,7 +1221,7 @@ namespace EMS.Repository
                                         x.CreatedAt.HasValue &&
                                         (x.CreatedAt.Value.Date == selectedDateTime.Date ||
                                          x.CreatedAt.Value.Date == previousDate))
-                            .Select(x => x.Id)
+                            .Select(x => x.Id).AsQueryable()
                             .ToListAsync();
 
                         // Get all data details for current date (all addresses) and previous date (only EPI)
@@ -1224,7 +1234,7 @@ namespace EMS.Repository
                                     (d.CreatedAt.Value.Date == previousDate && d.Address == "EPI") ||
                                     (d.CreatedAt.Value.Date == selectedDateTime.Date && addressList.Contains(d.Address))
                                 )
-                            )
+                            ).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
@@ -1294,7 +1304,7 @@ namespace EMS.Repository
                                         x.CreatedAt.HasValue &&
                                         ((x.CreatedAt.Value.Date >= startOfWeek && x.CreatedAt.Value.Date < endOfWeek) ||
                                          (x.CreatedAt.Value.Date >= prevWeekStart && x.CreatedAt.Value.Date < prevWeekEnd)))
-                            .Select(x => x.Id)
+                            .Select(x => x.Id).AsQueryable()
                             .ToListAsync();
 
                         allDeviceData = await DBEMSContext.DeviceDataDetails
@@ -1305,7 +1315,7 @@ namespace EMS.Repository
                                 (
                                     (d.CreatedAt.Value.Date >= startOfWeek && d.CreatedAt.Value.Date < endOfWeek && addressList.Contains(d.Address)) ||
                                     (d.CreatedAt.Value.Date >= prevWeekStart && d.CreatedAt.Value.Date < prevWeekEnd && d.Address == "EPI")
-                                ))
+                                )).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
@@ -1368,7 +1378,7 @@ namespace EMS.Repository
                                         x.CreatedAt.HasValue &&
                                         x.CreatedAt.Value.Date >= startOfMonth &&
                                         x.CreatedAt.Value.Date < endOfMonth)
-                            .Select(x => x.Id)
+                            .Select(x => x.Id).AsQueryable()
                             .ToListAsync();
 
                         allDeviceData = await DBEMSContext.DeviceDataDetails
@@ -1378,7 +1388,7 @@ namespace EMS.Repository
                                 addressList.Contains(d.Address) &&
                                 d.CreatedAt.HasValue &&
                                 d.CreatedAt.Value.Date >= startOfMonth &&
-                                d.CreatedAt.Value.Date < endOfMonth)
+                                d.CreatedAt.Value.Date < endOfMonth).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
@@ -1429,7 +1439,7 @@ namespace EMS.Repository
                                         x.CreatedAt.HasValue &&
                                         x.CreatedAt.Value.Date >= startOfYear &&
                                         x.CreatedAt.Value.Date < endOfYear)
-                            .Select(x => x.Id)
+                            .Select(x => x.Id).AsQueryable()
                             .ToListAsync();
 
                         allDeviceData = await DBEMSContext.DeviceDataDetails
@@ -1439,7 +1449,7 @@ namespace EMS.Repository
                                 addressList.Contains(d.Address) &&
                                 d.CreatedAt.HasValue &&
                                 d.CreatedAt.Value.Date >= startOfYear &&
-                                d.CreatedAt.Value.Date < endOfYear)
+                                d.CreatedAt.Value.Date < endOfYear).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
@@ -1495,7 +1505,7 @@ namespace EMS.Repository
                 {
                     Id = x.Id,
                     Name = x.Name
-                })
+                }).AsQueryable()
                 .ToListAsync();
 
             return data;
@@ -1509,7 +1519,7 @@ namespace EMS.Repository
                 {
                     Id = x.Id,
                     Name = x.Name
-                })
+                }).AsQueryable()
                 .ToListAsync();
 
             return data;
@@ -1529,7 +1539,7 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds != null && deviceIds.Count > 0)
@@ -1542,7 +1552,7 @@ namespace EMS.Repository
                         var dataMasterIds = await DBEMSContext.DeviceDataMasters
                             .Where(dm => dm.FkDeviceId == deviceId &&
                                          dm.CreatedAt >= startTime && dm.CreatedAt <= endTime)
-                            .Select(dm => new { dm.Id })
+                            .Select(dm => new { dm.Id }).AsQueryable()
                             .ToListAsync();
 
                         if (dataMasterIds.Count == 0) continue;
@@ -1553,7 +1563,7 @@ namespace EMS.Repository
                                 dataMasterIds.Select(x => x.Id).Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "EPI" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime)
+                                d.CreatedAt <= endTime).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
@@ -1614,7 +1624,7 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds != null && deviceIds.Count > 0)
@@ -1627,7 +1637,7 @@ namespace EMS.Repository
                         var dataMasterIds = await DBEMSContext.DeviceDataMasters
                             .Where(dm => dm.FkDeviceId == deviceId &&
                                          dm.CreatedAt >= startTime && dm.CreatedAt <= endTime)
-                            .Select(dm => new { dm.Id })
+                            .Select(dm => new { dm.Id }).AsQueryable()
                             .ToListAsync();
 
                         if (dataMasterIds.Count == 0) continue;
@@ -1638,12 +1648,12 @@ namespace EMS.Repository
                                 dataMasterIds.Select(x => x.Id).Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "EPI" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime)
+                                d.CreatedAt <= endTime).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
                         var dailyGroups = allDeviceData
-                            .GroupBy(d => d.CreatedAt.Value.Date)
+                            .GroupBy(d => d.CreatedAt.Value.Date).AsQueryable()
                             .ToList();
 
                         foreach (var group in dailyGroups)
@@ -1698,7 +1708,7 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds != null && deviceIds.Count > 0)
@@ -1711,7 +1721,7 @@ namespace EMS.Repository
                         var dataMasterIds = await DBEMSContext.DeviceDataMasters
                             .Where(dm => dm.FkDeviceId == deviceId &&
                                          dm.CreatedAt >= startTime && dm.CreatedAt <= endTime)
-                            .Select(dm => new { dm.Id })
+                            .Select(dm => new { dm.Id }).AsQueryable()
                             .ToListAsync();
 
                         if (dataMasterIds.Count == 0) continue;
@@ -1722,7 +1732,7 @@ namespace EMS.Repository
                                 dataMasterIds.Select(x => x.Id).Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "EPI" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime)
+                                d.CreatedAt <= endTime).AsQueryable()
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
@@ -1832,33 +1842,33 @@ namespace EMS.Repository
         {
 
             var result = await DBEMSContext.AlertCenterData
-                .Where(x => x.IsDeleted == false)
+                .Where(x => x.IsDeleted == false).AsQueryable()
                 .ToListAsync();
 
             return result;
 
         }
 
-     public async Task<List<AlertCenterDTO>> GetResolveCenter()
-{
-    var result = await (
-        from alert in DBEMSContext.AlertCenter
-        join device in DBEMSContext.Devices on alert.FkDeviceId equals device.Id
-        join unit in DBEMSContext.Units on alert.FkUnitId equals unit.Id
-        orderby alert.createdAt descending
-        select new AlertCenterDTO
+        public async Task<List<AlertCenterDTO>> GetResolveCenter()
         {
-            id = alert.id,
-            DeviceName = device.Name,
-            UnitName = unit.Name,
-            AlertLevel = alert.AlertLevel,
-            Event = alert.Event,
-            CreatedAt = alert.createdAt,
-            isDeleted = alert.isDeleted 
-        }).ToListAsync();
+            var result = await (
+                from alert in DBEMSContext.AlertCenter
+                join device in DBEMSContext.Devices on alert.FkDeviceId equals device.Id
+                join unit in DBEMSContext.Units on alert.FkUnitId equals unit.Id
+                orderby alert.createdAt descending
+                select new AlertCenterDTO
+                {
+                    id = alert.id,
+                    DeviceName = device.Name,
+                    UnitName = unit.Name,
+                    AlertLevel = alert.AlertLevel,
+                    Event = alert.Event,
+                    CreatedAt = alert.createdAt,
+                    isDeleted = alert.isDeleted
+                }).AsQueryable().ToListAsync();
 
-    return result;
-}
+            return result;
+        }
 
 
 
@@ -1907,14 +1917,14 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds.Any())
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => new { dm.Id, dm.FkDeviceId })
+                        .Select(dm => new { dm.Id, dm.FkDeviceId }).AsQueryable()
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
@@ -1925,11 +1935,11 @@ namespace EMS.Repository
                                 dataMasterIds.Select(dm => dm.Id).Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "P" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime)
+                                d.CreatedAt <= endTime).AsQueryable()
                             .ToListAsync();
 
                         var minutes = Enumerable.Range(0, (int)(endTime - startTime).TotalMinutes + 1)
-                            .Select(i => startTime.AddMinutes(i))
+                            .Select(i => startTime.AddMinutes(i)).AsQueryable()
                             .ToList();
 
                         foreach (var minute in minutes)
@@ -1943,14 +1953,14 @@ namespace EMS.Repository
                             {
                                 var masterIdsForDevice = dataMasterIds
                                     .Where(dm => dm.FkDeviceId == deviceId)
-                                    .Select(dm => dm.Id)
+                                    .Select(dm => dm.Id).AsQueryable()
                                     .ToList();
 
                                 var deviceDataInMinute = rawData
                                     .Where(d =>
                                         masterIdsForDevice.Contains(d.FkDeviceDataMasterId.Value) &&
                                         d.CreatedAt >= minuteStart &&
-                                        d.CreatedAt < minuteEnd)
+                                        d.CreatedAt < minuteEnd).AsQueryable()
                                     .OrderByDescending(d => d.CreatedAt)
                                     .FirstOrDefault(); // Take latest value for this device in that minute
 
@@ -1989,14 +1999,14 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
+                    .Select(dev => dev.Id).AsQueryable()
                     .ToListAsync();
 
                 if (deviceIds.Any())
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => new { dm.Id, dm.FkDeviceId })
+                        .Select(dm => new { dm.Id, dm.FkDeviceId }).AsQueryable()
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
@@ -2024,7 +2034,7 @@ namespace EMS.Repository
                             foreach (var deviceId in deviceIds)
                             {
                                 var masterIdsForDevice = dataMasterIds
-                                    .Where(dm => dm.FkDeviceId == deviceId)
+                                    .Where(dm => dm.FkDeviceId == deviceId).AsQueryable()
                                     .Select(dm => dm.Id)
                                     .ToList();
 
@@ -2032,7 +2042,7 @@ namespace EMS.Repository
                                     .Where(d =>
                                         masterIdsForDevice.Contains(d.FkDeviceDataMasterId.Value) &&
                                         d.CreatedAt >= minuteStart &&
-                                        d.CreatedAt < minuteEnd)
+                                        d.CreatedAt < minuteEnd).AsQueryable()
                                     .OrderByDescending(d => d.CreatedAt)
                                     .FirstOrDefault(); // Take latest value for this device in that minute
 
@@ -2064,7 +2074,7 @@ namespace EMS.Repository
 
             // Fetch all non-deleted alert rules
             var alertRules = await DBEMSContext.AlertCenterData
-                .Where(a => !a.IsDeleted)
+                .Where(a => !a.IsDeleted).AsQueryable()
                 .ToListAsync();
 
             // Fetch recent raw data
@@ -2077,7 +2087,7 @@ namespace EMS.Repository
                     Value = d.AddressVariable / 10,
                     FkUnitId = d.DeviceDataMaster.Device.FkUnitId,
                     DeviceId = d.DeviceDataMaster.FkDeviceId
-                })
+                }).AsQueryable()
                 .ToListAsync();
 
             foreach (var rule in alertRules)
@@ -2086,7 +2096,7 @@ namespace EMS.Repository
                     .Where(d =>
                         d.FkUnitId == rule.FkUnitId &&
                         d.DeviceId == rule.FkDeviceId &&
-                        d.Address == rule.Address)
+                        d.Address == rule.Address).AsQueryable()
                     .ToList();
 
                 foreach (var data in matches)
@@ -2143,63 +2153,121 @@ namespace EMS.Repository
 
             return devices.ToJson().FromJson<List<DeviceDTO>>();
         }
-
-
-        public async Task<List<PowerLoadDTO>> GetkW()
+        public async Task<List<DeviceDataMaster>> checkingDevice()
         {
+            // Step 1: Get the latest CreatedAt time for UA, UB, or UC
+            var latestTime = await DBEMSContext.DeviceDataDetails
+                .Where(d => d.Address == "UA" || d.Address == "UB" || d.Address == "UC")
+                .MaxAsync(d => d.CreatedAt);
+
+            if (latestTime == null)
+                return new List<DeviceDataMaster>();
+
+            DateTime endTime = latestTime.Value;
+            DateTime startTime = endTime.AddSeconds(-30);
+
+            // Step 2: Get DeviceDataDetails for UA, UB, or UC in the last 30 seconds
+            var detailEntries = await DBEMSContext.DeviceDataDetails
+                .Where(d =>
+                    d.FkDeviceDataMasterId.HasValue &&
+                    d.CreatedAt.HasValue &&
+                    (d.Address == "UA" || d.Address == "UB" || d.Address == "UC") &&
+                    d.CreatedAt.Value >= startTime &&
+                    d.CreatedAt.Value <= endTime
+                )
+                .ToListAsync();
+
+            // Step 3: Get distinct master IDs from those details
+            var masterIds = detailEntries
+                .Select(d => d.FkDeviceDataMasterId.Value)
+                .Distinct()
+                .ToList();
+
+            // Step 4: Get matching DeviceDataMaster entries
+            var masterEntries = await DBEMSContext.DeviceDataMasters
+                .Where(m => masterIds.Contains(m.Id))
+                .OrderBy(m => m.CreatedAt)
+                .ToListAsync();
+
+            return masterEntries;
+        }
+
+
+
+        public async Task<List<kWDTO>> GetkW()
+        {
+            // Preload all units
             var units = await DBEMSContext.Units.ToListAsync();
-            var result = new List<PowerLoadDTO>();
+
+            // Get all devices and link them to their units
+            var devices = await DBEMSContext.Devices
+                .Select(dev => new { dev.Id, dev.FkUnitId })
+                .ToListAsync();
+
+            var deviceIds = devices.Select(d => d.Id).ToList();
+
+            // Get the latest DeviceDataMaster per device
+            var latestDeviceDataMasters = await DBEMSContext.DeviceDataMasters
+                .Where(dm => deviceIds.Contains(dm.FkDeviceId.Value))
+                .GroupBy(dm => dm.FkDeviceId)
+                .Select(g => g.OrderByDescending(dm => dm.CreatedAt).FirstOrDefault())
+                .ToListAsync();
+
+            var latestDDMIds = latestDeviceDataMasters.Select(dm => dm.Id).ToList();
+
+            // Get all "P" address readings from latest masters
+            var deviceDataDetails = await DBEMSContext.DeviceDataDetails
+                .Where(d => latestDDMIds.Contains(d.FkDeviceDataMasterId.Value) && d.Address == "P")
+                .Select(d => new { d.FkDeviceDataMasterId, d.AddressVariable })
+                .ToListAsync();
+
+            // Join all data in memory
+            var result = new List<kWDTO>();
 
             foreach (var unit in units)
             {
-                var deviceIds = await DBEMSContext.Devices
-                    .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id)
-                    .ToListAsync();
+                // All devices in this unit
+                var unitDeviceIds = devices
+                    .Where(d => d.FkUnitId == unit.Id)
+                    .Select(d => d.Id)
+                    .ToList();
 
-                if (!deviceIds.Any())
+                if (!unitDeviceIds.Any())
                 {
-                    result.Add(new PowerLoadDTO { UnitName = unit.Name, AddressVariable = 0 });
+                    result.Add(new kWDTO { UnitName = unit.Name, AddressVariable = 0 });
                     continue;
                 }
 
-                // Fetch the latest DeviceDataMaster for each device in the unit
-                var latestDeviceDataMasters = await DBEMSContext.DeviceDataMasters
-                    .Where(dm => deviceIds.Contains(dm.FkDeviceId.Value))
-                    .GroupBy(dm => dm.FkDeviceId)
-                    .Select(g => g.OrderByDescending(dm => dm.CreatedAt).FirstOrDefault()) // Get the latest DeviceDataMaster for each device
-                    .ToListAsync();
+                // Get DDMs linked to this unit
+                var unitDDMs = latestDeviceDataMasters
+                    .Where(dm => unitDeviceIds.Contains(dm.FkDeviceId.Value))
+                    .Select(dm => dm.Id)
+                    .ToList();
 
-                if (!latestDeviceDataMasters.Any())
+                if (!unitDDMs.Any())
                 {
-                    result.Add(new PowerLoadDTO { UnitName = unit.Name, AddressVariable = 0 });
+                    result.Add(new kWDTO { UnitName = unit.Name, AddressVariable = 0 });
                     continue;
                 }
 
-                // Fetch the latest data for each device's DeviceDataMaster
-                var latestValues = await DBEMSContext.DeviceDataDetails
-                    .Where(d =>
-                        latestDeviceDataMasters.Select(dm => dm.Id).Contains(d.FkDeviceDataMasterId.Value) && // Match DeviceDataMasters
-                        d.Address == "P") // Filter for the "P" parameter
-                    .ToListAsync();
+                // Get relevant readings
+                var unitReadings = deviceDataDetails
+                    .Where(d => unitDDMs.Contains(d.FkDeviceDataMasterId.Value))
+                    .Select(d => d.AddressVariable ?? 0)
+                    .ToList();
 
-                // Sum the AddressVariable for all devices' latest readings
-                var totalPower = latestValues.Sum(d => d.AddressVariable ?? 0); // Sum of the latest readings for all devices
+                // Sum and convert to kW
+                var totalPowerKW = unitReadings.Sum() / 10;
 
-                // Convert the total power to kW (assuming AddressVariable is in 10ths, so divide by 10)
-                var totalPowerInKW = totalPower / 10;
-
-                result.Add(new PowerLoadDTO
+                result.Add(new kWDTO
                 {
                     UnitName = unit.Name,
-                    AddressVariable = totalPowerInKW, // Sum of all devices' latest readings in kW
-                    CreatedAt = DateTime.Now // Use the latest date or any specific time
+                    AddressVariable = totalPowerKW
                 });
             }
 
             return result;
         }
-
 
         public async Task<List<AlertCenterDTO>> GetAlertsNotices()
         {
@@ -2218,17 +2286,10 @@ namespace EMS.Repository
                                     AlertLevel = alert.AlertLevel,
                                     Event = alert.Event,
                                     CreatedAt = alert.createdAt
-                                }).ToListAsync();
+                                }).AsQueryable().ToListAsync();
 
             return result;
         }
-
-
-
-
-
-
-
 
         public async Task<List<DeviceDataDetailDTO>> GetDeviceDataDetailsAsync(int deviceid)
         {
@@ -2246,13 +2307,13 @@ namespace EMS.Repository
                 {
                     var deviceIds = await DBEMSContext.Devices
                         .Where(dev => dev.FkUnitId == unit.Id && dev.Id == deviceid)
-                        .Select(dev => dev.Id)
+                        .Select(dev => dev.Id).AsQueryable()
                         .ToListAsync();
 
                     if (deviceIds.Any())
                     {
                         var dataMasterIds = await DBEMSContext.DeviceDataMasters
-                            .Where(dm => dm.FkDeviceId == deviceid && dm.CreatedAt >= startTime && dm.CreatedAt <= endTime)
+                            .Where(dm => dm.FkDeviceId == deviceid && dm.CreatedAt >= startTime && dm.CreatedAt <= endTime).AsQueryable()
                             .Select(dm => dm.Id)
                             .ToListAsync();
 
@@ -2272,7 +2333,7 @@ namespace EMS.Repository
                                     AddressVariable = d.AddressVariable,
                                     CreatedAt = d.CreatedAt,
                                     DeviceId = deviceid
-                                })
+                                }).AsQueryable()
                                 .ToListAsync();
 
                             result.AddRange(data);
@@ -2326,7 +2387,7 @@ namespace EMS.Repository
                         case "pfb":
                         case "pfc":
                         case "pf":
-                     
+
                             // Ensure no divide by zero occurs
                             if (lastValue != 0)
                             {
@@ -2399,7 +2460,7 @@ namespace EMS.Repository
                         Address = d.Address,
                         AddressVariable = d.AddressVariable,
                         CreatedAt = d.CreatedAt,
-                    })
+                    }).AsQueryable()
                     .ToListAsync();
 
                 result.AddRange(data);
@@ -2465,7 +2526,7 @@ namespace EMS.Repository
                         case "eql":
                             if (lastValue != 0 && firstValue != 0)
                             {
-                                calculatedValue = lastValue  * 0.06;
+                                calculatedValue = lastValue * 0.06;
                             }
                             else
                             {
@@ -2510,7 +2571,7 @@ namespace EMS.Repository
                     Id = x.Id,
                     Name = x.Name,
                     // Map other fields as needed
-                })
+                }).AsQueryable()
                 .ToListAsync();
 
             return data;
@@ -2535,13 +2596,13 @@ namespace EMS.Repository
         public async Task<List<DeviceDataDetailDTO>> GetAddresses()
         {
             var data = await DBEMSContext.DeviceDataDetails
-                
+
                 .Select(x => new DeviceDataDetailDTO
                 {
-                        Address = x.Address
+                    Address = x.Address
                     // Map other fields as needed
                 })
-                .Take(13)
+                .Take(13).AsQueryable()
                 .ToListAsync();
 
             return data;
@@ -2566,7 +2627,7 @@ namespace EMS.Repository
                 data.Min = model.Min;
                 data.FkDeviceId = model.FkDeviceId;
                 data.FkUnitId = model.FkUnitId;
-               
+
 
                 await DBEMSContext.SaveChangesAsync(); // Only save here
                 return true;
@@ -2789,7 +2850,7 @@ namespace EMS.Repository
 
             // ✅ Build meterId dictionary from Units
             var meterId = request.Units
-                .Where(u => u.UnitId != 0)
+                .Where(u => u.UnitId != 0).AsQueryable()
                 .ToDictionary(
                     u => u.UnitId,
                     u => u.Meters.Where(m => m.MeterId != 0).Select(m => m.MeterId).ToList()
@@ -2853,7 +2914,7 @@ namespace EMS.Repository
                             d.DeviceDataMaster?.FkDeviceId != null &&
                             meterId.ContainsKey(d.DeviceDataMaster.Device.FkUnitId.Value) &&
                             meterId[d.DeviceDataMaster.Device.FkUnitId.Value]
-                                .Contains(d.DeviceDataMaster.FkDeviceId.Value))
+                                .Contains(d.DeviceDataMaster.FkDeviceId.Value)).AsQueryable()
                 .ToList();
 
             // ✅ Ensure all requested meterId entries exist in the final result
@@ -2939,7 +3000,7 @@ namespace EMS.Repository
                         UnitName = unitGroup.Key.UnitName,
                         TotalAddressVariable = unitGroup.Sum(d => d.AddressVariable)
                     }
-                ).ToListAsync();
+                ).AsQueryable().ToListAsync();
 
 
             return result;
@@ -2976,7 +3037,7 @@ namespace EMS.Repository
                     MinuteBlock = x.CreatedAt.Minute,  // Group by minute (0-59)
                     x.UnitId,
                     x.UnitName
-                })
+                }).AsQueryable()
                 .OrderBy(g => g.Key.MinuteBlock)  // Sort by minute block (ascending)
                 .Select(g => new HourlyAddressVariableSumDTO
                 {
@@ -3021,7 +3082,7 @@ namespace EMS.Repository
                     DeviceName = g.Key.DeviceName, // Use distinct name for DeviceName
                     TotalAddressVariable = g.Sum(x => x.AddressVariable) // Aggregate data
                 }
-            ).ToListAsync(); // Retrieve and group data in one step
+            ).AsQueryable().ToListAsync(); // Retrieve and group data in one step
 
             // Step 2: Return the result sorted by UnitId and DeviceId
             return rawData.OrderBy(x => x.UnitId)
@@ -3055,7 +3116,7 @@ namespace EMS.Repository
                     TotalAddressVariable = unitGroup.Sum(d => d.AddressVariable),
                     Date = start // ⏱ optional: include the hour being reported
                 }
-            ).ToListAsync();
+            ).AsQueryable().ToListAsync();
 
             return result;
         }
@@ -3074,19 +3135,19 @@ namespace EMS.Repository
             return timeRange.ToLower() switch
             {
                 "yearly" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, d.Address })
-                                .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault())
+                                .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
                                 .ToList(),
 
                 "monthly" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, Month = d.CreatedAt?.Month, d.Address })
-                                 .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault())
+                                 .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
                                  .ToList(),
 
                 "daily" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, Month = d.CreatedAt?.Month, Day = d.CreatedAt?.Day, d.Address })
-                               .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault())
+                               .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
                                .ToList(),
 
                 "hourly" => data.GroupBy(d => new { Year = d.CreatedAt?.Year, Month = d.CreatedAt?.Month, Day = d.CreatedAt?.Day, Hour = d.CreatedAt?.Hour, d.Address })
-                                .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault())
+                                .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
                                 .ToList(),
 
                 "15minutes" => data.GroupBy(d => new
@@ -3098,7 +3159,7 @@ namespace EMS.Repository
                     Quarter = d.CreatedAt?.Minute / 15,
                     d.Address
                 })
-                                   .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault())
+                                   .Select(g => g.OrderByDescending(d => d.CreatedAt).FirstOrDefault()).AsQueryable()
                                    .ToList(),
 
                 _ => data // 🛑 Return unmodified data if time range is invalid

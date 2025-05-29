@@ -57,7 +57,7 @@ namespace EMS.Core.Interfaces
         //Task<List<PowerLoadDTO>> AllUnitsConsumption();
 
 
-        Task<List<PowerLoadDTO>> GetkW();
+        Task<List<kWDTO>> GetkW();
 
         Task<List<DeviceDTO>> GetDeviceStatus();
 
@@ -96,6 +96,8 @@ namespace EMS.Core.Interfaces
         //Methods Use In Consumption Details  Page  
         Task<List<UnitDTO>> getUnits();
         Task<List<DeviceDTO>> getDevices();
+        Task<List<DeviceDataMaster>> checkingDevice();
+
         Task<List<ConsumptionDetailsDTO>> GetConsumptions(DateTime selectedDate, int? selectedUnit, int? selectedDevices, string selectedRange);
 
     }

@@ -1033,6 +1033,26 @@ public async Task<IActionResult> getDevices()
             return Ok(response);
 
         }
+        [HttpGet("checkingDevice")]
+        public async Task<IActionResult> checkingDevice()
+        {
+            var response = new ResponseModel();
+            try
+            {
+                var data = await _dataDetailRrepository.checkingDevice();
+
+                response.Data = data;
+                response.Message = "Successfully fetched!";
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Error: {ex.Message}";
+                response.IsSuccess = false;
+            }
+            return Ok(response);
+
+        }
 
     }
 }
