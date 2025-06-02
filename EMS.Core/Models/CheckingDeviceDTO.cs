@@ -6,13 +6,10 @@ using System.Threading.Tasks;
 
 namespace EMS.Core.Models
 {
-    public class DeviceDataMasterDTO:BaseDTO
+    public class CheckingDeviceDTO:BaseDTO
     {
-        public string? DeviceId { get; set; }
-
-        public DateTime? CreatedAt { get; set; }
         public string? DeviceName { get; set; }
-        public DeviceDTO? Device { get; set; }
+        public string Status { get; set; }
         public int? FkDeviceId { get; set; }
     }
 }

@@ -612,20 +612,20 @@ namespace EMS.Repository
             var startTime = endTime.Date.AddDays(-6); // Last 7 days including today
             var result = new List<PowerLoadDTO>();
 
-            var unit = await DBEMSContext.Units.AsQueryable().OrderBy(u => u.Id).FirstOrDefaultAsync();
+            var unit = await DBEMSContext.Units.OrderBy(u => u.Id).FirstOrDefaultAsync();
 
             if (unit != null)
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id).AsQueryable()
+                    .Select(dev => dev.Id)
                     .ToListAsync();
 
                 if (deviceIds.Any())
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => dm.Id).AsQueryable()
+                        .Select(dm => dm.Id)
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
@@ -636,30 +636,34 @@ namespace EMS.Repository
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "P" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime).AsQueryable()
+                                d.CreatedAt <= endTime)
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
-                        var dailyGroups = rawData
-                            .GroupBy(d => d.CreatedAt.Value.Date).AsQueryable()// Group by each day
+                        // 🔸 Generate all days in range
+                        var allDays = Enumerable.Range(0, 7)
+                            .Select(i => startTime.AddDays(i).Date)
                             .ToList();
 
-                        foreach (var group in dailyGroups)
+                        foreach (var day in allDays)
                         {
-                            // Calculate average P(kW) for the day
-                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).AsQueryable().ToList();
+                            var dayData = rawData
+                                .Where(d => d.CreatedAt.Value.Date == day && d.AddressVariable.HasValue)
+                                .Select(d => d.AddressVariable.Value)
+                                .ToList();
 
-                            if (validReadings.Any())
+                            double avgPower = 0;
+                            if (dayData.Any())
                             {
-                                var avgPower = validReadings.Average() / 10.0; // Assuming AddressVariable is *10 (divide by 10)
-
-                                result.Add(new PowerLoadDTO
-                                {
-                                    UnitName = unit.Name,
-                                    AddressVariable = avgPower, // now it's average kW
-                                    CreatedAt = group.Key // the date
-                                });
+                                avgPower = dayData.Average() / 10.0; // Assuming value is *10
                             }
+
+                            result.Add(new PowerLoadDTO
+                            {
+                                UnitName = unit.Name,
+                                AddressVariable = avgPower,
+                                CreatedAt = day
+                            });
                         }
                     }
                 }
@@ -796,10 +800,10 @@ namespace EMS.Repository
         }
 
         public async Task<List<ConsumptionDetailsDTO>> GetConsumptions(
-           DateTime selectedDate,
-           int? selectedUnit,
-           int? selectedDevices,
-           string selectedRange)
+       DateTime selectedDate,
+       int? selectedUnit,
+       int? selectedDevices,
+       string selectedRange)
         {
             var result = new List<ConsumptionDetailsDTO>();
             var selectedDateTime = selectedDate;
@@ -835,10 +839,14 @@ namespace EMS.Repository
                                         .Where(d =>
                                             d.FkDeviceDataMasterId.HasValue &&
                                             dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
-                                            ((d.CreatedAt.Value.Date == previousDate && d.Address == "EPI") || // Previous date only EPI
-                                             (d.CreatedAt.Value.Date == selectedDateTime.Date && addressList.Contains(d.Address))) // Selected date all addresses
-                                            &&
-                                            d.CreatedAt.HasValue).AsQueryable()
+                                            (
+                                                (d.CreatedAt.Value.Date == previousDate &&
+                                                 (d.Address == "EPI" || d.Address == "EPE")) ||  // <-- EPI and EPE for previous date
+                                                (d.CreatedAt.Value.Date == selectedDateTime.Date &&
+                                                 addressList.Contains(d.Address))  // <-- all selected addresses for current date
+                                            ) &&
+                                            d.CreatedAt.HasValue)
+                                        .AsQueryable()
                                         .OrderBy(d => d.CreatedAt)
                                         .ToListAsync();
                                 }
@@ -871,21 +879,24 @@ namespace EMS.Repository
                                 }
                             }
 
-                            // Prepare results for previousDate only for "EPI" address
-                            for (int hour = 0; hour < 24; hour++)
+                            // Prepare results for previousDate for EPI and EPE
+                            foreach (var address in new[] { "EPI", "EPE" })
                             {
-                                result.Add(new ConsumptionDetailsDTO
+                                for (int hour = 0; hour < 24; hour++)
                                 {
-                                    SelectedDate = previousDate.AddHours(hour),
-                                    SelectedUnit = selectedUnit.Value,
-                                    SelectedDevice = selectedDevices,
-                                    SelectedRange = selectedRange,
-                                    Address = "EPI",
-                                    AddressVariable = hourlyTotals.TryGetValue((previousDate, hour, "EPI"), out var val) ? val : 0.0
-                                });
+                                    result.Add(new ConsumptionDetailsDTO
+                                    {
+                                        SelectedDate = previousDate.AddHours(hour),
+                                        SelectedUnit = selectedUnit.Value,
+                                        SelectedDevice = selectedDevices,
+                                        SelectedRange = selectedRange,
+                                        Address = address,
+                                        AddressVariable = hourlyTotals.TryGetValue((previousDate, hour, address), out var val) ? val : 0.0
+                                    });
+                                }
                             }
 
-                            // Prepare results for selectedDate for all addresses
+                            // Prepare results for selectedDate for all selected addresses
                             foreach (var address in addressList)
                             {
                                 for (int hour = 0; hour < 24; hour++)
@@ -901,6 +912,7 @@ namespace EMS.Repository
                                     });
                                 }
                             }
+
                             break;
                         }
 
@@ -933,11 +945,15 @@ namespace EMS.Repository
                                         .Where(d =>
                                             d.FkDeviceDataMasterId.HasValue &&
                                             dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
-                                            ((d.CreatedAt.Value.Date >= prevWeekStart && d.CreatedAt.Value.Date < prevWeekEnd && d.Address == "EPI") || // Prev week only EPI
-                                             (d.CreatedAt.Value.Date >= weekStart && d.CreatedAt.Value.Date < weekEnd && addressList.Contains(d.Address))) // This week all addresses
-                                            &&
+                                            (
+                                                (d.CreatedAt.Value.Date >= prevWeekStart && d.CreatedAt.Value.Date < prevWeekEnd &&
+                                                 (d.Address == "EPI" || d.Address == "EPE")) ||  // <-- Previous week: EPI and EPE
+                                                (d.CreatedAt.Value.Date >= weekStart && d.CreatedAt.Value.Date < weekEnd &&
+                                                 addressList.Contains(d.Address))  // <-- Current week: all selected addresses
+                                            ) &&
                                             d.CreatedAt.HasValue)
-                                        .OrderBy(d => d.CreatedAt).AsQueryable()
+                                        .OrderBy(d => d.CreatedAt)
+                                        .AsQueryable()
                                         .ToListAsync();
                                 }
                             }
@@ -959,22 +975,25 @@ namespace EMS.Repository
                                 }
                             }
 
-                            // Previous week only EPI
-                            for (int day = 0; day < 7; day++)
+                            // Previous week: EPI and EPE
+                            foreach (var address in new[] { "EPI", "EPE" })
                             {
-                                var currentDate = prevWeekStart.AddDays(day);
-                                result.Add(new ConsumptionDetailsDTO
+                                for (int day = 0; day < 7; day++)
                                 {
-                                    SelectedDate = currentDate,
-                                    SelectedUnit = selectedUnit.Value,
-                                    SelectedDevice = selectedDevices,
-                                    SelectedRange = selectedRange,
-                                    Address = "EPI",
-                                    AddressVariable = dailyTotals.TryGetValue((currentDate, "EPI"), out var val) ? val : 0.0
-                                });
+                                    var currentDate = prevWeekStart.AddDays(day);
+                                    result.Add(new ConsumptionDetailsDTO
+                                    {
+                                        SelectedDate = currentDate,
+                                        SelectedUnit = selectedUnit.Value,
+                                        SelectedDevice = selectedDevices,
+                                        SelectedRange = selectedRange,
+                                        Address = address,
+                                        AddressVariable = dailyTotals.TryGetValue((currentDate, address), out var val) ? val : 0.0
+                                    });
+                                }
                             }
 
-                            // Selected week all addresses
+                            // Current week: all selected addresses
                             for (int day = 0; day < 7; day++)
                             {
                                 var currentDate = weekStart.AddDays(day);
@@ -991,8 +1010,10 @@ namespace EMS.Repository
                                     });
                                 }
                             }
+
                             break;
                         }
+
 
                     case "month":
                         {
@@ -1025,11 +1046,14 @@ namespace EMS.Repository
                                         .Where(d =>
                                             d.FkDeviceDataMasterId.HasValue &&
                                             dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
-                                            ((d.CreatedAt.Value.Date >= prevMonthStart && d.CreatedAt.Value.Date < prevMonthEnd && d.Address == "EPI") || // Prev month only EPI
-                                             (d.CreatedAt.Value.Date >= monthStart && d.CreatedAt.Value.Date < monthEnd && addressList.Contains(d.Address))) // Selected month all addresses
-                                            &&
-                                            d.CreatedAt.HasValue).AsQueryable()
-                                        .OrderBy(d => d.CreatedAt)
+                                            (
+                                                (d.CreatedAt.Value.Date >= prevMonthStart && d.CreatedAt.Value.Date < prevMonthEnd &&
+                                                 (d.Address == "EPI" || d.Address == "EPE")) || // <-- Previous month: EPI and EPE
+                                                (d.CreatedAt.Value.Date >= monthStart && d.CreatedAt.Value.Date < monthEnd &&
+                                                 addressList.Contains(d.Address)) // <-- Selected month: all addresses
+                                            ) &&
+                                            d.CreatedAt.HasValue)
+                                        .OrderBy(d => d.CreatedAt).AsQueryable()
                                         .ToListAsync();
                                 }
                             }
@@ -1051,22 +1075,25 @@ namespace EMS.Repository
                                 }
                             }
 
-                            // Previous month only EPI
-                            for (int day = 0; day < daysInPrevMonth; day++)
+                            // Previous month: EPI and EPE
+                            foreach (var address in new[] { "EPI", "EPE" })
                             {
-                                var currentDate = prevMonthStart.AddDays(day);
-                                result.Add(new ConsumptionDetailsDTO
+                                for (int day = 0; day < daysInPrevMonth; day++)
                                 {
-                                    SelectedDate = currentDate,
-                                    SelectedUnit = selectedUnit.Value,
-                                    SelectedDevice = selectedDevices,
-                                    SelectedRange = selectedRange,
-                                    Address = "EPI",
-                                    AddressVariable = dailyTotals.TryGetValue((currentDate, "EPI"), out var val) ? val : 0.0
-                                });
+                                    var currentDate = prevMonthStart.AddDays(day);
+                                    result.Add(new ConsumptionDetailsDTO
+                                    {
+                                        SelectedDate = currentDate,
+                                        SelectedUnit = selectedUnit.Value,
+                                        SelectedDevice = selectedDevices,
+                                        SelectedRange = selectedRange,
+                                        Address = address,
+                                        AddressVariable = dailyTotals.TryGetValue((currentDate, address), out var val) ? val : 0.0
+                                    });
+                                }
                             }
 
-                            // Selected month all addresses
+                            // Selected month: all selected addresses
                             for (int day = 0; day < daysInMonth; day++)
                             {
                                 var currentDate = monthStart.AddDays(day);
@@ -1083,9 +1110,9 @@ namespace EMS.Repository
                                     });
                                 }
                             }
+
                             break;
                         }
-
 
                     case "year":
                         {
@@ -1095,6 +1122,9 @@ namespace EMS.Repository
                             DateTime prevYearStart = yearStart.AddYears(-1);
                             DateTime prevYearEnd = yearStart;
 
+                            var previousYearAddresses = new[] { "EPI", "EPE" };
+                            var allAddressesToFetch = addressList.Concat(previousYearAddresses).Distinct().ToList();
+
                             var deviceIds = await DBEMSContext.Devices
                                 .Where(dev => dev.FkUnitId == selectedUnit.Value)
                                 .Select(dev => dev.Id)
@@ -1103,11 +1133,13 @@ namespace EMS.Repository
                             if (deviceIds.Any())
                             {
                                 var dataMasterIds = await DBEMSContext.DeviceDataMasters
-                                    .Where(dm => deviceIds.Contains(dm.FkDeviceId.Value) &&
-                                                 dm.CreatedAt.HasValue &&
-                                                 ((dm.CreatedAt.Value.Date >= yearStart && dm.CreatedAt.Value.Date < yearEnd) ||
-                                                  (dm.CreatedAt.Value.Date >= prevYearStart && dm.CreatedAt.Value.Date < prevYearEnd)))
-                                    .Select(dm => dm.Id).AsQueryable()
+                                    .Where(dm =>
+                                        dm.FkDeviceId.HasValue &&
+                                        deviceIds.Contains(dm.FkDeviceId.Value) &&
+                                        dm.CreatedAt.HasValue &&
+                                        dm.CreatedAt >= prevYearStart &&
+                                        dm.CreatedAt < yearEnd)
+                                    .Select(dm => dm.Id)
                                     .ToListAsync();
 
                                 if (dataMasterIds.Any())
@@ -1116,23 +1148,25 @@ namespace EMS.Repository
                                         .Where(d =>
                                             d.FkDeviceDataMasterId.HasValue &&
                                             dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
-                                            ((d.CreatedAt.Value.Date >= prevYearStart && d.CreatedAt.Value.Date < prevYearEnd && d.Address == "EPI") ||  // Prev year only EPI
-                                             (d.CreatedAt.Value.Date >= yearStart && d.CreatedAt.Value.Date < yearEnd && addressList.Contains(d.Address))) // Current year all addresses
-                                            &&
-                                            d.CreatedAt.HasValue).AsQueryable()
+                                            d.CreatedAt.HasValue &&
+                                            d.CreatedAt >= prevYearStart &&
+                                            d.CreatedAt < yearEnd &&
+                                            allAddressesToFetch.Contains(d.Address))
                                         .OrderBy(d => d.CreatedAt)
                                         .ToListAsync();
                                 }
                             }
 
-                            // Group current year data by month and address
-                            var currentYearGroups = allDeviceData
-                                .Where(d => d.CreatedAt.Value.Date >= yearStart && d.CreatedAt.Value.Date < yearEnd).AsQueryable()
-                                .GroupBy(d => new { Month = new DateTime(d.CreatedAt.Value.Year, d.CreatedAt.Value.Month, 1), d.Address });
+                            var monthlyGroups = allDeviceData
+                                .GroupBy(d => new
+                                {
+                                    Month = new DateTime(d.CreatedAt.Value.Year, d.CreatedAt.Value.Month, 1),
+                                    d.Address
+                                });
 
-                            var currentYearTotals = new Dictionary<(DateTime Month, string Address), double>();
+                            var monthlyTotals = new Dictionary<(DateTime Month, string Address), double>();
 
-                            foreach (var group in currentYearGroups)
+                            foreach (var group in monthlyGroups)
                             {
                                 var first = group.FirstOrDefault();
                                 var last = group.LastOrDefault();
@@ -1140,60 +1174,44 @@ namespace EMS.Repository
                                 if (first != null && last != null)
                                 {
                                     var diff = (last.AddressVariable ?? 0) - (first.AddressVariable ?? 0);
-                                    currentYearTotals[(group.Key.Month, group.Key.Address)] = diff * 0.06;
+                                    monthlyTotals[(group.Key.Month, group.Key.Address)] = diff * 0.06;
                                 }
                             }
 
-                            // Group previous year EPI data by month
-                            var prevYearEpiGroups = allDeviceData
-                                .Where(d => d.CreatedAt.Value.Date >= prevYearStart && d.CreatedAt.Value.Date < prevYearEnd && d.Address == "EPI").AsQueryable()
-                                .GroupBy(d => new DateTime(d.CreatedAt.Value.Year, d.CreatedAt.Value.Month, 1));
-
-                            var prevYearEpiTotals = new Dictionary<DateTime, double>();
-
-                            foreach (var group in prevYearEpiGroups)
+                            // Previous year: EPI and EPE
+                            foreach (var address in previousYearAddresses)
                             {
-                                var first = group.FirstOrDefault();
-                                var last = group.LastOrDefault();
-
-                                if (first != null && last != null)
+                                for (int month = 1; month <= 12; month++)
                                 {
-                                    var diff = (last.AddressVariable ?? 0) - (first.AddressVariable ?? 0);
-                                    prevYearEpiTotals[group.Key] = diff * 0.06;
-                                }
-                            }
-
-                            // Add results for current year for all addresses month-wise
-                            for (int month = 1; month <= 12; month++)
-                            {
-                                var currentMonth = new DateTime(selectedDateTime.Year, month, 1);
-                                foreach (var address in addressList)
-                                {
+                                    var prevMonth = new DateTime(selectedDateTime.Year - 1, month, 1);
                                     result.Add(new ConsumptionDetailsDTO
                                     {
-                                        SelectedDate = currentMonth,
+                                        SelectedDate = prevMonth,
                                         SelectedUnit = selectedUnit.Value,
                                         SelectedDevice = selectedDevices,
                                         SelectedRange = selectedRange,
                                         Address = address,
-                                        AddressVariable = currentYearTotals.TryGetValue((currentMonth, address), out var val) ? val : 0.0
+                                        AddressVariable = monthlyTotals.TryGetValue((prevMonth, address), out var val) ? val : 0.0
                                     });
                                 }
                             }
 
-                            // Add results for previous year EPI data month-wise
+                            // Current year: all selected addresses
                             for (int month = 1; month <= 12; month++)
                             {
-                                var prevMonth = new DateTime(selectedDateTime.Year - 1, month, 1);
-                                result.Add(new ConsumptionDetailsDTO
+                                var currMonth = new DateTime(selectedDateTime.Year, month, 1);
+                                foreach (var address in addressList)
                                 {
-                                    SelectedDate = prevMonth,
-                                    SelectedUnit = selectedUnit.Value,
-                                    SelectedDevice = selectedDevices,
-                                    SelectedRange = "prevYearEPI",
-                                    Address = "EPI",
-                                    AddressVariable = prevYearEpiTotals.TryGetValue(prevMonth, out var val) ? val : 0.0
-                                });
+                                    result.Add(new ConsumptionDetailsDTO
+                                    {
+                                        SelectedDate = currMonth,
+                                        SelectedUnit = selectedUnit.Value,
+                                        SelectedDevice = selectedDevices,
+                                        SelectedRange = selectedRange,
+                                        Address = address,
+                                        AddressVariable = monthlyTotals.TryGetValue((currMonth, address), out var val) ? val : 0.0
+                                    });
+                                }
                             }
 
                             break;
@@ -1205,40 +1223,39 @@ namespace EMS.Repository
                 }
                 return result;
             }
-
             if (selectedDevices == null)
-                return result;
-
+            {
+            }
             switch (selectedRange?.ToLower())
             {
                 case "date":
                     {
                         var previousDate = selectedDateTime.Date.AddDays(-1); // Previous day
 
-                        // Get dataMasterIds for current date and previous date (only EPI for previous date)
+                        // Get dataMasterIds for current and previous date
                         var dataMasterIds = await DBEMSContext.DeviceDataMasters
                             .Where(x => x.FkDeviceId == selectedDevices &&
                                         x.CreatedAt.HasValue &&
                                         (x.CreatedAt.Value.Date == selectedDateTime.Date ||
                                          x.CreatedAt.Value.Date == previousDate))
-                            .Select(x => x.Id).AsQueryable()
+                            .Select(x => x.Id)
                             .ToListAsync();
 
-                        // Get all data details for current date (all addresses) and previous date (only EPI)
+                        // Get all data details: current date (all addresses), previous date (EPI and EPE only)
                         allDeviceData = await DBEMSContext.DeviceDataDetails
                             .Where(d =>
                                 d.FkDeviceDataMasterId.HasValue &&
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.CreatedAt.HasValue &&
                                 (
-                                    (d.CreatedAt.Value.Date == previousDate && d.Address == "EPI") ||
+                                    (d.CreatedAt.Value.Date == previousDate && (d.Address == "EPI" || d.Address == "EPE")) ||
                                     (d.CreatedAt.Value.Date == selectedDateTime.Date && addressList.Contains(d.Address))
                                 )
-                            ).AsQueryable()
+                            )
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
-                        // Grouping with Date, Hour, Address to differentiate previous vs current
+                        // Group by date, hour, and address
                         var hourlyGroups = allDeviceData
                             .GroupBy(d => new { Date = d.CreatedAt.Value.Date, Hour = d.CreatedAt.Value.Hour, d.Address });
 
@@ -1258,21 +1275,24 @@ namespace EMS.Repository
                             }
                         }
 
-                        // Add results for previousDate, only EPI
-                        for (int hour = 0; hour < 24; hour++)
+                        // Previous date: add both EPI and EPE
+                        foreach (var address in new[] { "EPI", "EPE" })
                         {
-                            result.Add(new ConsumptionDetailsDTO
+                            for (int hour = 0; hour < 24; hour++)
                             {
-                                SelectedDate = previousDate.AddHours(hour),
-                                SelectedUnit = selectedUnit ?? 0,
-                                SelectedDevice = selectedDevices.Value,
-                                SelectedRange = "date",
-                                Address = "EPI",
-                                AddressVariable = hourlyTotals.TryGetValue((previousDate, hour, "EPI"), out var val) ? val : 0.0
-                            });
+                                result.Add(new ConsumptionDetailsDTO
+                                {
+                                    SelectedDate = previousDate.AddHours(hour),
+                                    SelectedUnit = selectedUnit ?? 0,
+                                    SelectedDevice = selectedDevices.Value,
+                                    SelectedRange = "date",
+                                    Address = address,
+                                    AddressVariable = hourlyTotals.TryGetValue((previousDate, hour, address), out var val) ? val : 0.0
+                                });
+                            }
                         }
 
-                        // Add results for selectedDate, all addresses
+                        // Current date: add all selected addresses
                         foreach (var address in addressList)
                         {
                             for (int hour = 0; hour < 24; hour++)
@@ -1291,6 +1311,7 @@ namespace EMS.Repository
 
                         break;
                     }
+
                 case "week":
                     {
                         var startOfWeek = selectedDateTime.Date;
@@ -1304,7 +1325,7 @@ namespace EMS.Repository
                                         x.CreatedAt.HasValue &&
                                         ((x.CreatedAt.Value.Date >= startOfWeek && x.CreatedAt.Value.Date < endOfWeek) ||
                                          (x.CreatedAt.Value.Date >= prevWeekStart && x.CreatedAt.Value.Date < prevWeekEnd)))
-                            .Select(x => x.Id).AsQueryable()
+                            .Select(x => x.Id)
                             .ToListAsync();
 
                         allDeviceData = await DBEMSContext.DeviceDataDetails
@@ -1313,13 +1334,16 @@ namespace EMS.Repository
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.CreatedAt.HasValue &&
                                 (
+                                    // Current week: all selected addresses
                                     (d.CreatedAt.Value.Date >= startOfWeek && d.CreatedAt.Value.Date < endOfWeek && addressList.Contains(d.Address)) ||
-                                    (d.CreatedAt.Value.Date >= prevWeekStart && d.CreatedAt.Value.Date < prevWeekEnd && d.Address == "EPI")
-                                )).AsQueryable()
+                                    // Previous week: only EPI and EPE
+                                    (d.CreatedAt.Value.Date >= prevWeekStart && d.CreatedAt.Value.Date < prevWeekEnd && (d.Address == "EPI" || d.Address == "EPE"))
+                                ))
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
                         var groupedData = allDeviceData.GroupBy(d => new { Date = d.CreatedAt.Value.Date, d.Address });
+
                         var dailyTotals = new Dictionary<(DateTime Date, string Address), double>();
 
                         foreach (var group in groupedData)
@@ -1329,26 +1353,30 @@ namespace EMS.Repository
 
                             if (first != null && last != null)
                             {
-                                dailyTotals[(group.Key.Date, group.Key.Address)] = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
+                                dailyTotals[(group.Key.Date, group.Key.Address)] =
+                                    ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
                             }
                         }
 
-                        // Add previous week's EPI data
+                        // Previous week: add both EPI and EPE
                         foreach (var day in Enumerable.Range(0, 7))
                         {
                             var currentDate = prevWeekStart.AddDays(day);
-                            result.Add(new ConsumptionDetailsDTO
+                            foreach (var address in new[] { "EPI", "EPE" })
                             {
-                                SelectedDate = currentDate,
-                                SelectedUnit = selectedUnit ?? 0,
-                                SelectedDevice = selectedDevices.Value,
-                                SelectedRange = "week",
-                                Address = "EPI",
-                                AddressVariable = dailyTotals.TryGetValue((currentDate, "EPI"), out var val) ? val : 0.0
-                            });
+                                result.Add(new ConsumptionDetailsDTO
+                                {
+                                    SelectedDate = currentDate,
+                                    SelectedUnit = selectedUnit ?? 0,
+                                    SelectedDevice = selectedDevices.Value,
+                                    SelectedRange = "week",
+                                    Address = address,
+                                    AddressVariable = dailyTotals.TryGetValue((currentDate, address), out var val) ? val : 0.0
+                                });
+                            }
                         }
 
-                        // Add selected week's data for all selected addresses
+                        // Current week: all selected addresses
                         foreach (var day in Enumerable.Range(0, 7))
                         {
                             var currentDate = startOfWeek.AddDays(day);
@@ -1368,16 +1396,22 @@ namespace EMS.Repository
 
                         break;
                     }
+
                 case "month":
                     {
-                        var startOfMonth = new DateTime(selectedDateTime.Year, selectedDateTime.Month, 1);
-                        var endOfMonth = startOfMonth.AddMonths(1);
+                        var monthStart = new DateTime(selectedDateTime.Year, selectedDateTime.Month, 1);
+                        var monthEnd = monthStart.AddMonths(1);
+                        var daysInMonth = DateTime.DaysInMonth(monthStart.Year, monthStart.Month);
+
+                        var prevMonthStart = monthStart.AddMonths(-1);
+                        var prevMonthEnd = monthStart;
+                        var daysInPrevMonth = DateTime.DaysInMonth(prevMonthStart.Year, prevMonthStart.Month);
 
                         var dataMasterIds = await DBEMSContext.DeviceDataMasters
                             .Where(x => x.FkDeviceId == selectedDevices &&
                                         x.CreatedAt.HasValue &&
-                                        x.CreatedAt.Value.Date >= startOfMonth &&
-                                        x.CreatedAt.Value.Date < endOfMonth)
+                                        ((x.CreatedAt.Value.Date >= prevMonthStart && x.CreatedAt.Value.Date < prevMonthEnd) ||
+                                         (x.CreatedAt.Value.Date >= monthStart && x.CreatedAt.Value.Date < monthEnd)))
                             .Select(x => x.Id).AsQueryable()
                             .ToListAsync();
 
@@ -1385,11 +1419,16 @@ namespace EMS.Repository
                             .Where(d =>
                                 d.FkDeviceDataMasterId.HasValue &&
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
-                                addressList.Contains(d.Address) &&
                                 d.CreatedAt.HasValue &&
-                                d.CreatedAt.Value.Date >= startOfMonth &&
-                                d.CreatedAt.Value.Date < endOfMonth).AsQueryable()
-                            .OrderBy(d => d.CreatedAt)
+                                (
+                                    // Previous month: EPI and EPE only
+                                    (d.CreatedAt.Value.Date >= prevMonthStart && d.CreatedAt.Value.Date < prevMonthEnd &&
+                                        (d.Address == "EPI" || d.Address == "EPE")) ||
+                                    // Current month: all selected addresses
+                                    (d.CreatedAt.Value.Date >= monthStart && d.CreatedAt.Value.Date < monthEnd &&
+                                        addressList.Contains(d.Address))
+                                ))
+                            .OrderBy(d => d.CreatedAt).AsQueryable()
                             .ToListAsync();
 
                         var groupedData = allDeviceData
@@ -1409,10 +1448,28 @@ namespace EMS.Repository
                             }
                         }
 
-                        var daysInMonth = (endOfMonth - startOfMonth).Days;
-                        foreach (var day in Enumerable.Range(0, daysInMonth))
+                        // Previous month - EPI and EPE only
+                        for (int day = 0; day < daysInPrevMonth; day++)
                         {
-                            var currentDate = startOfMonth.AddDays(day);
+                            var currentDate = prevMonthStart.AddDays(day);
+                            foreach (var address in new[] { "EPI", "EPE" })
+                            {
+                                result.Add(new ConsumptionDetailsDTO
+                                {
+                                    SelectedDate = currentDate,
+                                    SelectedUnit = selectedUnit ?? 0,
+                                    SelectedDevice = selectedDevices.Value,
+                                    SelectedRange = "month",
+                                    Address = address,
+                                    AddressVariable = dailyTotals.TryGetValue((currentDate, address), out var val) ? val : 0.0
+                                });
+                            }
+                        }
+
+                        // Selected month - all selected addresses
+                        for (int day = 0; day < daysInMonth; day++)
+                        {
+                            var currentDate = monthStart.AddDays(day);
                             foreach (var address in addressList)
                             {
                                 result.Add(new ConsumptionDetailsDTO
@@ -1429,72 +1486,93 @@ namespace EMS.Repository
 
                         break;
                     }
+
                 case "year":
                     {
                         var startOfYear = new DateTime(selectedDateTime.Year, 1, 1);
                         var endOfYear = startOfYear.AddYears(1);
 
+                        var prevYearStart = startOfYear.AddYears(-1);
+                        var prevYearEnd = startOfYear;
+
+                        var addressesToFetch = addressList.Concat(new[] { "EPI", "EPE" }).Distinct().ToList();
+
+                        // Fetch DeviceDataMaster IDs within both years
                         var dataMasterIds = await DBEMSContext.DeviceDataMasters
                             .Where(x => x.FkDeviceId == selectedDevices &&
-                                        x.CreatedAt.HasValue &&
-                                        x.CreatedAt.Value.Date >= startOfYear &&
-                                        x.CreatedAt.Value.Date < endOfYear)
-                            .Select(x => x.Id).AsQueryable()
+                                        x.CreatedAt >= prevYearStart &&
+                                        x.CreatedAt < endOfYear)
+                            .Select(x => x.Id)
                             .ToListAsync();
 
+                        // Fetch DeviceDataDetails
                         allDeviceData = await DBEMSContext.DeviceDataDetails
                             .Where(d =>
                                 d.FkDeviceDataMasterId.HasValue &&
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
-                                addressList.Contains(d.Address) &&
-                                d.CreatedAt.HasValue &&
-                                d.CreatedAt.Value.Date >= startOfYear &&
-                                d.CreatedAt.Value.Date < endOfYear).AsQueryable()
+                                d.CreatedAt >= prevYearStart &&
+                                d.CreatedAt < endOfYear &&
+                                addressesToFetch.Contains(d.Address))
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
                         var groupedData = allDeviceData
-                            .GroupBy(d => new {
+                            .GroupBy(d => new
+                            {
                                 Month = new DateTime(d.CreatedAt.Value.Year, d.CreatedAt.Value.Month, 1),
                                 d.Address
                             });
 
-                        var monthlyTotals = new Dictionary<(DateTime Month, string Address), double>();
+                        var monthlyTotals = groupedData
+                            .Where(g => g.FirstOrDefault() != g.LastOrDefault())
+                            .ToDictionary(
+                                g => (g.Key.Month, g.Key.Address),
+                                g => ((g.Last().AddressVariable ?? 0) - (g.First().AddressVariable ?? 0)) * 0.06
+                            );
 
-                        foreach (var group in groupedData)
-                        {
-                            var first = group.FirstOrDefault();
-                            var last = group.LastOrDefault();
-
-                            if (first != null && last != null && first != last)
-                            {
-                                monthlyTotals[(group.Key.Month, group.Key.Address)] = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
-                            }
-                        }
-
+                        // Previous year data (EPI, EPE)
                         for (int month = 1; month <= 12; month++)
                         {
-                            var currentMonth = new DateTime(selectedDateTime.Year, month, 1);
-                            foreach (var address in addressList)
+                            var prevMonth = new DateTime(selectedDateTime.Year - 1, month, 1);
+                            foreach (var address in new[] { "EPI", "EPE" })
                             {
                                 result.Add(new ConsumptionDetailsDTO
                                 {
-                                    SelectedDate = currentMonth,
+                                    SelectedDate = prevMonth,
                                     SelectedUnit = selectedUnit ?? 0,
                                     SelectedDevice = selectedDevices.Value,
                                     SelectedRange = "year",
                                     Address = address,
-                                    AddressVariable = monthlyTotals.TryGetValue((currentMonth, address), out var val) ? val : 0.0
+                                    AddressVariable = monthlyTotals.TryGetValue((prevMonth, address), out var val) ? val : 0.0
                                 });
                             }
                         }
+
+                        // Current year data (all selected addresses)
+                        for (int month = 1; month <= 12; month++)
+                        {
+                            var currMonth = new DateTime(selectedDateTime.Year, month, 1);
+                            foreach (var address in addressList)
+                            {
+                                result.Add(new ConsumptionDetailsDTO
+                                {
+                                    SelectedDate = currMonth,
+                                    SelectedUnit = selectedUnit ?? 0,
+                                    SelectedDevice = selectedDevices.Value,
+                                    SelectedRange = "year",
+                                    Address = address,
+                                    AddressVariable = monthlyTotals.TryGetValue((currMonth, address), out var val) ? val : 0.0
+                                });
+                            }
+                        }
+
                         break;
                     }
+
 
                 default:
                     throw new ArgumentException("Invalid range specified");
             }
-
             return result;
         }
         public async Task<List<UnitDTO>> getUnits()
@@ -2153,51 +2231,47 @@ namespace EMS.Repository
 
             return devices.ToJson().FromJson<List<DeviceDTO>>();
         }
-        public async Task<List<DeviceDataMaster>> checkingDevice()
+        public async Task<List<CheckingDeviceDTO>> checkingDevice()
         {
-            // Step 1: Get the latest CreatedAt time for UA, UB, or UC
-            var latestTime = await DBEMSContext.DeviceDataDetails
-                .Where(d => d.Address == "UA" || d.Address == "UB" || d.Address == "UC")
-                .MaxAsync(d => d.CreatedAt);
+            DateTime endTime = DateTime.Now;
+            DateTime startTime = endTime.AddSeconds(-90);
 
-            if (latestTime == null)
-                return new List<DeviceDataMaster>();
+            // Step 1: Get all devices
+            var allDevices = await DBEMSContext.Devices
+                .Select(d => new { d.Id, d.Name })
+                .ToListAsync();
 
-            DateTime endTime = latestTime.Value;
-            DateTime startTime = endTime.AddSeconds(-30);
-
-            // Step 2: Get DeviceDataDetails for UA, UB, or UC in the last 30 seconds
-            var detailEntries = await DBEMSContext.DeviceDataDetails
+            // Step 2: Get entries from DeviceDataDetails within 30 seconds
+            var activeDeviceIds = await DBEMSContext.DeviceDataDetails
                 .Where(d =>
                     d.FkDeviceDataMasterId.HasValue &&
                     d.CreatedAt.HasValue &&
-                    (d.Address == "UA" || d.Address == "UB" || d.Address == "UC") &&
+                    (d.Address == "Ua" || d.Address == "Ub" || d.Address == "Uc"  || d.Address == "Uab" || d.Address == "Uac" ||d.Address == "Ubc") &&
                     d.CreatedAt.Value >= startTime &&
-                    d.CreatedAt.Value <= endTime
-                )
+                    d.CreatedAt.Value <= endTime)
+                .Select(d => d.DeviceDataMaster.FkDeviceId) // navigate from detail -> master -> deviceId
+                .Distinct()
                 .ToListAsync();
 
-            // Step 3: Get distinct master IDs from those details
-            var masterIds = detailEntries
-                .Select(d => d.FkDeviceDataMasterId.Value)
-                .Distinct()
+            // Step 3: Build the DTO list with status
+            var result = allDevices
+                .Select(device => new CheckingDeviceDTO
+                {
+                    DeviceName = device.Name,
+                    Status = activeDeviceIds.Contains(device.Id) ? "Online" : "Offline"
+                })
                 .ToList();
 
-            // Step 4: Get matching DeviceDataMaster entries
-            var masterEntries = await DBEMSContext.DeviceDataMasters
-                .Where(m => masterIds.Contains(m.Id))
-                .OrderBy(m => m.CreatedAt)
-                .ToListAsync();
-
-            return masterEntries;
+            return result;
         }
+
 
 
 
         public async Task<List<kWDTO>> GetkW()
         {
             // Preload all units
-            var units = await DBEMSContext.Units.ToListAsync();
+            var units = await DBEMSContext.Units.Where(x => x.IsDeleted == false).ToListAsync();
 
             // Get all devices and link them to their units
             var devices = await DBEMSContext.Devices

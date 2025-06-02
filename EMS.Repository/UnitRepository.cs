@@ -29,14 +29,22 @@ namespace EMS.Repository
             return res.ToJson().FromJson<UnitDTO>();
         }
 
-        public async Task Insert(UnitDTO obj)
-        {
-            obj.IsActive = true;
-            obj.IsDeleted = false;
-            
-            await DBEMSContext.Units.AddAsync(obj.ToJson().FromJson<Unit>());
-            await DBEMSContext.SaveChangesAsync();
-        }
+ public async Task Insert(UnitDTO obj)
+{
+    // Check if serial number already exists (excluding deleted records)
+    var exists = await DBEMSContext.Units
+                    .AnyAsync(x => x.SerialNumber == obj.SerialNumber && x.IsDeleted == false);
+
+    if (exists)
+        throw new Exception("This Serial Number already exists.");
+
+    obj.IsActive = true;
+    obj.IsDeleted = false;
+
+    await DBEMSContext.Units.AddAsync(obj.ToJson().FromJson<Unit>());
+    await DBEMSContext.SaveChangesAsync();
+}
+
         public async Task Insert(ProjectManagementDTO obj)
         {
             await DBEMSContext.ProjectManagements.AddAsync(obj.ToJson().FromJson<ProjectManagement>());
@@ -76,6 +84,7 @@ namespace EMS.Repository
         }
         public async Task<List<UnitDTO>> GetUnitsByProjectId(int projectId, int companyId)
         {
+
             var result = await (from unit in DBEMSContext.Units       
                                 join project in DBEMSContext.ProjectManagements
                                 on unit.FkProjectManagement equals project.Id
@@ -113,6 +122,7 @@ namespace EMS.Repository
         }
         public async Task<List<UnitDTO>> GetUnitsWithoutProjectId( int companyId)
         {
+
             var result = await (from unit in DBEMSContext.Units
                                 join project in DBEMSContext.ProjectManagements
                                 on unit.FkProjectManagement equals project.Id
