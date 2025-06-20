@@ -89,11 +89,15 @@ namespace EMS.Repository
         public async Task<List<DeviceDTO>> GetDevicesWithGateways(int GatewayId, int companyId)
         {
             var result = await (from device in DBEMSContext.Devices
-
                                 join gateway in DBEMSContext.Gateways
-                                on device.FkGatewayId equals gateway.Id
-                                where device.IsDeleted != true && gateway.IsDeleted != true
-                                && device.FkGatewayId == GatewayId && device.FkCompanyId == companyId
+                                    on device.FkGatewayId equals gateway.Id
+                                join unit in DBEMSContext.Units
+                                    on device.FkUnitId equals unit.Id into unitGroup
+                                from unit in unitGroup.DefaultIfEmpty() // left join to allow null units
+                                where device.IsDeleted != true
+                                      && gateway.IsDeleted != true
+                                      && device.FkGatewayId == GatewayId
+                                      && device.FkCompanyId == companyId
                                 select new DeviceDTO
                                 {
                                     Id = device.Id,
@@ -116,7 +120,7 @@ namespace EMS.Repository
                                     FkGatewayId = device.FkGatewayId,
                                     FkUnitId = device.FkUnitId,
 
-                                    // ✅ Include Gateway Details
+                                    // ✅ Include Gateway
                                     Gateway = new GatewayDTO
                                     {
                                         Id = gateway.Id,
@@ -133,11 +137,23 @@ namespace EMS.Repository
                                         InstantVariable = gateway.InstantVariable,
                                         FkCompanyId = gateway.FkCompanyId,
                                         FkUnitId = gateway.FkUnitId
+                                    },
+
+                                    // ✅ Include Unit
+                                    Unit = unit == null ? null : new UnitDTO
+                                    {
+                                        Id = unit.Id,
+                                        Name = unit.Name,
+                                        IsActive = unit.IsActive,
+                                        IsDeleted = unit.IsDeleted,
+                                        CreatedAt = unit.CreatedAt,
+                                        UpdatedAt = unit.UpdatedAt
                                     }
                                 }).ToListAsync();
 
             return result;
         }
+
 
         public async Task<List<DeviceDTO>> GetDevicesWithoutGatewayId(int companyId)
         {

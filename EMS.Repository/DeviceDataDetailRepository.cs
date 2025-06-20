@@ -63,7 +63,7 @@ namespace EMS.Repository
                 .Select(d => (double?)d.AddressVariable)
                 .FirstOrDefaultAsync() ?? 0;
 
-            double totalConsumed = (latestValue - previousValue) * 0.06;
+            double totalConsumed = (latestValue - previousValue) ;
 
             List<EPIConspData> result;
 
@@ -114,7 +114,7 @@ namespace EMS.Repository
                         return new EPIConspData
                         {
                             Name = currentDay.DayOfWeek.ToString(), // e.g., "Sunday"
-                            Value = Math.Round(safeDiff * 0.06, 2),
+                            Value = Math.Round(safeDiff , 2),
                             CreatedAt = currentDay.AddDays(1).AddMilliseconds(-1)
                         };
                     })
@@ -154,7 +154,7 @@ namespace EMS.Repository
                     result.Add(new EPIConspData
                     {
                         Name = firstDay.ToString("MMMM"),
-                        Value = Math.Round(safeDiff * 0.06, 2),
+                        Value = Math.Round(safeDiff , 2),
                         CreatedAt = lastDay
                     });
                 }
@@ -201,7 +201,7 @@ namespace EMS.Repository
             var adjustedData = data.Select((d, index) => new
             {
                 d.CreatedAt,
-                AdjustedAddressVariable = d.AddressVariable * 0.06
+                AdjustedAddressVariable = d.AddressVariable 
             }).AsQueryable()
  .OrderBy(d => d.CreatedAt)
  .Where((item, index) => index % 2 == 0) // This filters to get odd indexed items (0, 2, 4, 6, etc.)
@@ -325,7 +325,7 @@ namespace EMS.Repository
                         result.Add(new PowerLoadDTO
                         {
                             UnitName = unit.Name,
-                            AddressVariable = totalDifference * 0.06,
+                            AddressVariable = totalDifference ,
                             CreatedAt = hourStart // Represent the start of the hour
                         });
 
@@ -420,7 +420,7 @@ namespace EMS.Repository
                         result.Add(new PowerLoadDTO
                         {
                             UnitName = unit.Name,
-                            AddressVariable = totalDifference * 0.06,
+                            AddressVariable = totalDifference ,
                             CreatedAt = hourStart // Represent the start of the hour
                         });
 
@@ -516,7 +516,7 @@ namespace EMS.Repository
                         result.Add(new PowerLoadDTO
                         {
                             UnitName = unit.Name,
-                            AddressVariable = totalDifference * 0.06,
+                            AddressVariable = totalDifference ,
                             CreatedAt = hourStart // Represent the start of the hour
                         });
 
@@ -595,7 +595,7 @@ namespace EMS.Repository
                 result.Add(new PowerLoadDTO
                 {
                     UnitName = unit.Name,
-                    AddressVariable = sum / 10,
+                    AddressVariable = sum,
                     CreatedAt = minute
                 });
             }
@@ -655,7 +655,7 @@ namespace EMS.Repository
                             double avgPower = 0;
                             if (dayData.Any())
                             {
-                                avgPower = dayData.Average() / 10.0; // Assuming value is *10
+                                avgPower = dayData.Average(); // Assuming value is *10
                             }
 
                             result.Add(new PowerLoadDTO
@@ -673,11 +673,10 @@ namespace EMS.Repository
         }
 
 
-
         public async Task<List<PowerLoadDTO>> LoadProfilev1()
         {
             var endTime = DateTime.Now;
-            var startTime = endTime.Date.AddDays(-6); // Last 7 days including today
+            var startTime = endTime.Date.AddDays(-6);
             var result = new List<PowerLoadDTO>();
 
             var unit = await DBEMSContext.Units.AsQueryable().OrderBy(u => u.Id).Skip(1).FirstOrDefaultAsync();
@@ -686,14 +685,14 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id).AsQueryable()
+                    .Select(dev => dev.Id)
                     .ToListAsync();
 
                 if (deviceIds.Any())
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => dm.Id).AsQueryable()
+                        .Select(dm => dm.Id)
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
@@ -704,28 +703,44 @@ namespace EMS.Repository
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "P" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime).AsQueryable()
+                                d.CreatedAt <= endTime)
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
                         var dailyGroups = rawData
-                            .GroupBy(d => d.CreatedAt.Value.Date).AsQueryable() // Group by each day
-                            .ToList();
+                            .GroupBy(d => d.CreatedAt.Value.Date)
+                            .ToDictionary(g => g.Key, g => g.ToList());
 
-                        foreach (var group in dailyGroups)
+                        // Ensure all 7 days are represented
+                        for (int i = 0; i < 7; i++)
                         {
-                            // Calculate average P(kW) for the day
-                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).AsQueryable().ToList();
+                            var currentDate = startTime.AddDays(i);
 
-                            if (validReadings.Any())
+                            if (dailyGroups.ContainsKey(currentDate))
                             {
-                                var avgPower = validReadings.Average() / 10.0; // Assuming AddressVariable is *10 (divide by 10)
+                                var group = dailyGroups[currentDate];
+                                var validReadings = group
+                                    .Where(g => g.AddressVariable.HasValue)
+                                    .Select(g => g.AddressVariable.Value)
+                                    .ToList();
+
+                                var avgPower = validReadings.Any() ? validReadings.Average()  : 0;
 
                                 result.Add(new PowerLoadDTO
                                 {
                                     UnitName = unit.Name,
-                                    AddressVariable = avgPower, // now it's average kW
-                                    CreatedAt = group.Key // the date
+                                    AddressVariable = avgPower,
+                                    CreatedAt = currentDate
+                                });
+                            }
+                            else
+                            {
+                                // No data for this day, add zero
+                                result.Add(new PowerLoadDTO
+                                {
+                                    UnitName = unit.Name,
+                                    AddressVariable = 0,
+                                    CreatedAt = currentDate
                                 });
                             }
                         }
@@ -735,6 +750,7 @@ namespace EMS.Repository
 
             return result;
         }
+
 
 
         public async Task<List<PowerLoadDTO>> LoadProfilev2()
@@ -749,14 +765,14 @@ namespace EMS.Repository
             {
                 var deviceIds = await DBEMSContext.Devices
                     .Where(dev => dev.FkUnitId == unit.Id)
-                    .Select(dev => dev.Id).AsQueryable()
+                    .Select(dev => dev.Id)
                     .ToListAsync();
 
                 if (deviceIds.Any())
                 {
                     var dataMasterIds = await DBEMSContext.DeviceDataMasters
                         .Where(dm => dm.FkDeviceId.HasValue && deviceIds.Contains(dm.FkDeviceId.Value))
-                        .Select(dm => dm.Id).AsQueryable()
+                        .Select(dm => dm.Id)
                         .ToListAsync();
 
                     if (dataMasterIds.Any())
@@ -767,28 +783,44 @@ namespace EMS.Repository
                                 dataMasterIds.Contains(d.FkDeviceDataMasterId.Value) &&
                                 d.Address == "P" &&
                                 d.CreatedAt >= startTime &&
-                                d.CreatedAt <= endTime).AsQueryable()
+                                d.CreatedAt <= endTime)
                             .OrderBy(d => d.CreatedAt)
                             .ToListAsync();
 
                         var dailyGroups = rawData
-                            .GroupBy(d => d.CreatedAt.Value.Date).AsQueryable()// Group by each day
-                            .ToList();
+                            .GroupBy(d => d.CreatedAt.Value.Date)
+                            .ToDictionary(g => g.Key, g => g.ToList());
 
-                        foreach (var group in dailyGroups)
+                        for (int i = 0; i < 7; i++)
                         {
-                            // Calculate average P(kW) for the day
-                            var validReadings = group.Where(g => g.AddressVariable.HasValue).Select(g => g.AddressVariable.Value).AsQueryable().ToList();
+                            var currentDate = startTime.AddDays(i);
 
-                            if (validReadings.Any())
+                            if (dailyGroups.ContainsKey(currentDate))
                             {
-                                var avgPower = validReadings.Average() / 10.0; // Assuming AddressVariable is *10 (divide by 10)
+                                var group = dailyGroups[currentDate];
+                                var validReadings = group
+                                    .Where(g => g.AddressVariable.HasValue)
+                                    .Select(g => g.AddressVariable.Value)
+                                    .ToList();
+                                
+                                var avgPower = validReadings.Any() ? validReadings.Average() : 0;
+
 
                                 result.Add(new PowerLoadDTO
                                 {
                                     UnitName = unit.Name,
-                                    AddressVariable = avgPower, // now it's average kW
-                                    CreatedAt = group.Key // the date
+                                    AddressVariable = avgPower,
+                                    CreatedAt = currentDate
+                                });
+                            }
+                            else
+                            {
+                                // No data for this day, insert 0
+                                result.Add(new PowerLoadDTO
+                                {
+                                    UnitName = unit.Name,
+                                    AddressVariable = 0,
+                                    CreatedAt = currentDate
                                 });
                             }
                         }
@@ -798,6 +830,7 @@ namespace EMS.Repository
 
             return result;
         }
+
 
         public async Task<List<ConsumptionDetailsDTO>> GetConsumptions(
        DateTime selectedDate,
@@ -870,11 +903,11 @@ namespace EMS.Repository
 
                                     if (hourlyTotals.ContainsKey(key))
                                     {
-                                        hourlyTotals[key] += diff * 0.06;
+                                        hourlyTotals[key] += diff;
                                     }
                                     else
                                     {
-                                        hourlyTotals[key] = diff * 0.06;
+                                        hourlyTotals[key] = diff ;
                                     }
                                 }
                             }
@@ -971,7 +1004,7 @@ namespace EMS.Repository
                                 if (first != null && last != null)
                                 {
                                     var diff = (last.AddressVariable ?? 0) - (first.AddressVariable ?? 0);
-                                    dailyTotals[(group.Key.Day, group.Key.Address)] = diff * 0.06;
+                                    dailyTotals[(group.Key.Day, group.Key.Address)] = diff ;
                                 }
                             }
 
@@ -1071,7 +1104,7 @@ namespace EMS.Repository
                                 if (first != null && last != null)
                                 {
                                     var diff = (last.AddressVariable ?? 0) - (first.AddressVariable ?? 0);
-                                    dailyTotals[(group.Key.Day, group.Key.Address)] = diff * 0.06;
+                                    dailyTotals[(group.Key.Day, group.Key.Address)] = diff ;
                                 }
                             }
 
@@ -1174,7 +1207,7 @@ namespace EMS.Repository
                                 if (first != null && last != null)
                                 {
                                     var diff = (last.AddressVariable ?? 0) - (first.AddressVariable ?? 0);
-                                    monthlyTotals[(group.Key.Month, group.Key.Address)] = diff * 0.06;
+                                    monthlyTotals[(group.Key.Month, group.Key.Address)] = diff ;
                                 }
                             }
 
@@ -1271,7 +1304,7 @@ namespace EMS.Repository
                                 var diff = (last.AddressVariable ?? 0) - (first.AddressVariable ?? 0);
                                 var key = (group.Key.Date, group.Key.Hour, group.Key.Address);
 
-                                hourlyTotals[key] = diff * 0.06;
+                                hourlyTotals[key] = diff ;
                             }
                         }
 
@@ -1354,7 +1387,7 @@ namespace EMS.Repository
                             if (first != null && last != null)
                             {
                                 dailyTotals[(group.Key.Date, group.Key.Address)] =
-                                    ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
+                                    ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) ;
                             }
                         }
 
@@ -1444,7 +1477,7 @@ namespace EMS.Repository
                             if (first != null && last != null)
                             {
                                 dailyTotals[(group.Key.Date, group.Key.Address)] =
-                                    ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
+                                    ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) ;
                             }
                         }
 
@@ -1527,7 +1560,7 @@ namespace EMS.Repository
                             .Where(g => g.FirstOrDefault() != g.LastOrDefault())
                             .ToDictionary(
                                 g => (g.Key.Month, g.Key.Address),
-                                g => ((g.Last().AddressVariable ?? 0) - (g.First().AddressVariable ?? 0)) * 0.06
+                                g => ((g.Last().AddressVariable ?? 0) - (g.First().AddressVariable ?? 0)) 
                             );
 
                         // Previous year data (EPI, EPE)
@@ -1656,7 +1689,7 @@ namespace EMS.Repository
 
                             if (first != null && last != null)
                             {
-                                var devicediff = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
+                                var devicediff = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) ;
                                 // apply multiplier here
 
                                 if (dailyTotals.ContainsKey(group.Key))
@@ -1741,7 +1774,7 @@ namespace EMS.Repository
 
                             if (first != null && last != null)
                             {
-                                var devicediff = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
+                                var devicediff = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) ;
                                 // apply multiplier here
 
                                 if (dailyTotals.ContainsKey(group.Key))
@@ -1825,7 +1858,7 @@ namespace EMS.Repository
 
                             if (first != null && last != null)
                             {
-                                var devicediff = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) * 0.06;
+                                var devicediff = ((last.AddressVariable ?? 0) - (first.AddressVariable ?? 0)) ;
                                 // apply multiplier here
 
                                 if (dailyTotals.ContainsKey(group.Key))
@@ -1916,15 +1949,32 @@ namespace EMS.Repository
         //    return result;
         //}
 
-        public async Task<List<AlertCenterData>> GetAllAlertCenterData()
+        public async Task<List<AlertCenterDataDTO>> GetAllAlertCenterData()
         {
-
-            var result = await DBEMSContext.AlertCenterData
-                .Where(x => x.IsDeleted == false).AsQueryable()
-                .ToListAsync();
+            var result = await (
+          from alert in DBEMSContext.AlertCenterData
+          join device in DBEMSContext.Devices on alert.FkDeviceId equals device.Id into deviceJoin
+          from device in deviceJoin.DefaultIfEmpty()
+          join unit in DBEMSContext.Units on alert.FkUnitId equals unit.Id into unitJoin
+          from unit in unitJoin.DefaultIfEmpty()
+          where alert.IsDeleted == false
+          orderby alert.CreatedAt descending
+          select new AlertCenterDataDTO
+          {
+              Id = alert.Id,
+              FkUnitId = unit.Id,
+              FkDeviceId = device.Id,
+              DeviceName = device != null ? device.Name : null,
+              UnitName = unit != null ? unit.Name : null,
+              Min = alert.Min,
+              Max = alert.Max,
+              Address = alert.Address,
+              AlertLevel = alert.AlertLevel,
+              CreatedAt = alert.CreatedAt,
+              IsDeleted = alert.IsDeleted
+          }).ToListAsync();
 
             return result;
-
         }
 
         public async Task<List<AlertCenterDTO>> GetResolveCenter()
@@ -1947,26 +1997,6 @@ namespace EMS.Repository
 
             return result;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2051,7 +2081,7 @@ namespace EMS.Repository
                             result.Add(new PowerLoadDTO
                             {
                                 UnitName = unit.Name,
-                                AddressVariable = sumPerMinute / 10, // like before
+                                AddressVariable = sumPerMinute , // like before
                                 CreatedAt = minuteStart
                             });
                         }
@@ -2133,7 +2163,7 @@ namespace EMS.Repository
                             result.Add(new PowerLoadDTO
                             {
                                 UnitName = unit.Name,
-                                AddressVariable = sumPerMinute / 10, // like before
+                                AddressVariable = sumPerMinute , // like before
                                 CreatedAt = minuteStart
                             });
                         }
@@ -2162,7 +2192,7 @@ namespace EMS.Repository
                 {
                     d.CreatedAt,
                     d.Address,
-                    Value = d.AddressVariable / 10,
+                    Value = d.AddressVariable ,
                     FkUnitId = d.DeviceDataMaster.Device.FkUnitId,
                     DeviceId = d.DeviceDataMaster.FkDeviceId
                 }).AsQueryable()
@@ -2236,34 +2266,42 @@ namespace EMS.Repository
             DateTime endTime = DateTime.Now;
             DateTime startTime = endTime.AddSeconds(-90);
 
-            // Step 1: Get all devices
+            // Get all devices with their IDs and Names
             var allDevices = await DBEMSContext.Devices
-                .Select(d => new { d.Id, d.Name })
-                .ToListAsync();
+     .Where(d => d.IsDeleted != true)
+     .Select(d => new { d.Id, d.Name, d.IsDeleted })
+     .ToListAsync();
 
-            // Step 2: Get entries from DeviceDataDetails within 30 seconds
+
+            // Get IDs of devices that have value > 0 for specified addresses in the last 90 seconds
             var activeDeviceIds = await DBEMSContext.DeviceDataDetails
                 .Where(d =>
                     d.FkDeviceDataMasterId.HasValue &&
+                    d.DeviceDataMaster != null &&
                     d.CreatedAt.HasValue &&
-                    (d.Address == "Ua" || d.Address == "Ub" || d.Address == "Uc"  || d.Address == "Uab" || d.Address == "Uac" ||d.Address == "Ubc") &&
+                    (d.Address == "Ua" || d.Address == "Ub" || d.Address == "Uc" ||
+                     d.Address == "Uab" || d.Address == "Uac" || d.Address == "Ubc") &&
+                    d.AddressVariable.HasValue && d.AddressVariable > 0 &&
                     d.CreatedAt.Value >= startTime &&
                     d.CreatedAt.Value <= endTime)
-                .Select(d => d.DeviceDataMaster.FkDeviceId) // navigate from detail -> master -> deviceId
+                .Select(d => d.DeviceDataMaster.FkDeviceId)
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
                 .Distinct()
                 .ToListAsync();
 
-            // Step 3: Build the DTO list with status
-            var result = allDevices
-                .Select(device => new CheckingDeviceDTO
-                {
-                    DeviceName = device.Name,
-                    Status = activeDeviceIds.Contains(device.Id) ? "Online" : "Offline"
-                })
-                .ToList();
+            // Create DTO list with status set based on whether the device ID is active
+            var result = allDevices.Select(d => new CheckingDeviceDTO
+            {
+                FkDeviceId = d.Id,
+                DeviceName = d.Name,
+                Status = activeDeviceIds.Contains(d.Id) ? "Online" : "Offline"
+            }).ToList();
 
             return result;
         }
+
+
 
 
 
@@ -2325,19 +2363,24 @@ namespace EMS.Repository
                 }
 
                 // Get relevant readings
+                // Get relevant readings
                 var unitReadings = deviceDataDetails
                     .Where(d => unitDDMs.Contains(d.FkDeviceDataMasterId.Value))
                     .Select(d => d.AddressVariable ?? 0)
                     .ToList();
 
-                // Sum and convert to kW
-                var totalPowerKW = unitReadings.Sum() / 10;
+                // Count how many readings are non-zero
+                var nonZeroCount = unitReadings.Count(v => v != 0);
+
+                // If less than 2 non-zero readings, set total to 0
+                var totalPowerKW = (nonZeroCount >= 2) ? unitReadings.Sum() : 0;
 
                 result.Add(new kWDTO
                 {
                     UnitName = unit.Name,
                     AddressVariable = totalPowerKW
                 });
+
             }
 
             return result;
@@ -2465,7 +2508,7 @@ namespace EMS.Repository
                             // Ensure no divide by zero occurs
                             if (lastValue != 0)
                             {
-                                calculatedValue = lastValue / 10; // Divide by 20 as per original logic
+                                calculatedValue = lastValue ; // Divide by 20 as per original logic
                             }
                             else
                             {
@@ -2480,14 +2523,14 @@ namespace EMS.Repository
 
                             if (lastValue != 0 && firstValue != 0)
                             {
-                                calculatedValue = lastValue * 0.06; // EPI formula
+                                calculatedValue = lastValue ; // EPI formula
                             }
                             break;
 
                         case "freq":
                             if (lastValue != 0 && firstValue != 0)
                             {
-                                calculatedValue = lastValue / 100;
+                                calculatedValue = lastValue ;
                             }
                             break;
                         default:
@@ -2586,7 +2629,7 @@ namespace EMS.Repository
                         case "pf":
                             if (lastValue != 0)
                             {
-                                calculatedValue = lastValue / 10;
+                                calculatedValue = lastValue ;
                             }
                             else
                             {
@@ -2600,7 +2643,7 @@ namespace EMS.Repository
                         case "eql":
                             if (lastValue != 0 && firstValue != 0)
                             {
-                                calculatedValue = lastValue * 0.06;
+                                calculatedValue = lastValue ;
                             }
                             else
                             {
@@ -2611,7 +2654,7 @@ namespace EMS.Repository
                         case "freq":
                             if (lastValue != 0)
                             {
-                                calculatedValue = lastValue / 100;
+                                calculatedValue = lastValue ;
                             }
                             else
                             {

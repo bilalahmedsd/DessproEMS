@@ -34,7 +34,7 @@ namespace EMS.Core.Interfaces
 
 
 
-        Task<List<AlertCenterData>> GetAllAlertCenterData();
+        Task<List<AlertCenterDataDTO>> GetAllAlertCenterData();
 
 
         Task<List<PowerLoadDTO>> GetEnergyConspDatau2();

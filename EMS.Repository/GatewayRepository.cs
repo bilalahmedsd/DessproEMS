@@ -108,8 +108,10 @@ namespace EMS.Repository
 
         public async Task Insert(GatewayDTO obj)
         {
+      
             await DBEMSContext.Gateways.AddAsync(obj.ToJson().FromJson<Gateway>());
             await DBEMSContext.SaveChangesAsync();
+      
         }
 
         public async Task Update(GatewayDTO obj)

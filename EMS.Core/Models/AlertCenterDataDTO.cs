@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EMS.Data.Models
+namespace EMS.Core.Models
 {
-    public partial class AlertCenterData
+    public partial class AlertCenterDataDTO
     {
         public int Id { get; set; }
         public int FkUnitId { get; set; }
@@ -18,8 +18,7 @@ namespace EMS.Data.Models
         public bool IsDeleted { get; set; } = false;
         public DateTime CreatedAt { get; set; }
 
-        // Add these properties to enrich from joined tables
-        //public string? DeviceName { get; set; }
-        //public string? UnitName { get; set; }
+        public string? DeviceName { get; set; }
+        public string? UnitName { get; set; }
     }
 }
